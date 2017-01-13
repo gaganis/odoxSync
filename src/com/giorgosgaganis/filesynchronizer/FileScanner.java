@@ -24,11 +24,14 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 13/01/17.
  */
 public class FileScanner {
+    private static final Logger logger = Logger.getLogger(FileScanner.class.getName());
+
     public static final long REGION_SIZE = 0x20000;
     
     private final Digester digester;

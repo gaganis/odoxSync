@@ -18,7 +18,12 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.LogManager;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -27,7 +32,16 @@ public class FileSynchronizer {
 
     private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        configureLogging();
 
+
+    }
+
+    private static void configureLogging() throws IOException {
+        Path logConfig = Paths.get("logging.properties");
+        if (Files.exists(logConfig)) {
+            LogManager.getLogManager().readConfiguration(Files.newInputStream(logConfig));
+        }
     }
 }

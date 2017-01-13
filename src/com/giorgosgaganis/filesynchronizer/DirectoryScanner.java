@@ -23,12 +23,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 13/01/17.
  */
 public class DirectoryScanner extends Thread {
+    private static final Logger logger = Logger.getLogger(DirectoryScanner.class.getName());
+
     private final ConcurrentHashMap<Integer, File> files;
+    AtomicInteger fileIdCounter = new AtomicInteger(1);
 
     public DirectoryScanner(ConcurrentHashMap<Integer, File> files) {
         this.files = files;
@@ -47,16 +52,14 @@ public class DirectoryScanner extends Thread {
                         .filter(Files::isRegularFile)
                         .map(Path::normalize)
                         .map(path -> root.relativize(path))
-                        .map(path -> Paths.get("/home/gaganis/temp/").resolve(path))
                         .forEach((path) -> {
-                            Path parent = path.getParent();
-                            try {
-                                if(Files.notExists(path)) {
-                                    Files.createDirectories(parent);
-                                    Files.createFile(path);
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            File file = new File(path.toString());
+                            if (!files.containsValue(file)) {
+                                int id = fileIdCounter.getAndIncrement();
+                                file.setId(id);
+                                files.put(id, file);
+
+                                logger.fine("Added new tracked file [" + file.getName() + "]");
                             }
                         });
             } catch (IOException e) {
@@ -75,7 +78,7 @@ public class DirectoryScanner extends Thread {
     public static void main(String[] args) {
 
         Path root = Paths.get("");
-        DirectoryScanner ds = new DirectoryScanner(null);
+        DirectoryScanner ds = new DirectoryScanner(new ConcurrentHashMap<>());
         ds.start();
     }
 }

@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.google.common.base.Objects;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,10 @@ public class File {
     private long size;
 
     private List<Region> regions = new ArrayList<>();
+
+    public File(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -61,5 +67,18 @@ public class File {
 
     public void setRegions(List<Region> regions) {
         this.regions = regions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        File file = (File) o;
+        return Objects.equal(name, file.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name);
     }
 }
