@@ -31,18 +31,18 @@ import java.nio.file.Paths;
 public class FileScanner {
     public static final long REGION_SIZE = 0x20000;
     
-    private Digester digester = new LongDigester();
+    private final Digester digester;
     
     private Path file;
     
 
-    public FileScanner(Path file) {
+    public FileScanner(Digester digester, Path file) {
+        this.digester = digester;
         this.file = file;
     }
 
     public void scanFile() throws IOException {
         RandomAccessFile randomAccessFile = new RandomAccessFile(file.toFile(), "r");
-//        Files.newByteChannel(file, EnumSet.of(StandardOpenOption.READ));
 
         long position = 0;
         FileChannel channel = randomAccessFile.getChannel();
@@ -54,7 +54,6 @@ public class FileScanner {
                             : REGION_SIZE;
             MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, position, regionSize);
             digester.digest(mappedByteBuffer);
-            System.out.println("digester.getStringResult() = " + digester.getStringResult());
             position += REGION_SIZE;
         } while (position < channel.size());
     }
@@ -63,9 +62,14 @@ public class FileScanner {
 
     public static void main(String[] args) throws IOException {
 //        FileScanner scanner = new FileScanner(Paths.get("/home/gaganis/Downloads/testfile"));
-        FileScanner scanner = new FileScanner(Paths.get("/home/gaganis/Downloads/testfile"));
+        FileScanner scanner = new FileScanner(new LongDigester(), Paths.get(args[0]));
 
         long start = System.currentTimeMillis();
+        scanner.scanFile();
+        System.out.println("System.currentTimeMillis() - start = " + (System.currentTimeMillis() - start));
+
+        scanner =  new FileScanner(new ShaDigester(), Paths.get(args[0]));
+        start = System.currentTimeMillis();
         scanner.scanFile();
         System.out.println("System.currentTimeMillis() - start = " + (System.currentTimeMillis() - start));
 

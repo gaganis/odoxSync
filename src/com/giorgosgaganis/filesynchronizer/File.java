@@ -18,26 +18,48 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import java.nio.MappedByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by gaganis on 13/01/17.
  */
-public class LongDigester implements Digester {
+public class File {
+    private String name;
+    private int id;
+    private long size;
 
+    private List<Region> regions = new ArrayList<>();
 
-    private long sum;
-
-    @Override
-    public void digest(MappedByteBuffer mappedByteBuffer) {
-        sum = 0;
-        do {
-            sum += mappedByteBuffer.get();
-        } while (mappedByteBuffer.hasRemaining());
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public String getStringResult() {
-        return Long.valueOf(sum).toString();
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public List<Region> getRegions() {
+        return regions;
+    }
+
+    public void setRegions(List<Region> regions) {
+        this.regions = regions;
     }
 }

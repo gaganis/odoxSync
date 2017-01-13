@@ -18,26 +18,16 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import java.nio.MappedByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by gaganis on 13/01/17.
  */
-public class LongDigester implements Digester {
+public class FileSynchronizer {
 
+    private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
-    private long sum;
+    public static void main(String[] args) {
 
-    @Override
-    public void digest(MappedByteBuffer mappedByteBuffer) {
-        sum = 0;
-        do {
-            sum += mappedByteBuffer.get();
-        } while (mappedByteBuffer.hasRemaining());
-    }
-
-    @Override
-    public String getStringResult() {
-        return Long.valueOf(sum).toString();
     }
 }

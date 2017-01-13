@@ -18,26 +18,29 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
+
 import java.nio.MappedByteBuffer;
 
 /**
  * Created by gaganis on 13/01/17.
  */
-public class LongDigester implements Digester {
+public class ShaDigester implements Digester {
 
 
-    private long sum;
+    private Hasher hasher;
 
     @Override
     public void digest(MappedByteBuffer mappedByteBuffer) {
-        sum = 0;
+        hasher = Hashing.sha256().newHasher();
         do {
-            sum += mappedByteBuffer.get();
+            hasher.putByte(mappedByteBuffer.get());
         } while (mappedByteBuffer.hasRemaining());
     }
 
     @Override
     public String getStringResult() {
-        return Long.valueOf(sum).toString();
+        return hasher.hash().toString();
     }
 }

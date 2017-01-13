@@ -18,26 +18,13 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import java.nio.MappedByteBuffer;
-
 /**
  * Created by gaganis on 13/01/17.
  */
-public class LongDigester implements Digester {
+public class Region {
+    private long offset;
+    private long size;
 
-
-    private long sum;
-
-    @Override
-    public void digest(MappedByteBuffer mappedByteBuffer) {
-        sum = 0;
-        do {
-            sum += mappedByteBuffer.get();
-        } while (mappedByteBuffer.hasRemaining());
-    }
-
-    @Override
-    public String getStringResult() {
-        return Long.valueOf(sum).toString();
-    }
+    private long quickDigest;
+    private long slowDigest;
 }
