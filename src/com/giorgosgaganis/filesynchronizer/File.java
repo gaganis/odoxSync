@@ -20,6 +20,7 @@ package com.giorgosgaganis.filesynchronizer;
 
 import com.google.common.base.Objects;
 
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,12 +30,15 @@ import java.util.List;
 public class File {
     private String name;
     private int id;
+
     private long size;
+    private FileTime lastModified;
 
     private List<Region> regions = new ArrayList<>();
 
     public File(String name) {
         this.name = name;
+        lastModified = FileTime.fromMillis(0);
     }
 
     public String getName() {
@@ -65,8 +69,12 @@ public class File {
         return regions;
     }
 
-    public void setRegions(List<Region> regions) {
-        this.regions = regions;
+    public FileTime getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(FileTime lastModified) {
+        this.lastModified = lastModified;
     }
 
     @Override

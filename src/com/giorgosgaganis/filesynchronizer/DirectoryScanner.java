@@ -24,61 +24,59 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 13/01/17.
  */
-public class DirectoryScanner extends Thread {
+public class DirectoryScanner {
     private static final Logger logger = Logger.getLogger(DirectoryScanner.class.getName());
 
     private final ConcurrentHashMap<Integer, File> files;
-    AtomicInteger fileIdCounter = new AtomicInteger(1);
+    private final AtomicInteger fileIdCounter;
 
-    public DirectoryScanner(ConcurrentHashMap<Integer, File> files) {
+    public DirectoryScanner(ConcurrentHashMap<Integer, File> files, AtomicInteger fileIdCounter) {
         this.files = files;
+        this.fileIdCounter = fileIdCounter;
     }
 
-    @Override
-    public void run() {
+    public void scan() {
 
-        for (; ; ) {
-            if (interrupted())
-                return;
+        logger.info("Starting directory scan");
+        try {
+            Path root = Paths.get(".")
+                    .toAbsolutePath()
+                    .normalize();
 
-            try {
-                Path root = Paths.get(".").toAbsolutePath().normalize();
-                Files.walk(root)
-                        .filter(Files::isRegularFile)
-                        .map(Path::normalize)
-                        .map(path -> root.relativize(path))
-                        .forEach((path) -> {
-                            File file = new File(path.toString());
-                            if (!files.containsValue(file)) {
-                                int id = fileIdCounter.getAndIncrement();
-                                file.setId(id);
-                                files.put(id, file);
-
-                                logger.fine("Added new tracked file [" + file.getName() + "]");
-                            }
-                        });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                Thread.sleep(30_000);
-            } catch (InterruptedException e) {
-                return;
-            }
+            Files.walk(root)
+                    .filter(Files::isRegularFile)
+                    .map(Path::normalize)
+                    .map(path -> root.relativize(path))
+                    .forEach((path) -> {
+                        String name = path.toString();
+                        File file = new File(name);
+                        if (!files.containsValue(file)) {
+                            int id = fileIdCounter.getAndIncrement();
+                            file.setId(id);
+                            files.put(id, file);
+                            logger.fine("Added new tracked file " + id + ":[" + name + "]");
+                        } else {
+                            logger.finer("File is already tracked [" + name + "]");
+                        }
+                    });
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error while scanning directory", e);
         }
-
+        logger.info("Finished directory scan");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        FileSynchronizer.configureLogging();
 
         Path root = Paths.get("");
-        DirectoryScanner ds = new DirectoryScanner(new ConcurrentHashMap<>());
-        ds.start();
+        DirectoryScanner ds = new DirectoryScanner(new ConcurrentHashMap<>(), new AtomicInteger(1));
+        ds.scan();
+        ds.scan();
     }
 }

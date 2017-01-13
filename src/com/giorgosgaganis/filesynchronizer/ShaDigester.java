@@ -26,20 +26,19 @@ import java.nio.MappedByteBuffer;
 /**
  * Created by gaganis on 13/01/17.
  */
-public class ShaDigester implements Digester {
+public class ShaDigester {
 
 
     private Hasher hasher;
 
-    @Override
-    public void digest(MappedByteBuffer mappedByteBuffer) {
+    public byte[] digest(MappedByteBuffer mappedByteBuffer) {
         hasher = Hashing.sha256().newHasher();
         do {
             hasher.putByte(mappedByteBuffer.get());
         } while (mappedByteBuffer.hasRemaining());
+        return hasher.hash().asBytes();
     }
 
-    @Override
     public String getStringResult() {
         return hasher.hash().toString();
     }

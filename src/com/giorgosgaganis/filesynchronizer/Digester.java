@@ -24,7 +24,7 @@ import java.nio.MappedByteBuffer;
  * Created by gaganis on 13/01/17.
  */
 public interface Digester {
-    void digest(MappedByteBuffer mappedByteBuffer);
+    long digest(MappedByteBuffer mappedByteBuffer);
 
     String getStringResult();
 }

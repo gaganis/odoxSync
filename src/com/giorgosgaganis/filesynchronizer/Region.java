@@ -26,5 +26,34 @@ public class Region {
     private long size;
 
     private long quickDigest;
-    private long slowDigest;
+    private byte[] slowDigest;
+
+    public Region(long offset, long size) {
+        this.offset = offset;
+        this.size = size;
+    }
+
+    public long getOffset() {
+        return offset;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public long getQuickDigest() {
+        return quickDigest;
+    }
+
+    public void setQuickDigest(long quickDigest) {
+        this.quickDigest = quickDigest;
+    }
+
+    public byte[] getSlowDigest() {
+        return slowDigest;
+    }
+
+    public void setSlowDigest(byte[] slowDigest) {
+        this.slowDigest = slowDigest;
+    }
 }

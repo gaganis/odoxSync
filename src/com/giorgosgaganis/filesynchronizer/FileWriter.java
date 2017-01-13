@@ -31,10 +31,6 @@ public class FileWriter {
     public static void main(String[] args) throws IOException {
 
         OutputStream outputStream = Files.newOutputStream(Paths.get("/home/gaganis/Downloads/testfile"));
-        for (int i = 0; i < FileScanner.REGION_SIZE - 100; i++) {
-            outputStream.write((byte) 1);
-        }
-        outputStream.close();
     }
 
 

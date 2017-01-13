@@ -26,14 +26,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
+import static com.giorgosgaganis.filesynchronizer.Contants.REGION_SIZE;
+
 /**
  * Created by gaganis on 13/01/17.
  */
 public class FileScanner {
     private static final Logger logger = Logger.getLogger(FileScanner.class.getName());
 
-    public static final long REGION_SIZE = 0x20000;
-    
+
     private final Digester digester;
     
     private Path file;
@@ -71,7 +72,7 @@ public class FileScanner {
         scanner.scanFile();
         System.out.println("System.currentTimeMillis() - start = " + (System.currentTimeMillis() - start));
 
-        scanner =  new FileScanner(new ShaDigester(), Paths.get(args[0]));
+//        scanner =  new FileScanner(new ShaDigester(), Paths.get(args[0]));
         start = System.currentTimeMillis();
         scanner.scanFile();
         System.out.println("System.currentTimeMillis() - start = " + (System.currentTimeMillis() - start));
