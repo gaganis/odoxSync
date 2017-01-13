@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2017 Giorgos Gaganis
+ *
+ * This file is part of odoxSync.
+ *
+ * odoxSync is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * odoxSync is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.giorgosgaganis.filesynchronizer;
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+/**
+ * Created by gaganis on 13/01/17.
+ */
+public class FileScanner {
+    public static final long REGION_SIZE = 0x20000;
+    
+    private Digester digester = new LongDigester();
+    
+    private Path file;
+    
+
+    public FileScanner(Path file) {
+        this.file = file;
+    }
+
+    public void scanFile() throws IOException {
+        RandomAccessFile randomAccessFile = new RandomAccessFile(file.toFile(), "r");
+//        Files.newByteChannel(file, EnumSet.of(StandardOpenOption.READ));
+
+        long position = 0;
+        FileChannel channel = randomAccessFile.getChannel();
+        do {
+
+            long regionSize =
+                    position + REGION_SIZE > channel.size()
+                            ? channel.size() - position
+                            : REGION_SIZE;
+            MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, position, regionSize);
+            digester.digest(mappedByteBuffer);
+            System.out.println("digester.getStringResult() = " + digester.getStringResult());
+            position += REGION_SIZE;
+        } while (position < channel.size());
+    }
+
+   
+
+    public static void main(String[] args) throws IOException {
+//        FileScanner scanner = new FileScanner(Paths.get("/home/gaganis/Downloads/testfile"));
+        FileScanner scanner = new FileScanner(Paths.get("/home/gaganis/Downloads/testfile"));
+
+        long start = System.currentTimeMillis();
+        scanner.scanFile();
+        System.out.println("System.currentTimeMillis() - start = " + (System.currentTimeMillis() - start));
+
+        System.out.println("REGION_SIZE = " + REGION_SIZE);
+    }
+}
