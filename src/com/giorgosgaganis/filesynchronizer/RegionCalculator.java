@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.giorgosgaganis.filesynchronizer.Contants.REGION_SIZE;
 
@@ -46,7 +47,7 @@ public class RegionCalculator {
     public void calculateForSize(long fileSize) {
         file.setSize(fileSize);
 
-        List<Region> regions = file.getRegions();
+        ConcurrentHashMap<Long, Region> regions = file.getRegions();
         regions.clear();
 
         long position = 0;
@@ -56,7 +57,7 @@ public class RegionCalculator {
                     position + REGION_SIZE > fileSize
                             ? fileSize - position
                             : REGION_SIZE;
-            regions.add(new Region(position, regionSize));
+            regions.put(position, new Region(position, regionSize));
 
             position += REGION_SIZE;
         } while (position < fileSize);

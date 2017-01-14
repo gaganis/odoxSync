@@ -32,5 +32,7 @@ public class Client {
         this.id = id;
     }
 
-
+    public ConcurrentHashMap<Integer, File> getFiles() {
+        return files;
+    }
 }

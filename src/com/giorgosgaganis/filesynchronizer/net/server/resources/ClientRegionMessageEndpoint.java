@@ -33,7 +33,12 @@ public class ClientRegionMessageEndpoint {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Integer getIt(ClientRegionMessage clientRegionMessage) {
-        DirectorySynchronizer.INSTANCE.addClientRegion(clientRegionMessage);
-        return 0;
+        try {
+            DirectorySynchronizer.INSTANCE.addClientRegion(clientRegionMessage);
+            return 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 1;
+        }
     }
 }

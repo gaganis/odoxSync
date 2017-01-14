@@ -23,8 +23,7 @@ import com.google.common.base.Objects;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -37,7 +36,7 @@ public class File {
     private long size;
     private FileTime lastModified;
 
-    private List<Region> regions = new ArrayList<>();
+    private ConcurrentHashMap<Long, Region> regions = new ConcurrentHashMap<>();
 
     public File() {
     }
@@ -71,7 +70,7 @@ public class File {
         this.size = size;
     }
 
-    public List<Region> getRegions() {
+    public ConcurrentHashMap<Long, Region> getRegions() {
         return regions;
     }
 

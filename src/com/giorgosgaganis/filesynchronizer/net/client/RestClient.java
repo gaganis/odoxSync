@@ -68,6 +68,6 @@ public class RestClient {
         Invocation.Builder invocationBuilder =
                 webTarget.request();
 
-        invocationBuilder.put(Entity.entity(clientRegionMessage, MediaType.APPLICATION_JSON_TYPE));
+        invocationBuilder.post(Entity.entity(clientRegionMessage, MediaType.APPLICATION_JSON_TYPE));
     }
 }

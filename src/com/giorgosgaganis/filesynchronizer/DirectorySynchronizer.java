@@ -94,7 +94,7 @@ public class DirectorySynchronizer {
                 RandomAccessFile randomAccessFile = new RandomAccessFile(file.getName(), "r");
                 FileChannel channel = randomAccessFile.getChannel()
         ) {
-            for (Region region : file.getRegions()) {
+            for (Region region : file.getRegions().values()) {
 
                 scanRegion(region, channel);
                 if (logger.isLoggable(Level.FINER)) {
@@ -152,5 +152,19 @@ public class DirectorySynchronizer {
 
     public void addClientRegion(ClientRegionMessage clientRegionMessage) {
 
+        int clientId = clientRegionMessage.getClientId();
+        int fileId = clientRegionMessage.getFileId();
+
+        String fileName = files.get(fileId).getName();
+
+        Client client = clients.get(clientId);
+
+        client.files.putIfAbsent(fileId, new File(fileName));
+        File file = client.files.get(fileId);
+        ConcurrentHashMap<Long, Region> clientRegions = file.getRegions();
+        Region region = clientRegionMessage.getRegion();
+
+        clientRegions.put(region.getOffset(), region);
+        logger.fine("Added client region " + region);
     }
 }

@@ -25,9 +25,10 @@ import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,20 +84,22 @@ public class SyncClient {
                 Files.createDirectories(parent);
 
                 try (
-                        FileOutputStream fos = new FileOutputStream(filePath.toFile());
-                        BufferedOutputStream bos = new BufferedOutputStream(fos)
+                        RandomAccessFile randomAccessFile = new RandomAccessFile(file.getName(), "rw");
+                        FileChannel channel = randomAccessFile.getChannel()
 
                 ) {
                     long counter = 0;
                     RegionCalculator regionCalculator = new RegionCalculator(file);
                     regionCalculator.calculateForSize(file.getSize());
 
-                    for (Region region : file.getRegions()) {
+
+                    for (Region region : file.getRegions().values()) {
                         long sum = 0;
                         Hasher hasher = Hashing.sha256().newHasher();
+                        MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, region.getOffset(), region.getSize());
                         for (long i = 0; i < region.getSize(); i++) {
                             byte b = (byte) counter;
-                            bos.write(b);
+                            mappedByteBuffer.put(b);
 
                             hasher.putByte(b);
                             sum += b;
