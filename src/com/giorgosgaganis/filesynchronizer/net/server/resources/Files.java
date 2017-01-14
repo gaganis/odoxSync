@@ -16,26 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.net.server;
+package com.giorgosgaganis.filesynchronizer.net.server.resources;
+
+import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.FileSynchronizer;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.util.Collection;
 
 /**
- * Handles both client-side and server-side handler depending on which
- * constructor was called.
+ * Root resource (exposed at "myresource" path)
  */
-public class ServerHandler extends SimpleChannelInboundHandler<IntroductionRequest>{
+@Path("files")
+public class Files {
 
-    private final FileSynchronizer fileSynchronizer;
-
-    public ServerHandler(FileSynchronizer fileSynchronizer) {
-        this.fileSynchronizer = fileSynchronizer;
-    }
-
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, IntroductionRequest msg) throws Exception {
-        long clientId = fileSynchronizer.setupClient();
-        ctx.channel().write(Long.valueOf(clientId));
+    /**
+     * Method handling HTTP GET requests. The returned object will be sent
+     * to the client as "text/plain" media type.
+     *
+     * @return String that will be returned as a text/plain response.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<File> getIt() {
+        return FileSynchronizer.INSTANCE.files.values();
     }
 }

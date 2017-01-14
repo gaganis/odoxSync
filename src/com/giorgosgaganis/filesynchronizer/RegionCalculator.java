@@ -19,8 +19,6 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,7 +36,7 @@ public class RegionCalculator {
         this.file = file;
     }
 
-    public void calculate() throws IOException{
+    public void calculate() throws IOException {
         Path path = Paths.get(file.getName());
         long fileSize = Files.size(path);
 
@@ -56,5 +54,7 @@ public class RegionCalculator {
 
             position += REGION_SIZE;
         } while (position < fileSize);
+
+        file.setSize(fileSize);
     }
 }

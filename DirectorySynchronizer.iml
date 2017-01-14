@@ -8,6 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="com.google.guava:guava:21.0" level="project" />
-    <orderEntry type="library" name="io.netty:netty-all:4.1.7.Final" level="project" />
+    <orderEntry type="library" name="org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.25" level="project" />
+    <orderEntry type="library" name="org.glassfish.jersey.media:jersey-media-json-jackson:2.25" level="project" />
   </component>
 </module>

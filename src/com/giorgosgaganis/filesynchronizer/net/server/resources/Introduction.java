@@ -16,11 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.net.server;
+package com.giorgosgaganis.filesynchronizer.net.server.resources;
+
+import com.giorgosgaganis.filesynchronizer.FileSynchronizer;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 
 /**
- * Created by gaganis on 14/01/17.
+ * Root resource (exposed at "myresource" path)
  */
-public class IntroductionRequest {
+@Path("introduction")
+public class Introduction {
 
+    /**
+     * Method handling HTTP GET requests. The returned object will be sent
+     * to the client as "text/plain" media type.
+     *
+     * @return String that will be returned as a text/plain response.
+     */
+    @GET
+    @Produces({"text/plain"})
+    public String getIt() {
+        int clientId = FileSynchronizer.INSTANCE.setupClient();
+        return "" + clientId;
+    }
 }

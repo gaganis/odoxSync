@@ -38,17 +38,19 @@ import java.util.logging.Logger;
  * Created by gaganis on 13/01/17.
  */
 public class FileSynchronizer {
+    public static final FileSynchronizer INSTANCE = new FileSynchronizer();
+
     private static final Logger logger = Logger.getLogger(FileSynchronizer.class.getName());
 
     private final AtomicInteger fileIdCounter = new AtomicInteger(1);
-    private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
 
     private final AtomicInteger clientIdCounter = new AtomicInteger(1);
     private final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
 
 
-    private void start() {
+    public void start() {
 //        do {
         scanDirectoryAndFiles();
 //        } while (true);

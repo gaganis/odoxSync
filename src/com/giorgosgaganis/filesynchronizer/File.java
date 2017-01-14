@@ -18,8 +18,10 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.List;
 /**
  * Created by gaganis on 13/01/17.
  */
+@XmlRootElement
 public class File {
     private String name;
     private int id;
@@ -35,6 +38,9 @@ public class File {
     private FileTime lastModified;
 
     private List<Region> regions = new ArrayList<>();
+
+    public File() {
+    }
 
     public File(String name) {
         this.name = name;
@@ -69,6 +75,7 @@ public class File {
         return regions;
     }
 
+    @JsonIgnore
     public FileTime getLastModified() {
         return lastModified;
     }

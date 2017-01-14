@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Created by gaganis on 13/01/17.
  */
@@ -27,6 +29,9 @@ public class Region {
 
     private long quickDigest;
     private byte[] slowDigest;
+
+    public Region() {
+    }
 
     public Region(long offset, long size) {
         this.offset = offset;
@@ -45,10 +50,12 @@ public class Region {
         return quickDigest;
     }
 
+    @JsonIgnore
     public void setQuickDigest(long quickDigest) {
         this.quickDigest = quickDigest;
     }
 
+    @JsonIgnore
     public byte[] getSlowDigest() {
         return slowDigest;
     }
