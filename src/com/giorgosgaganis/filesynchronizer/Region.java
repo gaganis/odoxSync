@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import static com.google.common.base.MoreObjects.toStringHelper;
 
 /**
@@ -65,11 +67,11 @@ public class Region {
 
     @Override
     public String toString() {
-        return toStringHelper(this)
-                .add("offset", offset)
-                .add("size", size)
-                .add("quickDigest", quickDigest)
-                .add("slowDigest", slowDigest)
+        return new ToStringBuilder(this)
+                .append("offset", offset)
+                .append("size", size)
+                .append("quickDigest", quickDigest)
+                .append("slowDigest", slowDigest)
                 .toString();
     }
 }

@@ -40,6 +40,12 @@ public class RegionCalculator {
         Path path = Paths.get(file.getName());
         long fileSize = Files.size(path);
 
+        calculateForSize(fileSize);
+    }
+
+    public void calculateForSize(long fileSize) {
+        file.setSize(fileSize);
+
         List<Region> regions = file.getRegions();
         regions.clear();
 
@@ -54,7 +60,5 @@ public class RegionCalculator {
 
             position += REGION_SIZE;
         } while (position < fileSize);
-
-        file.setSize(fileSize);
     }
 }

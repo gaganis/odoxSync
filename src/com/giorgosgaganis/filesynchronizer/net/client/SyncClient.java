@@ -20,15 +20,11 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -45,8 +40,9 @@ import java.util.logging.Logger;
 public class SyncClient {
     private static final Logger logger = Logger.getLogger(SyncClient.class.getName());
 
-    private Client restClient = ClientBuilder.newClient();
     private int clientId = -1;
+
+    RestClient restClient = new RestClient();
 
     private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
 
@@ -64,42 +60,16 @@ public class SyncClient {
     private void start() {
 
         logger.info("Starting sync client");
-        clientId = getClientId();
+        clientId = restClient.getClientId();
         processFiles();
     }
 
     private void processFiles() {
-        Collection<File> files = getFiles();
+        Collection<File> files = restClient.getFiles();
 
-        files.stream().peek(file -> System.out.println(file.getName())).parallel().forEach(this::processFile);
+        files.stream().parallel().forEach(this::processFile);
     }
 
-    private Collection<File> getFiles() {
-        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/files");
-
-        Invocation.Builder invocationBuilder =
-                webTarget.request();
-
-        Collection<File> files = invocationBuilder.get(new GenericType<Collection<File>>() {
-        });
-
-        logger.info("Retrieved files from server");
-        if (logger.isLoggable(Level.FINER)) {
-            logger.finest("Files collection content " + files);
-        }
-        return files;
-    }
-
-    private int getClientId() {
-        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/introduction");
-
-        Invocation.Builder invocationBuilder =
-                webTarget.request();
-
-        Integer id = invocationBuilder.get(Integer.class);
-        logger.info("Retrieved clientId [" + id + "]");
-        return id;
-    }
 
     private void processFile(File file) {
 
@@ -118,6 +88,9 @@ public class SyncClient {
 
                 ) {
                     long counter = 0;
+                    RegionCalculator regionCalculator = new RegionCalculator(file);
+                    regionCalculator.calculateForSize(file.getSize());
+
                     for (Region region : file.getRegions()) {
                         long sum = 0;
                         Hasher hasher = Hashing.sha256().newHasher();

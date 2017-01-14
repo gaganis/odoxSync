@@ -16,21 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer;
+package com.giorgosgaganis.filesynchronizer.net.server.resources;
 
-import java.util.concurrent.ConcurrentHashMap;
+import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
+import com.giorgosgaganis.filesynchronizer.net.client.ClientRegionMessage;
 
-/**
- * Created by gaganis on 14/01/17.
- */
-public class Client {
-    private final int id;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-    ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
+@Path("clientregionmessage")
+public class ClientRegionMessageEndpoint {
 
-    public Client(int id) {
-        this.id = id;
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Integer getIt(ClientRegionMessage clientRegionMessage) {
+        DirectorySynchronizer.INSTANCE.addClientRegion(clientRegionMessage);
+        return 0;
     }
-
-
 }

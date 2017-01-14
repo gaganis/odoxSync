@@ -20,6 +20,7 @@ package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
 import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
+import com.giorgosgaganis.filesynchronizer.net.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.HashCode;
 
@@ -147,5 +148,9 @@ public class DirectorySynchronizer {
         Client client = new Client(clientId);
         clients.put(clientId, client);
         return clientId;
+    }
+
+    public void addClientRegion(ClientRegionMessage clientRegionMessage) {
+
     }
 }

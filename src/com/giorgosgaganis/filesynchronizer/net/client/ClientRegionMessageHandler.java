@@ -21,6 +21,8 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 
 import javax.ws.rs.client.Client;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,9 +32,13 @@ import java.util.logging.Logger;
 public class ClientRegionMessageHandler {
     private static final Logger logger = Logger.getLogger(DirectorySynchronizer.class.getName());
 
-    private final Client restClient;
+    public static final int MAX_REGION_THREADS = 4;
 
-    public ClientRegionMessageHandler(Client restClient) {
+    private ExecutorService executorService = Executors.newFixedThreadPool(MAX_REGION_THREADS);
+
+    private final RestClient restClient;
+
+    public ClientRegionMessageHandler(RestClient restClient) {
         this.restClient = restClient;
     }
 
@@ -42,5 +48,11 @@ public class ClientRegionMessageHandler {
                     + clientRegionMessage + "]");
         }
 
+        executorService.submit(()->transferClientRegionMessage(clientRegionMessage));
+
+    }
+
+    public void transferClientRegionMessage(ClientRegionMessage clientRegionMessage) {
+        restClient.postClientRegionMessage(clientRegionMessage);
     }
 }
