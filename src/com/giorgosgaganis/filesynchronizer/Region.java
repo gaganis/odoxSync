@@ -50,12 +50,11 @@ public class Region {
         return quickDigest;
     }
 
-    @JsonIgnore
+
     public void setQuickDigest(long quickDigest) {
         this.quickDigest = quickDigest;
     }
 
-    @JsonIgnore
     public byte[] getSlowDigest() {
         return slowDigest;
     }

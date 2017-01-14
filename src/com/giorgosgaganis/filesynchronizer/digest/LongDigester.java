@@ -16,30 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer;
-
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
+package com.giorgosgaganis.filesynchronizer.digest;
 
 import java.nio.MappedByteBuffer;
 
 /**
  * Created by gaganis on 13/01/17.
  */
-public class ShaDigester {
+public class LongDigester {
 
 
-    private Hasher hasher;
+    private long sum;
 
-    public byte[] digest(MappedByteBuffer mappedByteBuffer) {
-        hasher = Hashing.sha256().newHasher();
+    public long digest(MappedByteBuffer mappedByteBuffer) {
+        sum = 0;
         do {
-            hasher.putByte(mappedByteBuffer.get());
+            sum = sum + (long) mappedByteBuffer.get();
         } while (mappedByteBuffer.hasRemaining());
-        return hasher.hash().asBytes();
+        return sum;
     }
 
     public String getStringResult() {
-        return hasher.hash().toString();
+        return Long.valueOf(sum).toString();
     }
 }

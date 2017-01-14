@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
+import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
 import com.google.common.hash.HashCode;
 
 import java.io.IOException;

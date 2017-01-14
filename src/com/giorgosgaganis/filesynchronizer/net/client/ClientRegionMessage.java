@@ -16,15 +16,40 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer;
+package com.giorgosgaganis.filesynchronizer.net.client;
 
-import java.nio.MappedByteBuffer;
+import com.giorgosgaganis.filesynchronizer.Region;
 
 /**
- * Created by gaganis on 13/01/17.
+ * Created by gaganis on 14/01/17.
  */
-public interface Digester {
-    long digest(MappedByteBuffer mappedByteBuffer);
+public class ClientRegionMessage {
+    private int clientId;
+    private int fileId;
 
-    String getStringResult();
+    private Region region;
+
+    public int getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
+    }
+
+    public int getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(int fileId) {
+        this.fileId = fileId;
+    }
+
+    public Region getRegion() {
+        return region;
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
+    }
 }

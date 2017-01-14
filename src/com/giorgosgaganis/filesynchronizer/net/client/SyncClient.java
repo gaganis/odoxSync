@@ -20,6 +20,8 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -38,20 +40,46 @@ import java.util.Collection;
  * Created by gaganis on 14/01/17.
  */
 public class SyncClient {
-    public static void main(String[] args) {
-        Client client = ClientBuilder.newClient();
+    private Client client = ClientBuilder.newClient();
+    private int clientId = -1;
 
+    public static void main(String[] args) {
+
+        SyncClient syncClient = new SyncClient();
+        syncClient.start();
+
+//        System.out.println("files = " + files);
+    }
+
+    private void start() {
+
+        clientId = getClientId();
+        processFiles();
+    }
+
+    private void processFiles() {
+        Collection<File> files = getFiles();
+
+        files.stream().peek(file -> System.out.println(file.getName())).parallel().forEach(SyncClient::processFile);
+    }
+
+    private Collection<File> getFiles() {
         WebTarget webTarget = client.target("http://localhost:8081/myapp/files");
 
         Invocation.Builder invocationBuilder =
                 webTarget.request();
 
-        Collection<File> files = invocationBuilder.get(new GenericType<Collection<File>>() {
+        return invocationBuilder.get(new GenericType<Collection<File>>() {
         });
+    }
 
-        files.stream().peek(file -> System.out.println(file.getName())).parallel().forEach(SyncClient::processFile);
+    private int getClientId() {
+        WebTarget webTarget = client.target("http://localhost:8081/myapp/introduction");
 
-//        System.out.println("files = " + files);
+        Invocation.Builder invocationBuilder =
+                webTarget.request();
+
+        return invocationBuilder.get(Integer.class);
     }
 
     private static void processFile(File file) {
@@ -71,10 +99,22 @@ public class SyncClient {
                 ) {
                     long counter = 0;
                     for (Region region : file.getRegions()) {
+                        long sum = 0;
+                        Hasher hasher = Hashing.sha256().newHasher();
                         for (long i = 0; i < region.getSize(); i++) {
-                            bos.write((byte) counter);
+                            byte b = (byte) counter;
+                            bos.write(b);
+
+                            hasher.putByte(b);
+                            sum += b;
+
                             counter++;
                         }
+                        Region clientRegion = new Region(region.getOffset(), region.getSize());
+                        clientRegion.setQuickDigest(sum);
+                        clientRegion.setSlowDigest(hasher.hash().asBytes());
+                        ClientRegionMessage clientRegionMessage = new ClientRegionMessage();
+                        clientRegionMessage.
                     }
                 }
             }
