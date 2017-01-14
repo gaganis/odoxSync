@@ -43,16 +43,18 @@ public class DirectoryScanner {
 
     public void scan() {
 
-        logger.info("Starting directory scan");
         try {
             Path root = Paths.get(".")
                     .toAbsolutePath()
                     .normalize();
 
+            logger.info("Starting directory scan in [" + root + "]");
+
             Files.walk(root)
                     .filter(Files::isRegularFile)
                     .map(Path::normalize)
                     .map(path -> root.relativize(path))
+                    .peek(System.out::println)
                     .forEach((path) -> {
                         String name = path.toString();
                         File file = new File(name);

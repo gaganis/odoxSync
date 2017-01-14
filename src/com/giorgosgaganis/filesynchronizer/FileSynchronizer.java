@@ -40,9 +40,11 @@ import java.util.logging.Logger;
 public class FileSynchronizer {
     private static final Logger logger = Logger.getLogger(FileSynchronizer.class.getName());
 
-    private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
     private final AtomicInteger fileIdCounter = new AtomicInteger(1);
+    private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
+
+    private final AtomicInteger clientIdCounter = new AtomicInteger(1);
     private final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
 
 
@@ -91,13 +93,13 @@ public class FileSynchronizer {
             for (Region region : file.getRegions()) {
 
                 scanRegion(region, channel);
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.fine("Calculated fast digest[" + region.getQuickDigest()
+                if (logger.isLoggable(Level.FINER)) {
+                    logger.finer("Calculated fast digest[" + region.getQuickDigest()
                             + "] for file [" + file.getName() + "]" + region.getOffset()
                             + ":" + (region.getOffset() + region.getSize()));
 
                     String slowDigest = HashCode.fromBytes(region.getSlowDigest()).toString();
-                    logger.fine("Calculated slow digest[" + slowDigest + "] for file ["
+                    logger.finer("Calculated slow digest[" + slowDigest + "] for file ["
                             + file.getName() + "]" + region.getOffset()
                             + ":" + (region.getOffset() + region.getSize()));
 
@@ -144,4 +146,10 @@ public class FileSynchronizer {
 
     }
 
+    public int setupClient() {
+        int clientId = clientIdCounter.getAndIncrement();
+        Client client = new Client(clientId);
+        clients.put(clientId, client);
+        return clientId;
+    }
 }

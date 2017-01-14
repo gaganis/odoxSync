@@ -16,15 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer;
+package com.giorgosgaganis.filesynchronizer.net.server;
 
 /**
  * Created by gaganis on 14/01/17.
  */
-public class Client {
-    private final int id;
+public class IntroductionRequest {
 
-    public Client(int id) {
-        this.id = id;
-    }
 }

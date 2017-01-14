@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="com.google.guava:guava:21.0" level="project" />
+    <orderEntry type="library" name="io.netty:netty-all:4.1.7.Final" level="project" />
   </component>
 </module>
