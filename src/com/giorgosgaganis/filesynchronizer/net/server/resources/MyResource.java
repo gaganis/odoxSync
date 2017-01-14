@@ -18,10 +18,14 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.server.resources;
 
+import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,9 +33,11 @@ import java.io.OutputStream;
 /**
  * Root resource (exposed at "myresource" path)
  */
-@Path("myresource")
+@Path("regiondata")
 public class MyResource {
 
+    @Context
+    Response response;
     /**
      * Method handling HTTP GET requests. The returned object will be sent
      * to the client as "text/plain" media type.
@@ -41,15 +47,15 @@ public class MyResource {
     @GET
     @Produces({"application/octet-stream"})
     public StreamingOutput getIt() {
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+        response.getHeaders().add("fileId", "1");
+        response.getHeaders().add("offset", "1");
+        response.getHeaders().add("size", "1");
+        return outputStream -> {
 
-                for (int i = 0; i < 1000; i++) {
-                    outputStream.write(100);
-                }
-                outputStream.flush();
+            for (int i = 0; i < 1000; i++) {
+                outputStream.write(100);
             }
+            outputStream.flush();
         };
     }
 }
