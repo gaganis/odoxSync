@@ -37,10 +37,10 @@ import java.util.logging.Logger;
 /**
  * Created by gaganis on 13/01/17.
  */
-public class FileSynchronizer {
-    public static final FileSynchronizer INSTANCE = new FileSynchronizer();
+public class DirectorySynchronizer {
+    public static final DirectorySynchronizer INSTANCE = new DirectorySynchronizer();
 
-    private static final Logger logger = Logger.getLogger(FileSynchronizer.class.getName());
+    private static final Logger logger = Logger.getLogger(DirectorySynchronizer.class.getName());
 
     private final AtomicInteger fileIdCounter = new AtomicInteger(1);
     public final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
@@ -142,7 +142,7 @@ public class FileSynchronizer {
         configureLogging();
 
 
-        FileSynchronizer fs = new FileSynchronizer();
+        DirectorySynchronizer fs = new DirectorySynchronizer();
 
         fs.start();
 

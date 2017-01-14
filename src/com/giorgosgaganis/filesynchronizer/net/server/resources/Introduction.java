@@ -18,7 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.server.resources;
 
-import com.giorgosgaganis.filesynchronizer.FileSynchronizer;
+import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -39,7 +39,7 @@ public class Introduction {
     @GET
     @Produces({"text/plain"})
     public String getIt() {
-        int clientId = FileSynchronizer.INSTANCE.setupClient();
+        int clientId = DirectorySynchronizer.INSTANCE.setupClient();
         return "" + clientId;
     }
 }

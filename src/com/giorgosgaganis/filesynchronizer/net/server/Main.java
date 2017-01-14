@@ -18,7 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.server;
 
-import com.giorgosgaganis.filesynchronizer.FileSynchronizer;
+import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -39,7 +39,7 @@ public class Main {
      * @return Grizzly HTTP server.
      */
     public static HttpServer startServer() {
-        FileSynchronizer.INSTANCE.start();
+        DirectorySynchronizer.INSTANCE.start();
         // create a resource config that scans for JAX-RS resources and providers
         // in com.example package
         final ResourceConfig rc = new ResourceConfig().packages("com.giorgosgaganis.filesynchronizer.net.server.resources");

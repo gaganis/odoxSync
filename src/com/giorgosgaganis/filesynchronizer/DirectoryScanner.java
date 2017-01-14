@@ -74,7 +74,7 @@ public class DirectoryScanner {
     }
 
     public static void main(String[] args) throws IOException {
-        FileSynchronizer.configureLogging();
+        DirectorySynchronizer.configureLogging();
 
         Path root = Paths.get("");
         DirectoryScanner ds = new DirectoryScanner(new ConcurrentHashMap<>(), new AtomicInteger(1));

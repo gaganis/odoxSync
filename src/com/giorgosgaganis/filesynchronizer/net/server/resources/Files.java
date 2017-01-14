@@ -19,7 +19,7 @@
 package com.giorgosgaganis.filesynchronizer.net.server.resources;
 
 import com.giorgosgaganis.filesynchronizer.File;
-import com.giorgosgaganis.filesynchronizer.FileSynchronizer;
+import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -42,6 +42,6 @@ public class Files {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Collection<File> getIt() {
-        return FileSynchronizer.INSTANCE.files.values();
+        return DirectorySynchronizer.INSTANCE.files.values();
     }
 }
