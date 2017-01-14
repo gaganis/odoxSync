@@ -26,11 +26,13 @@ import org.glassfish.jersey.server.ResourceConfig;
 import java.io.IOException;
 import java.net.URI;
 
+import static com.giorgosgaganis.filesynchronizer.utils.LoggingUtils.configureLogging;
+
 /**
- * com.giorgosgaganis.filesynchronizer.net.server.Main class.
+ * com.giorgosgaganis.filesynchronizer.net.server.Server class.
  *
  */
-public class Main {
+public class Server {
     // Base URI the Grizzly HTTP server will listen on
     public static final String BASE_URI = "http://localhost:8081/myapp/";
 
@@ -38,7 +40,8 @@ public class Main {
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
      * @return Grizzly HTTP server.
      */
-    public static HttpServer startServer() {
+    public static HttpServer startServer() throws IOException {
+        configureLogging();
         DirectorySynchronizer.INSTANCE.start();
         // create a resource config that scans for JAX-RS resources and providers
         // in com.example package
@@ -50,7 +53,7 @@ public class Main {
     }
 
     /**
-     * com.giorgosgaganis.filesynchronizer.net.server.Main method.
+     * com.giorgosgaganis.filesynchronizer.net.server.Server method.
      * @param args
      * @throws IOException
      */

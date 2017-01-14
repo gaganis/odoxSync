@@ -20,6 +20,7 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
@@ -35,15 +36,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 14/01/17.
  */
 public class SyncClient {
-    private Client client = ClientBuilder.newClient();
+    private static final Logger logger = Logger.getLogger(SyncClient.class.getName());
+
+    private Client restClient = ClientBuilder.newClient();
     private int clientId = -1;
 
-    public static void main(String[] args) {
+    private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
+
+
+    public static void main(String[] args) throws IOException {
+
+        LoggingUtils.configureLogging();
 
         SyncClient syncClient = new SyncClient();
         syncClient.start();
@@ -53,6 +63,7 @@ public class SyncClient {
 
     private void start() {
 
+        logger.info("Starting sync client");
         clientId = getClientId();
         processFiles();
     }
@@ -60,30 +71,39 @@ public class SyncClient {
     private void processFiles() {
         Collection<File> files = getFiles();
 
-        files.stream().peek(file -> System.out.println(file.getName())).parallel().forEach(SyncClient::processFile);
+        files.stream().peek(file -> System.out.println(file.getName())).parallel().forEach(this::processFile);
     }
 
     private Collection<File> getFiles() {
-        WebTarget webTarget = client.target("http://localhost:8081/myapp/files");
+        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/files");
 
         Invocation.Builder invocationBuilder =
                 webTarget.request();
 
-        return invocationBuilder.get(new GenericType<Collection<File>>() {
+        Collection<File> files = invocationBuilder.get(new GenericType<Collection<File>>() {
         });
+
+        logger.info("Retrieved files from server");
+        if (logger.isLoggable(Level.FINER)) {
+            logger.finest("Files collection content " + files);
+        }
+        return files;
     }
 
     private int getClientId() {
-        WebTarget webTarget = client.target("http://localhost:8081/myapp/introduction");
+        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/introduction");
 
         Invocation.Builder invocationBuilder =
                 webTarget.request();
 
-        return invocationBuilder.get(Integer.class);
+        Integer id = invocationBuilder.get(Integer.class);
+        logger.info("Retrieved clientId [" + id + "]");
+        return id;
     }
 
-    private static void processFile(File file) {
+    private void processFile(File file) {
 
+        logger.fine("Processing file [" + file.getName() + "]");
         Path root = Paths.get(".").toAbsolutePath().normalize();
         Path filePath = root.resolve(file.getName());
 
@@ -110,16 +130,25 @@ public class SyncClient {
 
                             counter++;
                         }
-                        Region clientRegion = new Region(region.getOffset(), region.getSize());
-                        clientRegion.setQuickDigest(sum);
-                        clientRegion.setSlowDigest(hasher.hash().asBytes());
-                        ClientRegionMessage clientRegionMessage = new ClientRegionMessage();
-                        clientRegionMessage.
+
+                        clientRegionMessageHandler.submit(
+                                createClientRegionMessage(file, region, sum, hasher));
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private ClientRegionMessage createClientRegionMessage(File file, Region region, long sum, Hasher hasher) {
+        Region clientRegion = new Region(region.getOffset(), region.getSize());
+        clientRegion.setQuickDigest(sum);
+        clientRegion.setSlowDigest(hasher.hash().asBytes());
+        ClientRegionMessage clientRegionMessage = new ClientRegionMessage();
+        clientRegionMessage.setClientId(clientId);
+        clientRegionMessage.setFileId(file.getId());
+        clientRegionMessage.setRegion(clientRegion);
+        return clientRegionMessage;
     }
 }

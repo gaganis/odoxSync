@@ -20,6 +20,8 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 
 import com.giorgosgaganis.filesynchronizer.Region;
 
+import static com.google.common.base.MoreObjects.toStringHelper;
+
 /**
  * Created by gaganis on 14/01/17.
  */
@@ -51,5 +53,14 @@ public class ClientRegionMessage {
 
     public void setRegion(Region region) {
         this.region = region;
+    }
+
+    @Override
+    public String toString() {
+        return toStringHelper(this)
+                .add("clientId", clientId)
+                .add("fileId", fileId)
+                .add("region", region)
+                .toString();
     }
 }

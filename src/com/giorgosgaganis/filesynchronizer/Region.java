@@ -18,7 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import static com.google.common.base.MoreObjects.toStringHelper;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -61,5 +61,15 @@ public class Region {
 
     public void setSlowDigest(byte[] slowDigest) {
         this.slowDigest = slowDigest;
+    }
+
+    @Override
+    public String toString() {
+        return toStringHelper(this)
+                .add("offset", offset)
+                .add("size", size)
+                .add("quickDigest", quickDigest)
+                .add("slowDigest", slowDigest)
+                .toString();
     }
 }

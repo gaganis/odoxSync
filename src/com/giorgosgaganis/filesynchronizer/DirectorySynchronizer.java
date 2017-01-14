@@ -20,6 +20,7 @@ package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
 import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
+import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.HashCode;
 
 import java.io.IOException;
@@ -33,20 +34,18 @@ import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 13/01/17.
  */
 public class DirectorySynchronizer {
-    public static final DirectorySynchronizer INSTANCE = new DirectorySynchronizer();
-
     private static final Logger logger = Logger.getLogger(DirectorySynchronizer.class.getName());
+
+    public static final DirectorySynchronizer INSTANCE = new DirectorySynchronizer();
 
     private final AtomicInteger fileIdCounter = new AtomicInteger(1);
     public final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
-
 
     private final AtomicInteger clientIdCounter = new AtomicInteger(1);
     private final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
@@ -133,15 +132,8 @@ public class DirectorySynchronizer {
         regionCalculator.calculate();
     }
 
-    public static void configureLogging() throws IOException {
-        Path logConfig = Paths.get("logging.properties");
-        if (Files.exists(logConfig)) {
-            LogManager.getLogManager().readConfiguration(Files.newInputStream(logConfig));
-        }
-    }
-
     public static void main(String[] args) throws IOException {
-        configureLogging();
+        LoggingUtils.configureLogging();
 
 
         DirectorySynchronizer fs = new DirectorySynchronizer();
