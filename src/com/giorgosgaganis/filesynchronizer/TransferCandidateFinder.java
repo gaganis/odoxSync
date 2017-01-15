@@ -20,12 +20,15 @@ package com.giorgosgaganis.filesynchronizer;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Created by gaganis on 15/01/17.
  */
 public class TransferCandidateFinder {
+    private static final Logger logger = Logger.getLogger(TransferCandidateFinder.class.getName());
+
     private final ConcurrentHashMap<Integer, File> files;
     private final ConcurrentHashMap<Integer, Client> clients;
     private final LinkedBlockingQueue<TransferCandidate> transferCandidateQueue;
@@ -82,7 +85,19 @@ public class TransferCandidateFinder {
                 return;
             }
 
+            boolean doTransfer = false;
             if (clintRegion.getQuickDigest() != serverRegion.getQuickDigest()) {
+                doTransfer = true;
+            } else {
+                for (int i = 0; i < clintRegion.getSlowDigest().length; i++) {
+                    if(clintRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
+                        doTransfer = true;
+                        logger.info("Colistion detected");
+                    }
+                }
+            }
+
+            if(doTransfer) {
                 TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
                 try {
                     //TODO Transfer candidates should be added to per client queues

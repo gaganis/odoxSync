@@ -19,6 +19,7 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import com.google.common.base.Objects;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Created by gaganis on 15/01/17.
@@ -26,9 +27,9 @@ import com.google.common.base.Objects;
 public class TransferCandidate {
     private final Integer fileId;
     private final Long offset;
-    private final long size;
+    private final Long size;
 
-    public TransferCandidate(Integer fileId, Long offset, long size) {
+    public TransferCandidate(Integer fileId, Long offset, Long size) {
 
         this.fileId = fileId;
         this.offset = offset;
@@ -43,7 +44,7 @@ public class TransferCandidate {
         return offset;
     }
 
-    public long getSize() {
+    public Long getSize() {
         return size;
     }
 
@@ -59,5 +60,14 @@ public class TransferCandidate {
     @Override
     public int hashCode() {
         return Objects.hashCode(fileId, offset);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("fileId", fileId)
+                .append("offset", offset)
+                .append("size", size)
+                .toString();
     }
 }

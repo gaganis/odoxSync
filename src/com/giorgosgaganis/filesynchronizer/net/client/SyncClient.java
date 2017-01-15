@@ -48,6 +48,8 @@ public class SyncClient {
 
     private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
 
+    private RegionDataHandler regionDataHandler = new RegionDataHandler();
+
     public SyncClient(String workingDirectory) {
         this.workingDirectory = workingDirectory;
     }

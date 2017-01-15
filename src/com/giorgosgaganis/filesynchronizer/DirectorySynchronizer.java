@@ -60,7 +60,7 @@ public class DirectorySynchronizer {
 
     private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(files, clients, transferCandidateQueue);
 
-    private String workingDirectory;
+    public String workingDirectory;
 
 
     public void start(String workingDirectory) {
