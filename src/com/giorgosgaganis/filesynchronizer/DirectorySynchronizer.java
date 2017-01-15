@@ -58,6 +58,8 @@ public class DirectorySynchronizer {
     public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
             new LinkedBlockingQueue<>();
 
+    private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(files, clients, transferCandidateQueue);
+
     private String workingDirectory;
 
 
@@ -74,68 +76,7 @@ public class DirectorySynchronizer {
             } while (true);
         }).start();
 
-        new Thread(() -> {
-            lookForRegionsToTransfer();
-        }).start();
-    }
-
-    private void lookForRegionsToTransfer() {
-        do {
-
-            for (Integer clientId : clients.keySet()) {
-                lookAtClient(clientId);
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } while (true);
-    }
-
-    private void lookAtClient(Integer clientId) {
-        Client client = clients.get(clientId);
-        if (client != null) {
-            for (Integer fileId : client.files.keySet()) {
-                lookAtFile(client, clientId, fileId);
-            }
-        }
-    }
-
-    private void lookAtFile(Client client,Integer clientId, Integer fileId) {
-        File clientFile = client.files.get(fileId);
-        if(clientFile != null) {
-            for (Long offset : clientFile.getRegions().keySet()
-                    .stream()
-                    .sorted()
-                    .collect(Collectors.toList())) {
-                lookAtRegion(clientFile, clientId, fileId, offset);
-            }
-        }
-    }
-
-    private void lookAtRegion(File clientFile, Integer clientId, Integer fileId, Long offset) {
-        Region clintRegion = clientFile.getRegions().get(offset);
-        if(clintRegion != null) {
-            Region serverRegion = files.get(fileId).getRegions().get(offset);
-
-            if(serverRegion == null) {
-                return;
-            }
-
-            if(clintRegion.getQuickDigest() != serverRegion.getQuickDigest()) {
-                TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
-                try {
-                    //TODO Transfer candidates should be added to per client queues
-                    if(!transferCandidateQueue.contains(transferCandidate)) {
-                        transferCandidateQueue.put(transferCandidate);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        transferCandidateFinder.lookForRegionsToTransfer();
     }
 
     private void scanDirectoryAndFiles() {
