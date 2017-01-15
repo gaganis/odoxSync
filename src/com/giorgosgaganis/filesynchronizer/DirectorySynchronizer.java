@@ -51,23 +51,26 @@ public class DirectorySynchronizer {
     private final AtomicInteger clientIdCounter = new AtomicInteger(1);
     private final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
 
+    private String workingDirectory;
 
-    public void start() {
+
+    public void start(String workingDirectory) {
 //        do {
+        this.workingDirectory = workingDirectory;
         scanDirectoryAndFiles();
 //        } while (true);
     }
 
     private void scanDirectoryAndFiles() {
         DirectoryScanner ds = new DirectoryScanner(files, fileIdCounter);
-        ds.scan();
+        ds.scan(workingDirectory);
 
         files.values().parallelStream().forEach(this::processFile);
     }
 
     private void processFile(File file) {
         try {
-            Path path = Paths.get(file.getName());
+            Path path = Paths.get(workingDirectory, file.getName());
             FileTime lastModifiedTime = Files.getLastModifiedTime(path);
             if (lastModifiedTime.compareTo(file.getLastModified()) < 0) {
                 logger.fine(" File has not been modified [" + file.getName() + "]");
@@ -90,8 +93,9 @@ public class DirectorySynchronizer {
     }
 
     private void scanFile(File file) throws IOException {
+        Path filePath = Paths.get(workingDirectory, file.getName());
         try (
-                RandomAccessFile randomAccessFile = new RandomAccessFile(file.getName(), "r");
+                RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
                 FileChannel channel = randomAccessFile.getChannel()
         ) {
             for (Region region : file.getRegions().values()) {
@@ -129,7 +133,7 @@ public class DirectorySynchronizer {
     }
 
     private void reCalculateRegions(File file) throws IOException {
-        RegionCalculator regionCalculator = new RegionCalculator(file);
+        RegionCalculator regionCalculator = new RegionCalculator(workingDirectory, file);
         regionCalculator.calculate();
     }
 
@@ -139,7 +143,7 @@ public class DirectorySynchronizer {
 
         DirectorySynchronizer fs = new DirectorySynchronizer();
 
-        fs.start();
+        fs.start(".");
 
     }
 

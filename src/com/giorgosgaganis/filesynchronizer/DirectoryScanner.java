@@ -43,10 +43,10 @@ public class DirectoryScanner {
         this.fileIdCounter = fileIdCounter;
     }
 
-    public void scan() {
+    public void scan(String workingDirectory) {
 
         try {
-            Path root = Paths.get(".")
+            Path root = Paths.get(workingDirectory)
                     .toAbsolutePath()
                     .normalize();
 
@@ -80,7 +80,7 @@ public class DirectoryScanner {
 
         Path root = Paths.get("");
         DirectoryScanner ds = new DirectoryScanner(new ConcurrentHashMap<>(), new AtomicInteger(1));
-        ds.scan();
-        ds.scan();
+        ds.scan(".");
+        ds.scan(".");
     }
 }

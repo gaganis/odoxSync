@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.giorgosgaganis.filesynchronizer.Contants.REGION_SIZE;
@@ -32,13 +31,16 @@ import static com.giorgosgaganis.filesynchronizer.Contants.REGION_SIZE;
  */
 public class RegionCalculator {
     private final File file;
+    private final String workingDirectory;
 
-    public RegionCalculator(File file) {
+    public RegionCalculator(String workingDirectory, File file) {
+        this.workingDirectory = workingDirectory;
         this.file = file;
+
     }
 
     public void calculate() throws IOException {
-        Path path = Paths.get(file.getName());
+        Path path = Paths.get(workingDirectory, file.getName());
         long fileSize = Files.size(path);
 
         calculateForSize(fileSize);

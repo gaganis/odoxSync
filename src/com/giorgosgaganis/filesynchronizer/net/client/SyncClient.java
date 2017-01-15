@@ -40,6 +40,7 @@ import java.util.logging.Logger;
  */
 public class SyncClient {
     private static final Logger logger = Logger.getLogger(SyncClient.class.getName());
+    private final String workingDirectory;
 
     private int clientId = -1;
 
@@ -47,12 +48,17 @@ public class SyncClient {
 
     private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
 
+    public SyncClient(String workingDirectory) {
+        this.workingDirectory = workingDirectory;
+    }
+
 
     public static void main(String[] args) throws IOException {
 
+        String workingDirectory = args.length > 0 ? args[0] : ".";
         LoggingUtils.configureLogging();
 
-        SyncClient syncClient = new SyncClient();
+        SyncClient syncClient = new SyncClient(workingDirectory);
         syncClient.start();
 
 //        System.out.println("files = " + files);
@@ -75,7 +81,7 @@ public class SyncClient {
     private void processFile(File file) {
 
         logger.fine("Processing file [" + file.getName() + "]");
-        Path root = Paths.get(".").toAbsolutePath().normalize();
+        Path root = Paths.get(workingDirectory).toAbsolutePath().normalize();
         Path filePath = root.resolve(file.getName());
 
         try {
@@ -89,7 +95,7 @@ public class SyncClient {
 
                 ) {
                     long counter = 0;
-                    RegionCalculator regionCalculator = new RegionCalculator(file);
+                    RegionCalculator regionCalculator = new RegionCalculator(workingDirectory, file);
                     regionCalculator.calculateForSize(file.getSize());
 
 

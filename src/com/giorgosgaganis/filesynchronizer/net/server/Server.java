@@ -40,9 +40,9 @@ public class Server {
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
      * @return Grizzly HTTP server.
      */
-    public static HttpServer startServer() throws IOException {
+    public static HttpServer startServer(String workingDirectory) throws IOException {
         configureLogging();
-        DirectorySynchronizer.INSTANCE.start();
+        DirectorySynchronizer.INSTANCE.start(workingDirectory);
         // create a resource config that scans for JAX-RS resources and providers
         // in com.example package
         final ResourceConfig rc = new ResourceConfig().packages("com.giorgosgaganis.filesynchronizer.net.server.resources");
@@ -58,7 +58,8 @@ public class Server {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        final HttpServer server = startServer();
+        String workingDirectory = args.length > 0 ? args[0] : ".";
+        final HttpServer server = startServer(workingDirectory);
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
         System.in.read();
