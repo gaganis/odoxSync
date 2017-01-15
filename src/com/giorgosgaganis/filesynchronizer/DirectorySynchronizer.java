@@ -33,9 +33,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -51,21 +55,104 @@ public class DirectorySynchronizer {
     private final AtomicInteger clientIdCounter = new AtomicInteger(1);
     private final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
 
+    public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
+            new LinkedBlockingQueue<>();
+
     private String workingDirectory;
 
 
     public void start(String workingDirectory) {
-//        do {
         this.workingDirectory = workingDirectory;
-        scanDirectoryAndFiles();
-//        } while (true);
+
+        new Thread(() -> {
+            do {
+                scanDirectoryAndFiles();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                }
+            } while (true);
+        }).start();
+
+        new Thread(() -> {
+            lookForRegionsToTransfer();
+        }).start();
+    }
+
+    private void lookForRegionsToTransfer() {
+        do {
+
+            for (Integer clientId : clients.keySet()) {
+                lookAtClient(clientId);
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (true);
+    }
+
+    private void lookAtClient(Integer clientId) {
+        Client client = clients.get(clientId);
+        if (client != null) {
+            for (Integer fileId : client.files.keySet()) {
+                lookAtFile(client, clientId, fileId);
+            }
+        }
+    }
+
+    private void lookAtFile(Client client,Integer clientId, Integer fileId) {
+        File clientFile = client.files.get(fileId);
+        if(clientFile != null) {
+            for (Long offset : clientFile.getRegions().keySet()
+                    .stream()
+                    .sorted()
+                    .collect(Collectors.toList())) {
+                lookAtRegion(clientFile, clientId, fileId, offset);
+            }
+        }
+    }
+
+    private void lookAtRegion(File clientFile, Integer clientId, Integer fileId, Long offset) {
+        Region clintRegion = clientFile.getRegions().get(offset);
+        if(clintRegion != null) {
+            Region serverRegion = files.get(fileId).getRegions().get(offset);
+
+            if(serverRegion == null) {
+                return;
+            }
+
+            if(clintRegion.getQuickDigest() != serverRegion.getQuickDigest()) {
+                TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
+                try {
+                    //TODO Transfer candidates should be added to per client queues
+                    if(!transferCandidateQueue.contains(transferCandidate)) {
+                        transferCandidateQueue.put(transferCandidate);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void scanDirectoryAndFiles() {
         DirectoryScanner ds = new DirectoryScanner(files, fileIdCounter);
         ds.scan(workingDirectory);
 
-        files.values().parallelStream().forEach(this::processFile);
+        ForkJoinPool forkJoinPool = new ForkJoinPool(2);
+        try {
+            forkJoinPool.submit(() ->
+                    //parallel task here, for example
+                    files.values().parallelStream().forEach(this::processFile)
+            ).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     private void processFile(File file) {
