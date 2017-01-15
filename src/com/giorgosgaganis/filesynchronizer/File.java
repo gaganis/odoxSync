@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +36,8 @@ public class File {
 
     private long size;
     private FileTime lastModified;
+
+    private Path absolutePath;
 
     private ConcurrentHashMap<Long, Region> regions = new ConcurrentHashMap<>();
 
@@ -81,6 +84,15 @@ public class File {
 
     public void setLastModified(FileTime lastModified) {
         this.lastModified = lastModified;
+    }
+
+    @JsonIgnore
+    public Path getAbsolutePath() {
+        return absolutePath;
+    }
+
+    public void setAbsolutePath(Path absolutePath) {
+        this.absolutePath = absolutePath;
     }
 
     @Override

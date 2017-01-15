@@ -23,6 +23,10 @@ import com.giorgosgaganis.filesynchronizer.File;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,5 +73,18 @@ public class RestClient {
                 webTarget.request();
 
         invocationBuilder.post(Entity.entity(clientRegionMessage, MediaType.APPLICATION_JSON_TYPE));
+    }
+
+    public RegionDataParams getRegionData() throws IOException {
+        URLConnection connection = new URL("http://localhost:8081/myapp/regiondata").openConnection();
+
+        connection.setDoOutput(false);
+        connection.connect();
+        int fileId = connection.getHeaderFieldInt("fileId", -1);
+        long offset = connection.getHeaderFieldLong("offset", -1);
+        long size = connection.getHeaderFieldLong("size", -1);
+
+        return new RegionDataParams(fileId, offset, size, connection.getInputStream());
+
     }
 }

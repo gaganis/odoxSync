@@ -18,8 +18,60 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.client;
 
+import com.giorgosgaganis.filesynchronizer.File;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Created by gaganis on 15/01/17.
  */
-public class RegionDataHandler {
+public class RegionDataHandler extends Thread {
+
+    private RestClient restClient;
+    private ConcurrentHashMap<Integer, File> files;
+
+    private ExecutorService service = Executors.newFixedThreadPool(4);
+
+    public RegionDataHandler(RestClient restClient, ConcurrentHashMap<Integer, File> files) {
+        this.restClient = restClient;
+        this.files = files;
+    }
+
+    @Override
+    public void run() {
+        do {
+            service.submit(() -> {
+                try {
+                    RegionDataParams regionData = restClient.getRegionData();
+
+                    File file = files.get(regionData.fileId);
+                    Path absolutePath = file.getAbsolutePath();
+
+                    try (
+                            RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw");
+                            FileChannel channel = randomAccessFile.getChannel();
+                            InputStream inputStream = regionData.inputStream;
+                            BufferedInputStream bufferedInputStream = new BufferedInputStream(regionData.inputStream)
+                    ) {
+                        MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
+                        while(mappedByteBuffer.hasRemaining() && bufferedInputStream.available() >0) {
+                            byte b = (byte) bufferedInputStream.read();
+                            mappedByteBuffer.put(b);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } while (true);
+    }
 }

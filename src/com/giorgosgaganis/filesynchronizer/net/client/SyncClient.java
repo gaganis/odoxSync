@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -40,15 +41,16 @@ import java.util.logging.Logger;
  */
 public class SyncClient {
     private static final Logger logger = Logger.getLogger(SyncClient.class.getName());
-    private final String workingDirectory;
 
+    private final String workingDirectory;
     private int clientId = -1;
 
-    RestClient restClient = new RestClient();
+    private ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
+    private RestClient restClient = new RestClient();
+    private RegionDataHandler regionDataHandler = new RegionDataHandler(restClient, files);
     private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
 
-    private RegionDataHandler regionDataHandler = new RegionDataHandler();
 
     public SyncClient(String workingDirectory) {
         this.workingDirectory = workingDirectory;
@@ -85,6 +87,8 @@ public class SyncClient {
         logger.fine("Processing file [" + file.getName() + "]");
         Path root = Paths.get(workingDirectory).toAbsolutePath().normalize();
         Path filePath = root.resolve(file.getName());
+
+        file.setAbsolutePath(filePath.toAbsolutePath());
 
         try {
             if (Files.notExists(filePath)) {

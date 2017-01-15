@@ -100,10 +100,11 @@ public class DirectorySynchronizer {
         try {
             Path path = Paths.get(workingDirectory, file.getName());
             FileTime lastModifiedTime = Files.getLastModifiedTime(path);
-            if (lastModifiedTime.compareTo(file.getLastModified()) < 0) {
+            if (lastModifiedTime.compareTo(file.getLastModified()) == 0) {
                 logger.fine(" File has not been modified [" + file.getName() + "]");
                 return;
             }
+            file.setLastModified(lastModifiedTime);
 
             long size = Files.size(path);
             if (size != file.getSize()) {
