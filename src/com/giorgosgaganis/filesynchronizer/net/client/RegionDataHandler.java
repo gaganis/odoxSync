@@ -30,12 +30,14 @@ import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 15/01/17.
  */
 public class RegionDataHandler extends Thread {
+//    private AtomicLong bytesTransferred = new
     private static final Logger logger = Logger.getLogger(RegionDataHandler.class.getName());
 
     private RestClient restClient;

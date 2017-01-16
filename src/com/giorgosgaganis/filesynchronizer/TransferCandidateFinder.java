@@ -104,7 +104,7 @@ public class TransferCandidateFinder {
                 for (int i = 0; i < clintRegion.getSlowDigest().length; i++) {
                     if (clintRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
                         doTransfer = true;
-                        logger.info("Colistion detected");
+                        logger.info("Collision detected");
                     }
                 }
             }
