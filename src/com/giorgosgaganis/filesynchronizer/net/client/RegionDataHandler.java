@@ -37,7 +37,8 @@ import java.util.logging.Logger;
  * Created by gaganis on 15/01/17.
  */
 public class RegionDataHandler extends Thread {
-//    private AtomicLong bytesTransferred = new
+    private AtomicLong bytesTransferred = new AtomicLong(0);
+
     private static final Logger logger = Logger.getLogger(RegionDataHandler.class.getName());
 
     private RestClient restClient;
@@ -52,38 +53,60 @@ public class RegionDataHandler extends Thread {
 
     @Override
     public void run() {
-        do {
-            service.submit(() -> {
+        new Thread(() -> {
+            do {
+                long start = System.currentTimeMillis();
+                long startBytes = bytesTransferred.get();
                 try {
-                    RegionDataParams regionData = restClient.getRegionData();
-                    if(regionData == null) {
-                        logger.fine("Nothing to transfer");
-                        return;
-                    }
-
-
-                    logger.fine("Starting to copy region [" + regionData + "]");
-                    File file = files.get(regionData.fileId);
-                    Path absolutePath = file.getAbsolutePath();
-
-                    try (
-                            RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw");
-                            FileChannel channel = randomAccessFile.getChannel();
-                            InputStream inputStream = regionData.inputStream;
-                            BufferedInputStream bufferedInputStream = new BufferedInputStream(regionData.inputStream)
-                    ) {
-                        MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
-                        while (mappedByteBuffer.hasRemaining() && bufferedInputStream.available() > 0) {
-                            byte b = (byte) bufferedInputStream.read();
-                            mappedByteBuffer.put(b);
-                        }
-                    }catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } catch (IOException e) {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            });
-        } while (true);
+                long duration = System.currentTimeMillis() - start;
+                long endBytes = bytesTransferred.get();
+                long bytes = endBytes - startBytes;
+                long bytesPerSecond = bytes * 1000 / duration;
+                logger.info("bytes [" + bytes
+                        + "], bytes/s [" + bytesPerSecond + "]");
+            } while (true);
+        }).start();
+
+        for (int i = 0; i < 4; i++) {
+
+            new Thread(() -> {
+                do {
+                    try {
+                        RegionDataParams regionData = restClient.getRegionData();
+                        if (regionData == null) {
+                        logger.fine("Nothing to transfer");
+                            return;
+                        }
+
+
+                        logger.fine("Starting to copy region [" + regionData + "]");
+                        File file = files.get(regionData.fileId);
+                        Path absolutePath = file.getAbsolutePath();
+
+                        try (
+                                RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw");
+                                FileChannel channel = randomAccessFile.getChannel();
+                                InputStream inputStream = regionData.inputStream;
+                                BufferedInputStream bufferedInputStream = new BufferedInputStream(regionData.inputStream)
+                        ) {
+                            MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
+                            while (mappedByteBuffer.hasRemaining() && bufferedInputStream.available() > 0) {
+                                byte b = (byte) bufferedInputStream.read();
+                                mappedByteBuffer.put(b);
+                                bytesTransferred.incrementAndGet();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } while (true);
+            }).start();
+        }
     }
 }
