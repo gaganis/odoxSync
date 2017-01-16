@@ -27,13 +27,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedOutputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -57,8 +57,13 @@ public class RegionData {
         DirectorySynchronizer directorySynchronizer = DirectorySynchronizer.INSTANCE;
 
         try {
-            TransferCandidate transferCandidate = directorySynchronizer.transferCandidateQueue.take();
+            TransferCandidate transferCandidate = directorySynchronizer.transferCandidateQueue.poll(2, TimeUnit.SECONDS);
 
+            if (transferCandidate == null) {
+                response.addHeader("nothingToTransfer", "nothingToTransfer");
+                return outputStream -> {
+                };
+            }
             response.addHeader("fileId", transferCandidate.getFileId().toString());
             response.addHeader("offset", transferCandidate.getOffset().toString());
             response.addHeader("size", transferCandidate.getSize().toString());
@@ -78,7 +83,6 @@ public class RegionData {
                     do {
                         bof.write(mappedByteBuffer.get());
                     } while (mappedByteBuffer.hasRemaining());
-                    outputStream.flush();
                 }
             };
         } catch (Exception e) {

@@ -32,10 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,6 +54,8 @@ public class DirectorySynchronizer {
 
     public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
             new LinkedBlockingQueue<>();
+
+    public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
 
     private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(files, clients, transferCandidateQueue);
 

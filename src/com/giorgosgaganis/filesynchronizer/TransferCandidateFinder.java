@@ -43,6 +43,7 @@ public class TransferCandidateFinder {
         new Thread(() -> {
             do {
                 for (Integer clientId : clients.keySet()) {
+                    logger.finer("Looking candidates for client [" + clientId + "]");
                     lookAtClient(clientId);
                 }
 
@@ -59,6 +60,8 @@ public class TransferCandidateFinder {
         Client client = clients.get(clientId);
         if (client != null) {
             for (Integer fileId : client.files.keySet()) {
+                logger.finer("Looking candidates for client ["
+                        + clientId + "] and file [" + fileId + "]");
                 lookAtFile(client, clientId, fileId);
             }
         }
@@ -71,6 +74,9 @@ public class TransferCandidateFinder {
                     .stream()
                     .sorted()
                     .collect(Collectors.toList())) {
+                logger.finer("Looking candidates for client ["
+                        + clientId + "] and file ["
+                        + fileId + "] and region " + offset + "]");
                 lookAtRegion(clientFile, clientId, fileId, offset);
             }
         }
@@ -90,14 +96,14 @@ public class TransferCandidateFinder {
                 doTransfer = true;
             } else {
                 for (int i = 0; i < clintRegion.getSlowDigest().length; i++) {
-                    if(clintRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
+                    if (clintRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
                         doTransfer = true;
                         logger.info("Colistion detected");
                     }
                 }
             }
 
-            if(doTransfer) {
+            if (doTransfer) {
                 TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
                 try {
                     //TODO Transfer candidates should be added to per client queues

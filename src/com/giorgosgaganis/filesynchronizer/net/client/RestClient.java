@@ -80,6 +80,10 @@ public class RestClient {
 
         connection.setDoOutput(false);
         connection.connect();
+        String noTransfer = connection.getHeaderField("nothingToTransfer");
+        if("nothingToTransfer".equals(noTransfer)){
+            return null;
+        }
         int fileId = connection.getHeaderFieldInt("fileId", -1);
         long offset = connection.getHeaderFieldLong("offset", -1);
         long size = connection.getHeaderFieldLong("size", -1);

@@ -30,11 +30,13 @@ import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 15/01/17.
  */
 public class RegionDataHandler extends Thread {
+    private static final Logger logger = Logger.getLogger(RegionDataHandler.class.getName());
 
     private RestClient restClient;
     private ConcurrentHashMap<Integer, File> files;
@@ -52,7 +54,13 @@ public class RegionDataHandler extends Thread {
             service.submit(() -> {
                 try {
                     RegionDataParams regionData = restClient.getRegionData();
+                    if(regionData == null) {
+                        logger.fine("Nothing to transfer");
+                        return;
+                    }
 
+
+                    logger.fine("Starting to copy region [" + regionData + "]");
                     File file = files.get(regionData.fileId);
                     Path absolutePath = file.getAbsolutePath();
 
@@ -63,10 +71,12 @@ public class RegionDataHandler extends Thread {
                             BufferedInputStream bufferedInputStream = new BufferedInputStream(regionData.inputStream)
                     ) {
                         MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
-                        while(mappedByteBuffer.hasRemaining() && bufferedInputStream.available() >0) {
+                        while (mappedByteBuffer.hasRemaining() && bufferedInputStream.available() > 0) {
                             byte b = (byte) bufferedInputStream.read();
                             mappedByteBuffer.put(b);
                         }
+                    }catch (Exception e) {
+                        e.printStackTrace();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

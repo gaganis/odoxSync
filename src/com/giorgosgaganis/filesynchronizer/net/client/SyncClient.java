@@ -72,7 +72,17 @@ public class SyncClient {
 
         logger.info("Starting sync client");
         clientId = restClient.getClientId();
-        processFiles();
+        new Thread(() -> {
+            do {
+                processFiles();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } while (true);
+        }).start();
+        regionDataHandler.start();
     }
 
     private void processFiles() {
@@ -90,13 +100,15 @@ public class SyncClient {
 
         file.setAbsolutePath(filePath.toAbsolutePath());
 
+        files.putIfAbsent(file.getId(), file);
+
         try {
             if (Files.notExists(filePath)) {
                 Path parent = filePath.getParent();
                 Files.createDirectories(parent);
 
                 try (
-                        RandomAccessFile randomAccessFile = new RandomAccessFile(file.getName(), "rw");
+                        RandomAccessFile randomAccessFile = new RandomAccessFile(file.getAbsolutePath().toFile(), "rw");
                         FileChannel channel = randomAccessFile.getChannel()
 
                 ) {

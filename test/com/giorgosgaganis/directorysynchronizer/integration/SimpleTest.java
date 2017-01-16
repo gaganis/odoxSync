@@ -32,6 +32,22 @@ public class SimpleTest {
 
         Thread.sleep(2000);
 
+        deleteTargetDir();
+
+        new Thread(() -> {
+            try {
+                SyncClient.main(new String[]{TARGET_DIR});
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        Thread.sleep(2000);
+
+        System.out.println("result = " + compareSourceTarget());
+    }
+
+    public static void deleteTargetDir() throws IOException {
         Files.walkFileTree(
                 Paths.get(TARGET_DIR), new SimpleFileVisitor<Path>() {
                     @Override
@@ -50,18 +66,6 @@ public class SimpleTest {
                     }
                 }
         );
-
-        new Thread(() -> {
-            try {
-                SyncClient.main(new String[]{TARGET_DIR});
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
-        Thread.sleep(2000);
-
-        System.out.println("result = " + compareSourceTarget());
     }
 
     private static boolean compareSourceTarget() throws IOException {

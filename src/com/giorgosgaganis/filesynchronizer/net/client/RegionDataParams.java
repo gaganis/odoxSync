@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.client;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.InputStream;
 
 /**
@@ -36,5 +38,15 @@ public class RegionDataParams {
         this.offset = offset;
         this.size = size;
         this.inputStream = inputStream;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("fileId", fileId)
+                .append("offset", offset)
+                .append("size", size)
+                .append("inputStream", inputStream)
+                .toString();
     }
 }
