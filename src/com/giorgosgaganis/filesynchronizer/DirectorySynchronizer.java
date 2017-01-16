@@ -155,11 +155,11 @@ public class DirectorySynchronizer {
                 longDigester.digest(mappedByteBuffer));
 
 
-        mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, region.getOffset(), region.getSize());
-        ShaDigester shaDigester = new ShaDigester();
-        region.setSlowDigest(
-                shaDigester.digest(mappedByteBuffer)
-        );
+//        mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, region.getOffset(), region.getSize());
+//        ShaDigester shaDigester = new ShaDigester();
+//        region.setSlowDigest(
+//                shaDigester.digest(mappedByteBuffer)
+//        );
 
     }
 

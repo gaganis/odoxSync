@@ -119,13 +119,14 @@ public class SyncClient {
 
                     for (Region region : file.getRegions().values()) {
                         long sum = 0;
-                        Hasher hasher = Hashing.sha256().newHasher();
+//                        Hasher hasher = Hashing.sha256().newHasher();
+                        Hasher hasher = null;
                         MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, region.getOffset(), region.getSize());
                         for (long i = 0; i < region.getSize(); i++) {
                             byte b = (byte) counter;
                             mappedByteBuffer.put(b);
 
-                            hasher.putByte(b);
+//                            hasher.putByte(b);
                             sum += b;
 
                             counter++;
@@ -144,7 +145,7 @@ public class SyncClient {
     private ClientRegionMessage createClientRegionMessage(File file, Region region, long sum, Hasher hasher) {
         Region clientRegion = new Region(region.getOffset(), region.getSize());
         clientRegion.setQuickDigest(sum);
-        clientRegion.setSlowDigest(hasher.hash().asBytes());
+//        clientRegion.setSlowDigest(hasher.hash().asBytes());
         ClientRegionMessage clientRegionMessage = new ClientRegionMessage();
         clientRegionMessage.setClientId(clientId);
         clientRegionMessage.setFileId(file.getId());
