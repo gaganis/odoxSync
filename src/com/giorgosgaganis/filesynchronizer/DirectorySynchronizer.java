@@ -36,7 +36,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -57,7 +56,11 @@ public class DirectorySynchronizer {
 
     public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
 
-    private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(files, clients, transferCandidateQueue);
+    private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(
+            files,
+            clients,
+            transferCandidateQueue,
+            offeredTransferCandidates);
 
     public String workingDirectory;
 

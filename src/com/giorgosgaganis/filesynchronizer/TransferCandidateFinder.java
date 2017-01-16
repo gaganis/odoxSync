@@ -19,6 +19,7 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,11 +33,16 @@ public class TransferCandidateFinder {
     private final ConcurrentHashMap<Integer, File> files;
     private final ConcurrentHashMap<Integer, Client> clients;
     private final LinkedBlockingQueue<TransferCandidate> transferCandidateQueue;
+    private CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates;
 
-    public TransferCandidateFinder(ConcurrentHashMap<Integer, File> files, ConcurrentHashMap<Integer, Client> clients, LinkedBlockingQueue<TransferCandidate> transferCandidateQueue) {
+    public TransferCandidateFinder(ConcurrentHashMap<Integer, File> files,
+                                   ConcurrentHashMap<Integer, Client> clients,
+                                   LinkedBlockingQueue<TransferCandidate> transferCandidateQueue,
+                                   CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates) {
         this.files = files;
         this.clients = clients;
         this.transferCandidateQueue = transferCandidateQueue;
+        this.offeredTransferCandidates = offeredTransferCandidates;
     }
 
     public void lookForRegionsToTransfer() {
@@ -107,8 +113,10 @@ public class TransferCandidateFinder {
                 TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
                 try {
                     //TODO Transfer candidates should be added to per client queues
-                    if (!transferCandidateQueue.contains(transferCandidate)) {
+                    if (!transferCandidateQueue.contains(transferCandidate)
+                            && !offeredTransferCandidates.contains(transferCandidate)) {
                         transferCandidateQueue.put(transferCandidate);
+                        offeredTransferCandidates.add(transferCandidate);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

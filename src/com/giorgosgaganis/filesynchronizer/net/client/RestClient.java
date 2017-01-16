@@ -23,6 +23,7 @@ import com.giorgosgaganis.filesynchronizer.File;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -76,19 +77,24 @@ public class RestClient {
     }
 
     public RegionDataParams getRegionData() throws IOException {
-        URLConnection connection = new URL("http://localhost:8081/myapp/regiondata").openConnection();
+        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/regiondata");
+        Invocation.Builder invocationBuilder =
+                webTarget.request();
 
-        connection.setDoOutput(false);
-        connection.connect();
-        String noTransfer = connection.getHeaderField("nothingToTransfer");
+        Response response = invocationBuilder.get();
+
+
+        String noTransfer = response.getHeaderString("nothingToTransfer");
         if("nothingToTransfer".equals(noTransfer)){
             return null;
         }
-        int fileId = connection.getHeaderFieldInt("fileId", -1);
-        long offset = connection.getHeaderFieldLong("offset", -1);
-        long size = connection.getHeaderFieldLong("size", -1);
+        int fileId = Integer.valueOf(response.getHeaderString("fileId"));
+        long offset = Long.valueOf(response.getHeaderString("offset"));
+        long size = Long.valueOf(response.getHeaderString("size"));
 
-        return new RegionDataParams(fileId, offset, size, connection.getInputStream());
+        InputStream inputStream = response.readEntity(InputStream.class);
+
+        return new RegionDataParams(fileId, offset, size, inputStream);
 
     }
 }
