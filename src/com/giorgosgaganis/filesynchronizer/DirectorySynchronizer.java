@@ -19,8 +19,10 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
+import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
 import com.giorgosgaganis.filesynchronizer.net.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
+import com.google.common.hash.HashCode;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -54,7 +56,7 @@ public class DirectorySynchronizer {
 
     private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(
             files,
-            clients );
+            clients);
 
     public String workingDirectory;
 
@@ -94,11 +96,21 @@ public class DirectorySynchronizer {
 
     private void processFile(File file) {
         try {
+
+            boolean doScan = file.getRegions()
+                    .values()
+                    .stream()
+                    .filter(Region::isDoSlowScan)
+                    .findFirst()
+                    .isPresent();
+
             Path path = Paths.get(workingDirectory, file.getName());
             FileTime lastModifiedTime = Files.getLastModifiedTime(path);
+
             if (lastModifiedTime.compareTo(file.getLastModified()) == 0) {
                 logger.fine(" File has not been modified [" + file.getName() + "]");
-                return;
+            } else {
+                doScan = true;
             }
             file.setLastModified(lastModifiedTime);
 
@@ -106,11 +118,14 @@ public class DirectorySynchronizer {
             if (size != file.getSize()) {
                 logger.fine("Recalculation regions for [" + file.getName() + "]");
                 reCalculateRegions(file);
+                doScan = true;
             }
 
-            logger.fine("Starting scan for [" + file.getName() + "]");
-            scanFile(file);
-            logger.fine("Finished scan for [" + file.getName() + "]");
+            if (doScan) {
+                logger.info("Starting scan for [" + file.getName() + "]");
+                scanFile(file);
+                logger.info("Finished scan for [" + file.getName() + "]");
+            }
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Unable to scan file [" + file.getName() + "]", e);
@@ -126,16 +141,17 @@ public class DirectorySynchronizer {
             for (Region region : file.getRegions().values()) {
 
                 scanRegion(region, channel);
-                logger.info("quick digest = " + region.getQuickDigest());
+                if (region.isDoSlowScan()) {
+                    String slowDigest = HashCode.fromBytes(region.getSlowDigest()).toString();
+                    logger.info("Calculated slow digest[" + slowDigest + "] for file ["
+                            + file.getName() + "]" + region.getOffset()
+                            + ":" + (region.getOffset() + region.getSize()));
+                }
                 if (logger.isLoggable(Level.FINER)) {
                     logger.finer("Calculated fast digest[" + region.getQuickDigest()
                             + "] for file [" + file.getName() + "]" + region.getOffset()
                             + ":" + (region.getOffset() + region.getSize()));
 
-//                    String slowDigest = HashCode.fromBytes(region.getSlowDigest()).toString();
-//                    logger.finer("Calculated slow digest[" + slowDigest + "] for file ["
-//                            + file.getName() + "]" + region.getOffset()
-//                            + ":" + (region.getOffset() + region.getSize()));
 
                 }
             }
@@ -143,18 +159,26 @@ public class DirectorySynchronizer {
     }
 
     private void scanRegion(Region region, FileChannel channel) throws IOException {
-        MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, region.getOffset(), region.getSize());
+        MappedByteBuffer mappedByteBuffer = channel.map(
+                FileChannel.MapMode.READ_ONLY,
+                region.getOffset(),
+                region.getSize());
 
         LongDigester longDigester = new LongDigester();
         region.setQuickDigest(
                 longDigester.digest(mappedByteBuffer));
 
 
-//        mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, region.getOffset(), region.getSize());
-//        ShaDigester shaDigester = new ShaDigester();
-//        region.setSlowDigest(
-//                shaDigester.digest(mappedByteBuffer)
-//        );
+        if (region.isDoSlowScan()) {
+            mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY,
+                    region.getOffset(),
+                    region.getSize());
+
+            ShaDigester shaDigester = new ShaDigester();
+            region.setSlowDigest(
+                    shaDigester.digest(mappedByteBuffer)
+            );
+        }
 
     }
 

@@ -18,6 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -26,6 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by gaganis on 14/01/17.
  */
 public class Client {
+    public static final double OFFER_EXPIRATION_SECONDS = 30;
     private final int id;
     public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
             new LinkedBlockingQueue<>();
@@ -37,9 +39,44 @@ public class Client {
 
     public Client(int id) {
         this.id = id;
+        removeExpiredOffers();
     }
 
     public ConcurrentHashMap<Integer, File> getFiles() {
         return files;
+    }
+
+    public void removeExpiredOffers() {
+        new Thread(() -> {
+            do {
+                CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = this.offeredTransferCandidates;
+
+                try {
+                    if (offeredTransferCandidates.isEmpty()) {
+                        Thread.sleep(1000);
+                    continue;
+                }
+
+
+                long time = System.currentTimeMillis();
+                Iterator<TransferCandidate> iterator = offeredTransferCandidates.iterator();
+                while (iterator.hasNext()) {
+                    TransferCandidate offer = iterator.next();
+                    if (time < (offer.getOfferedTimeMillis() + OFFER_EXPIRATION_SECONDS * 1000)) {
+                        break;
+                    }
+                    iterator.remove();
+                }
+                TransferCandidate firstRemainingOffer = offeredTransferCandidates.get(0);
+
+                long nextSleepTime = firstRemainingOffer.getOfferedTimeMillis() - time + 100;
+                Thread.sleep(nextSleepTime);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            } while (true);
+        }).start();
     }
 }

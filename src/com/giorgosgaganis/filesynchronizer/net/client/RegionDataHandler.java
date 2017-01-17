@@ -19,6 +19,8 @@
 package com.giorgosgaganis.filesynchronizer.net.client;
 
 import com.giorgosgaganis.filesynchronizer.File;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -27,8 +29,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -36,17 +36,18 @@ import java.util.logging.Logger;
  * Created by gaganis on 15/01/17.
  */
 public class RegionDataHandler extends Thread {
-    private AtomicLong bytesTransferred = new AtomicLong(0);
-
     private static final Logger logger = Logger.getLogger(RegionDataHandler.class.getName());
 
+    private AtomicLong bytesTransferred = new AtomicLong(0);
+
     private RestClient restClient;
+    private ClientRegionMessageHandler clientRegionMessageHandler;
     private ConcurrentHashMap<Integer, File> files;
+    private int clientId;
 
-    private ExecutorService service = Executors.newFixedThreadPool(4);
-
-    public RegionDataHandler(RestClient restClient, ConcurrentHashMap<Integer, File> files) {
+    public RegionDataHandler(RestClient restClient, ClientRegionMessageHandler clientRegionMessageHandler, ConcurrentHashMap<Integer, File> files) {
         this.restClient = restClient;
+        this.clientRegionMessageHandler = clientRegionMessageHandler;
         this.files = files;
     }
 
@@ -89,7 +90,6 @@ public class RegionDataHandler extends Thread {
                             return;
                         }
 
-
                         logger.fine("Starting to copy region [" + regionData + "]");
                         File file = files.get(regionData.fileId);
                         Path absolutePath = file.getAbsolutePath();
@@ -101,11 +101,16 @@ public class RegionDataHandler extends Thread {
                                 BufferedInputStream bufferedInputStream = new BufferedInputStream(regionData.inputStream)
                         ) {
                             MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
+                            long sum = 0;
+                            Hasher hasher = Hashing.sha256().newHasher();
                             while (mappedByteBuffer.hasRemaining() && bufferedInputStream.available() > 0) {
                                 byte b = (byte) bufferedInputStream.read();
                                 mappedByteBuffer.put(b);
                                 bytesTransferred.incrementAndGet();
+                                hasher.putByte(b);
+                                sum += b;
                             }
+                            clientRegionMessageHandler.submitClientRegionMessage(clientId, file, regionData.offset, regionData.size, sum, hasher.hash().asBytes());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -115,5 +120,9 @@ public class RegionDataHandler extends Thread {
                 } while (true);
             }).start();
         }
+    }
+
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
     }
 }

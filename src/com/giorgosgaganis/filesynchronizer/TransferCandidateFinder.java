@@ -82,8 +82,8 @@ public class TransferCandidateFinder {
     }
 
     private void lookAtRegion(File clientFile, Client client, Integer fileId, Long offset) {
-        Region clintRegion = clientFile.getRegions().get(offset);
-        if (clintRegion != null) {
+        Region clientRegion = clientFile.getRegions().get(offset);
+        if (clientRegion != null) {
             Region serverRegion = files.get(fileId).getRegions().get(offset);
 
             if (serverRegion == null) {
@@ -91,13 +91,17 @@ public class TransferCandidateFinder {
             }
 
             boolean doTransfer = false;
-            if (clintRegion.getQuickDigest() != serverRegion.getQuickDigest()) {
+            if (clientRegion.getQuickDigest() != serverRegion.getQuickDigest()) {
                 doTransfer = true;
             } else {
-                for (int i = 0; i < clintRegion.getSlowDigest().length; i++) {
-                    if (clintRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
-                        doTransfer = true;
-                        logger.info("Collision detected");
+                if(serverRegion.getSlowDigest() == null) {
+                    serverRegion.setDoSlowScan(true);
+                }else {
+                    for (int i = 0; i < clientRegion.getSlowDigest().length; i++) {
+                        if (clientRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
+                            doTransfer = true;
+                            logger.info("Collision detected");
+                        }
                     }
                 }
             }

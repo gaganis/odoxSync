@@ -50,13 +50,12 @@ public class DirectoryScanner {
                     .toAbsolutePath()
                     .normalize();
 
-            logger.info("Starting directory scan in [" + root + "]");
+            logger.fine("Starting directory scan in [" + root + "]");
 
             Files.walk(root)
                     .filter(Files::isRegularFile)
                     .map(Path::normalize)
                     .map(path -> root.relativize(path))
-                    .peek(System.out::println)
                     .forEach((path) -> {
                         String name = path.toString();
                         File file = new File(name);
@@ -72,7 +71,7 @@ public class DirectoryScanner {
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error while scanning directory", e);
         }
-        logger.info("Finished directory scan");
+        logger.fine("Finished directory scan");
     }
 
     public static void main(String[] args) throws IOException {

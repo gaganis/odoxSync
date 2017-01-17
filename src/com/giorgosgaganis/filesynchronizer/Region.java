@@ -30,7 +30,9 @@ public class Region {
     private long size;
 
     private long quickDigest;
-    private byte[] slowDigest;
+
+    private boolean doSlowScan = false;
+    private byte[] slowDigest = null;
 
     public Region() {
     }
@@ -65,6 +67,14 @@ public class Region {
         this.slowDigest = slowDigest;
     }
 
+    public boolean isDoSlowScan() {
+        return doSlowScan;
+    }
+
+    public void setDoSlowScan(boolean doSlowScan) {
+        this.doSlowScan = doSlowScan;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -74,4 +84,5 @@ public class Region {
                 .append("slowDigest", slowDigest)
                 .toString();
     }
+
 }

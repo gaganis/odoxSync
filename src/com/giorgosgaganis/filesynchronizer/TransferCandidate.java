@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by gaganis on 15/01/17.
  */
-public class TransferCandidate implements Delayed {
+public class TransferCandidate {
     private final Integer fileId;
     private final Long offset;
     private final Long size;
@@ -74,17 +74,6 @@ public class TransferCandidate implements Delayed {
                 .append("size", size)
                 .toString();
     }
-
-    @Override
-    public int compareTo(Delayed o) {
-        return Long.compare(getDelay(TimeUnit.MILLISECONDS), o.getDelay(TimeUnit.MILLISECONDS));
-    }
-
-    @Override
-    public long getDelay(TimeUnit unit) {
-        return unit.convert(30, TimeUnit.SECONDS);
-    }
-
 
     public void setOfferedTimeMillis(long offeredTimeMillis) {
         this.offeredTimeMillis = offeredTimeMillis;

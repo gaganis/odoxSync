@@ -48,8 +48,8 @@ public class SyncClient {
     private ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
     private RestClient restClient = new RestClient();
-    private RegionDataHandler regionDataHandler = new RegionDataHandler(restClient, files);
     private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
+    private RegionDataHandler regionDataHandler = new RegionDataHandler(restClient, clientRegionMessageHandler, files);
 
 
     public SyncClient(String workingDirectory) {
@@ -64,15 +64,15 @@ public class SyncClient {
 
         SyncClient syncClient = new SyncClient(workingDirectory);
         syncClient.start();
-
-//        System.out.println("files = " + files);
     }
 
     private void start() {
-
         logger.info("Starting sync client");
         clientId = restClient.getClientId();
+
         restClient.setClientId(clientId);
+        regionDataHandler.setClientId(clientId);
+
         new Thread(() -> {
             do {
                 processFiles();
@@ -113,11 +113,11 @@ public class SyncClient {
                         FileChannel channel = randomAccessFile.getChannel()
 
                 ) {
-                    long counter = 0;
                     RegionCalculator regionCalculator = new RegionCalculator(workingDirectory, file);
                     regionCalculator.calculateForSize(file.getSize());
 
 
+                    long counter = 0;
                     for (Region region : file.getRegions().values()) {
                         long sum = 0;
                         Hasher hasher = Hashing.sha256().newHasher();
@@ -132,24 +132,17 @@ public class SyncClient {
                             counter++;
                         }
 
-                        clientRegionMessageHandler.submit(
-                                createClientRegionMessage(file, region, sum, hasher));
+                        region.setQuickDigest(sum);
+
+                        byte[] slowDigest = hasher.hash().asBytes();
+                        region.setSlowDigest(slowDigest);
+
+                        clientRegionMessageHandler.submitClientRegionMessage(clientId, file, region.getOffset(), region.getSize(), sum, slowDigest);
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private ClientRegionMessage createClientRegionMessage(File file, Region region, long sum, Hasher hasher) {
-        Region clientRegion = new Region(region.getOffset(), region.getSize());
-        clientRegion.setQuickDigest(sum);
-//        clientRegion.setSlowDigest(hasher.hash().asBytes());
-        ClientRegionMessage clientRegionMessage = new ClientRegionMessage();
-        clientRegionMessage.setClientId(clientId);
-        clientRegionMessage.setFileId(file.getId());
-        clientRegionMessage.setRegion(clientRegion);
-        return clientRegionMessage;
     }
 }

@@ -50,7 +50,6 @@ public class RegionCalculator {
         file.setSize(fileSize);
 
         ConcurrentHashMap<Long, Region> regions = file.getRegions();
-        regions.clear();
 
         long position = 0;
         do {
@@ -59,7 +58,7 @@ public class RegionCalculator {
                     position + REGION_SIZE > fileSize
                             ? fileSize - position
                             : REGION_SIZE;
-            regions.put(position, new Region(position, regionSize));
+            regions.putIfAbsent(position, new Region(position, regionSize));
 
             position += REGION_SIZE;
         } while (position < fileSize);

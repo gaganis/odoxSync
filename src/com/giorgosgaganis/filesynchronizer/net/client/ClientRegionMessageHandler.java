@@ -18,9 +18,9 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.client;
 
-import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
+import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.Region;
 
-import javax.ws.rs.client.Client;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -42,17 +42,29 @@ public class ClientRegionMessageHandler {
         this.restClient = restClient;
     }
 
-    public void submit(ClientRegionMessage clientRegionMessage) {
+    private void submit(ClientRegionMessage clientRegionMessage) {
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("ClientRegionMessager submited for processing ["
                     + clientRegionMessage + "]");
         }
 
-        executorService.submit(()->transferClientRegionMessage(clientRegionMessage));
+        executorService.submit(() -> transferClientRegionMessage(clientRegionMessage));
 
     }
 
-    public void transferClientRegionMessage(ClientRegionMessage clientRegionMessage) {
+    private void transferClientRegionMessage(ClientRegionMessage clientRegionMessage) {
         restClient.postClientRegionMessage(clientRegionMessage);
+    }
+
+    public void submitClientRegionMessage(int clientId, File file, long offset, long size, long sum, byte[] slowDigest) {
+        Region clientRegion = new Region(offset, size);
+        clientRegion.setQuickDigest(sum);
+        clientRegion.setSlowDigest(slowDigest);
+
+        ClientRegionMessage clientRegionMessage = new ClientRegionMessage();
+        clientRegionMessage.setClientId(clientId);
+        clientRegionMessage.setFileId(file.getId());
+        clientRegionMessage.setRegion(clientRegion);
+        submit(clientRegionMessage);
     }
 }
