@@ -22,7 +22,6 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
@@ -97,20 +96,21 @@ public class RegionDataHandler extends Thread {
                         try (
                                 RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw");
                                 FileChannel channel = randomAccessFile.getChannel();
-                                InputStream inputStream = regionData.inputStream;
-                                BufferedInputStream bufferedInputStream = new BufferedInputStream(regionData.inputStream)
                         ) {
                             MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
                             long sum = 0;
                             Hasher hasher = Hashing.sha256().newHasher();
-                            while (mappedByteBuffer.hasRemaining() && bufferedInputStream.available() > 0) {
-                                byte b = (byte) bufferedInputStream.read();
+                            int counter = 0;
+                            while (mappedByteBuffer.hasRemaining() && counter < regionData.bytes.length) {
+                                byte b = regionData.bytes[counter];
                                 mappedByteBuffer.put(b);
                                 bytesTransferred.incrementAndGet();
                                 hasher.putByte(b);
                                 sum += b;
+                                counter++;
                             }
                             clientRegionMessageHandler.submitClientRegionMessage(clientId, file, regionData.offset, regionData.size, sum, hasher.hash().asBytes());
+                            regionData.response.close();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

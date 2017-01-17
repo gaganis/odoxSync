@@ -34,7 +34,7 @@ import static com.giorgosgaganis.filesynchronizer.utils.LoggingUtils.configureLo
  */
 public class Server {
     // Base URI the Grizzly HTTP server will listen on
-    public static final String BASE_URI = "http://localhost:8081/myapp/";
+    public static final String BASE_URI = "http://0.0.0.0:8081/myapp/";
 
     /**
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.

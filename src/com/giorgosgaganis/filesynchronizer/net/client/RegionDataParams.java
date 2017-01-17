@@ -20,6 +20,7 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 
 /**
@@ -30,14 +31,16 @@ public class RegionDataParams {
     final int fileId;
     final long offset;
     final long size;
-    final InputStream inputStream;
+    final Response response;
+    final byte[] bytes;
 
-    public RegionDataParams(int fileId, long offset, long size, InputStream inputStream) {
+    public RegionDataParams(int fileId, long offset, long size, byte[] bytes, Response response) {
 
         this.fileId = fileId;
         this.offset = offset;
         this.size = size;
-        this.inputStream = inputStream;
+        this.bytes = bytes;
+        this.response = response;
     }
 
     @Override
@@ -46,7 +49,6 @@ public class RegionDataParams {
                 .append("fileId", fileId)
                 .append("offset", offset)
                 .append("size", size)
-                .append("inputStream", inputStream)
                 .toString();
     }
 }

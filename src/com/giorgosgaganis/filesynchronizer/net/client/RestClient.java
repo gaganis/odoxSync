@@ -19,6 +19,7 @@
 package com.giorgosgaganis.filesynchronizer.net.client;
 
 import com.giorgosgaganis.filesynchronizer.File;
+import org.apache.commons.io.IOUtils;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
@@ -26,8 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,12 +36,14 @@ import java.util.logging.Logger;
  */
 public class RestClient {
     private static final Logger logger = Logger.getLogger(RestClient.class.getName());
+//    public static final String SERVER_PATH = "http://localhost:8081/myapp/";
+    public static final String SERVER_PATH = "http://192.168.1.7:8081/myapp/";
 
     private Client restClient = ClientBuilder.newClient();
     private int clientId;
 
     public Collection<File> getFiles() {
-        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/files");
+        WebTarget webTarget = restClient.target(SERVER_PATH + "files");
 
         Invocation.Builder invocationBuilder =
                 webTarget.request();
@@ -58,7 +59,7 @@ public class RestClient {
     }
 
     public int getClientId() {
-        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/introduction");
+        WebTarget webTarget = restClient.target(SERVER_PATH + "introduction");
 
         Invocation.Builder invocationBuilder =
                 webTarget.request();
@@ -70,15 +71,17 @@ public class RestClient {
 
     public void postClientRegionMessage(ClientRegionMessage clientRegionMessage) {
         logger.fine("Posting ClientRegionMessage");
-        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/clientregionmessage");
+        WebTarget webTarget = restClient.target(SERVER_PATH + "clientregionmessage");
         Invocation.Builder invocationBuilder =
                 webTarget.request();
 
-        invocationBuilder.post(Entity.entity(clientRegionMessage, MediaType.APPLICATION_JSON_TYPE));
+        Response post = invocationBuilder.post(Entity.entity(clientRegionMessage, MediaType.APPLICATION_JSON_TYPE));
+        post.close();
+
     }
 
     public RegionDataParams getRegionData() throws IOException {
-        WebTarget webTarget = restClient.target("http://localhost:8081/myapp/regiondata");
+        WebTarget webTarget = restClient.target(SERVER_PATH + "regiondata");
         Invocation.Builder invocationBuilder =
                 webTarget.request();
         invocationBuilder.header("clientId", clientId);
@@ -87,7 +90,7 @@ public class RestClient {
 
 
         String noTransfer = response.getHeaderString("nothingToTransfer");
-        if("nothingToTransfer".equals(noTransfer)){
+        if ("nothingToTransfer".equals(noTransfer)) {
             return null;
         }
         int fileId = Integer.valueOf(response.getHeaderString("fileId"));
@@ -95,8 +98,9 @@ public class RestClient {
         long size = Long.valueOf(response.getHeaderString("size"));
 
         InputStream inputStream = response.readEntity(InputStream.class);
+        byte[] bytes = IOUtils.toByteArray(inputStream);
 
-        return new RegionDataParams(fileId, offset, size, inputStream);
+        return new RegionDataParams(fileId, offset, size, bytes, response);
 
     }
 

@@ -52,25 +52,18 @@ public class Client {
                 CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = this.offeredTransferCandidates;
 
                 try {
-                    if (offeredTransferCandidates.isEmpty()) {
-                        Thread.sleep(1000);
-                    continue;
-                }
+                    Thread.sleep(1000);
 
 
-                long time = System.currentTimeMillis();
-                Iterator<TransferCandidate> iterator = offeredTransferCandidates.iterator();
-                while (iterator.hasNext()) {
-                    TransferCandidate offer = iterator.next();
-                    if (time < (offer.getOfferedTimeMillis() + OFFER_EXPIRATION_SECONDS * 1000)) {
-                        break;
+                    long time = System.currentTimeMillis();
+                    Iterator<TransferCandidate> iterator = offeredTransferCandidates.iterator();
+                    while (iterator.hasNext()) {
+                        TransferCandidate offer = iterator.next();
+                        if (time < (offer.getOfferedTimeMillis() + OFFER_EXPIRATION_SECONDS * 1000)) {
+                            break;
+                        }
+                        iterator.remove();
                     }
-                    iterator.remove();
-                }
-                TransferCandidate firstRemainingOffer = offeredTransferCandidates.get(0);
-
-                long nextSleepTime = firstRemainingOffer.getOfferedTimeMillis() - time + 100;
-                Thread.sleep(nextSleepTime);
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();

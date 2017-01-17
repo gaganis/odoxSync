@@ -22,5 +22,5 @@ package com.giorgosgaganis.filesynchronizer;
  * Created by gaganis on 14/01/17.
  */
 public class Contants {
-    public static final long REGION_SIZE = 0x20000;
+    public static final long REGION_SIZE = 0x100000;
 }

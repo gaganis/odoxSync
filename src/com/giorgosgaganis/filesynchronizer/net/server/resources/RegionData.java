@@ -22,6 +22,7 @@ import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.TransferCandidate;
+import org.apache.commons.io.IOUtils;
 import org.glassfish.grizzly.http.server.Response;
 
 import javax.ws.rs.GET;
@@ -29,7 +30,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedOutputStream;
 import java.io.RandomAccessFile;
@@ -37,6 +37,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -44,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 @Path("regiondata")
 
 public class RegionData {
+    private static final Logger logger = Logger.getLogger(RegionData.class.getName());
 
     @Context
     Response response;
@@ -87,15 +90,19 @@ public class RegionData {
             return outputStream -> {
                 java.nio.file.Path filePath = Paths.get(directorySynchronizer.workingDirectory, file.getName());
                 try (
-                        BufferedOutputStream bof = new BufferedOutputStream(outputStream);
                         RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
-                        FileChannel channel = randomAccessFile.getChannel()
+                        FileChannel channel = randomAccessFile.getChannel();
+                        BufferedOutputStream bof = IOUtils.buffer(outputStream, 64_536);
                 ) {
 
                     MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, transferCandidate.getOffset(), transferCandidate.getSize());
                     do {
                         bof.write(mappedByteBuffer.get());
                     } while (mappedByteBuffer.hasRemaining());
+                    bof.flush();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "data transmision failed", e);
+                    e.printStackTrace();
                 }
             };
         } catch (Exception e) {

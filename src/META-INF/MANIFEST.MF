@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-com.giorgosgaganis.filesynchronizer.net.server.Server-Class: com.giorgosgaganis.filesynchronizer.DirectorySynchronizer
-
