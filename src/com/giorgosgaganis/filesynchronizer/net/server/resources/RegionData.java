@@ -68,13 +68,15 @@ public class RegionData {
 
             //TODO A race exists here in between polling and adding it to the offered queue
             TransferCandidate transferCandidate = client.transferCandidateQueue.poll(2, TimeUnit.SECONDS);
-            client.offeredTransferCandidates.add(transferCandidate);
 
             if (transferCandidate == null) {
                 response.addHeader("nothingToTransfer", "nothingToTransfer");
                 return outputStream -> {
                 };
             }
+            transferCandidate.setOfferedTimeMillis(System.currentTimeMillis());
+            client.offeredTransferCandidates.add(transferCandidate);
+
             response.addHeader("fileId", transferCandidate.getFileId().toString());
             response.addHeader("offset", transferCandidate.getOffset().toString());
             response.addHeader("size", transferCandidate.getSize().toString());

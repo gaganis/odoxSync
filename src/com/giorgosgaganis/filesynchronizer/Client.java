@@ -19,7 +19,7 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -30,23 +30,13 @@ public class Client {
     public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
             new LinkedBlockingQueue<>();
 
-    public DelayQueue<TransferCandidate> offeredTransferCandidates = new DelayQueue<>();
+    public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
 
     ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
 
     public Client(int id) {
         this.id = id;
-        new Thread(() -> {
-            do {
-                try {
-                    offeredTransferCandidates.take();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } while (true);
-
-        }).start();
     }
 
     public ConcurrentHashMap<Integer, File> getFiles() {

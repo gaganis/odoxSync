@@ -31,6 +31,7 @@ public class TransferCandidate implements Delayed {
     private final Integer fileId;
     private final Long offset;
     private final Long size;
+    private long offeredTimeMillis;
 
     public TransferCandidate(Integer fileId, Long offset, Long size) {
 
@@ -82,5 +83,14 @@ public class TransferCandidate implements Delayed {
     @Override
     public long getDelay(TimeUnit unit) {
         return unit.convert(30, TimeUnit.SECONDS);
+    }
+
+
+    public void setOfferedTimeMillis(long offeredTimeMillis) {
+        this.offeredTimeMillis = offeredTimeMillis;
+    }
+
+    public long getOfferedTimeMillis() {
+        return offeredTimeMillis;
     }
 }

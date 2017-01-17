@@ -19,8 +19,6 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -29,6 +27,7 @@ import java.util.stream.Collectors;
  */
 public class TransferCandidateFinder {
     private static final Logger logger = Logger.getLogger(TransferCandidateFinder.class.getName());
+    public static final int OFFER_EXPIRY_SECONDS = 30;
 
     private final ConcurrentHashMap<Integer, File> files;
     private final ConcurrentHashMap<Integer, Client> clients;
@@ -108,6 +107,8 @@ public class TransferCandidateFinder {
                 try {
 
                     //TODO this is contains a race since is is a unsynchronized compare and set idiom
+                    removeFromOfferedIfExpired(client, transferCandidate);
+
                     if (!client.transferCandidateQueue.contains(transferCandidate)
                             && !client.offeredTransferCandidates.contains(transferCandidate)) {
                         client.transferCandidateQueue.put(transferCandidate);
@@ -116,6 +117,16 @@ public class TransferCandidateFinder {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private void removeFromOfferedIfExpired(Client client, TransferCandidate transferCandidate) {
+        int index = client.offeredTransferCandidates.indexOf(transferCandidate);
+
+        int expiryDelay = OFFER_EXPIRY_SECONDS * 1000;
+        if(index >= 0 && (client.offeredTransferCandidates.get(index).getOfferedTimeMillis() + expiryDelay) < System.currentTimeMillis())
+        {
+            client.offeredTransferCandidates.remove(index);
         }
     }
 }

@@ -120,14 +120,13 @@ public class SyncClient {
 
                     for (Region region : file.getRegions().values()) {
                         long sum = 0;
-//                        Hasher hasher = Hashing.sha256().newHasher();
-                        Hasher hasher = null;
+                        Hasher hasher = Hashing.sha256().newHasher();
                         MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, region.getOffset(), region.getSize());
                         for (long i = 0; i < region.getSize(); i++) {
                             byte b = (byte) (counter % 127);
                             mappedByteBuffer.put(b);
 
-//                            hasher.putByte(b);
+                            hasher.putByte(b);
                             sum += b;
 
                             counter++;
