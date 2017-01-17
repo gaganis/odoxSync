@@ -39,6 +39,7 @@ public class RestClient {
     private static final Logger logger = Logger.getLogger(RestClient.class.getName());
 
     private Client restClient = ClientBuilder.newClient();
+    private int clientId;
 
     public Collection<File> getFiles() {
         WebTarget webTarget = restClient.target("http://localhost:8081/myapp/files");
@@ -80,6 +81,7 @@ public class RestClient {
         WebTarget webTarget = restClient.target("http://localhost:8081/myapp/regiondata");
         Invocation.Builder invocationBuilder =
                 webTarget.request();
+        invocationBuilder.header("clientId", clientId);
 
         Response response = invocationBuilder.get();
 
@@ -96,5 +98,9 @@ public class RestClient {
 
         return new RegionDataParams(fileId, offset, size, inputStream);
 
+    }
+
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
     }
 }

@@ -30,7 +30,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,19 +49,12 @@ public class DirectorySynchronizer {
     private final AtomicInteger fileIdCounter = new AtomicInteger(1);
     public final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
-    private final AtomicInteger clientIdCounter = new AtomicInteger(1);
-    private final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
 
-    public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
-            new LinkedBlockingQueue<>();
-
-    public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
 
     private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(
             files,
-            clients,
-            transferCandidateQueue,
-            offeredTransferCandidates);
+            clients );
 
     public String workingDirectory;
 
@@ -178,9 +174,13 @@ public class DirectorySynchronizer {
     }
 
     public int setupClient() {
-        int clientId = clientIdCounter.getAndIncrement();
-        Client client = new Client(clientId);
-        clients.put(clientId, client);
+        Client collision;
+        int clientId;
+        do {
+            clientId = ThreadLocalRandom.current().nextInt();
+            Client client = new Client(clientId);
+            collision = clients.putIfAbsent(clientId, client);
+        } while (collision != null);
         return clientId;
     }
 

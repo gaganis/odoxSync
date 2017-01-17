@@ -18,6 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.server.resources;
 
+import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.TransferCandidate;
@@ -27,6 +28,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedOutputStream;
 import java.io.RandomAccessFile;
@@ -45,6 +48,9 @@ public class RegionData {
     @Context
     Response response;
 
+    @Context
+    HttpHeaders httpHeaders;
+
     /**
      * Method handling HTTP GET requests. The returned object will be sent
      * to the client as "text/plain" media type.
@@ -57,7 +63,12 @@ public class RegionData {
         DirectorySynchronizer directorySynchronizer = DirectorySynchronizer.INSTANCE;
 
         try {
-            TransferCandidate transferCandidate = directorySynchronizer.transferCandidateQueue.poll(2, TimeUnit.SECONDS);
+            int clientId = Integer.valueOf(httpHeaders.getHeaderString("clientId"));
+            Client client = directorySynchronizer.clients.get(clientId);
+
+            //TODO A race exists here in between polling and adding it to the offered queue
+            TransferCandidate transferCandidate = client.transferCandidateQueue.poll(2, TimeUnit.SECONDS);
+            client.offeredTransferCandidates.add(transferCandidate);
 
             if (transferCandidate == null) {
                 response.addHeader("nothingToTransfer", "nothingToTransfer");

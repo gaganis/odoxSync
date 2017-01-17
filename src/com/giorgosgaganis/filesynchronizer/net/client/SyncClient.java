@@ -72,6 +72,7 @@ public class SyncClient {
 
         logger.info("Starting sync client");
         clientId = restClient.getClientId();
+        restClient.setClientId(clientId);
         new Thread(() -> {
             do {
                 processFiles();

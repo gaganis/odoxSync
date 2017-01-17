@@ -32,17 +32,11 @@ public class TransferCandidateFinder {
 
     private final ConcurrentHashMap<Integer, File> files;
     private final ConcurrentHashMap<Integer, Client> clients;
-    private final LinkedBlockingQueue<TransferCandidate> transferCandidateQueue;
-    private CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates;
 
     public TransferCandidateFinder(ConcurrentHashMap<Integer, File> files,
-                                   ConcurrentHashMap<Integer, Client> clients,
-                                   LinkedBlockingQueue<TransferCandidate> transferCandidateQueue,
-                                   CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates) {
+                                   ConcurrentHashMap<Integer, Client> clients) {
         this.files = files;
         this.clients = clients;
-        this.transferCandidateQueue = transferCandidateQueue;
-        this.offeredTransferCandidates = offeredTransferCandidates;
     }
 
     public void lookForRegionsToTransfer() {
@@ -83,12 +77,12 @@ public class TransferCandidateFinder {
                 logger.finer("Looking candidates for client ["
                         + clientId + "] and file ["
                         + fileId + "] and region " + offset + "]");
-                lookAtRegion(clientFile, clientId, fileId, offset);
+                lookAtRegion(clientFile, client, fileId, offset);
             }
         }
     }
 
-    private void lookAtRegion(File clientFile, Integer clientId, Integer fileId, Long offset) {
+    private void lookAtRegion(File clientFile, Client client, Integer fileId, Long offset) {
         Region clintRegion = clientFile.getRegions().get(offset);
         if (clintRegion != null) {
             Region serverRegion = files.get(fileId).getRegions().get(offset);
@@ -112,11 +106,11 @@ public class TransferCandidateFinder {
             if (doTransfer) {
                 TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
                 try {
-                    //TODO Transfer candidates should be added to per client queues
-                    if (!transferCandidateQueue.contains(transferCandidate)
-                            && !offeredTransferCandidates.contains(transferCandidate)) {
-                        transferCandidateQueue.put(transferCandidate);
-                        offeredTransferCandidates.add(transferCandidate);
+
+                    //TODO this is contains a race since is is a unsynchronized compare and set idiom
+                    if (!client.transferCandidateQueue.contains(transferCandidate)
+                            && !client.offeredTransferCandidates.contains(transferCandidate)) {
+                        client.transferCandidateQueue.put(transferCandidate);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
