@@ -31,7 +31,7 @@ public class LongDigester {
     public long digest(MappedByteBuffer mappedByteBuffer) {
         sum = 0;
         do {
-            sum = sum + (long) mappedByteBuffer.get();
+            sum += mappedByteBuffer.get();
         } while (mappedByteBuffer.hasRemaining());
         return sum;
     }

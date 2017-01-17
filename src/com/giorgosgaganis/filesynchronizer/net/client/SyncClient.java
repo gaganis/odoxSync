@@ -123,7 +123,7 @@ public class SyncClient {
                         Hasher hasher = null;
                         MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, region.getOffset(), region.getSize());
                         for (long i = 0; i < region.getSize(); i++) {
-                            byte b = (byte) counter;
+                            byte b = (byte) (counter % 127);
                             mappedByteBuffer.put(b);
 
 //                            hasher.putByte(b);

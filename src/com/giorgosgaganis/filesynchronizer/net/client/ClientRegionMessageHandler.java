@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * Created by gaganis on 14/01/17.
  */
 public class ClientRegionMessageHandler {
-    private static final Logger logger = Logger.getLogger(DirectorySynchronizer.class.getName());
+    private static final Logger logger = Logger.getLogger(ClientRegionMessageHandler.class.getName());
 
     public static final int MAX_REGION_THREADS = 4;
 

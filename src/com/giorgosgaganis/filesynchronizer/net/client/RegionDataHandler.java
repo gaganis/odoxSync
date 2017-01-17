@@ -21,7 +21,6 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 import com.giorgosgaganis.filesynchronizer.File;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
@@ -51,6 +50,14 @@ public class RegionDataHandler extends Thread {
         this.files = files;
     }
 
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
     @Override
     public void run() {
         new Thread(() -> {
@@ -66,8 +73,8 @@ public class RegionDataHandler extends Thread {
                 long endBytes = bytesTransferred.get();
                 long bytes = endBytes - startBytes;
                 long bytesPerSecond = bytes * 1000 / duration;
-                logger.info("bytes [" + bytes
-                        + "], bytes/s [" + bytesPerSecond + "]");
+                logger.info("bytes [" + humanReadableByteCount(endBytes, false)
+                        + "], bytes/s [" + humanReadableByteCount(bytesPerSecond, false) + "]");
             } while (true);
         }).start();
 
@@ -78,7 +85,7 @@ public class RegionDataHandler extends Thread {
                     try {
                         RegionDataParams regionData = restClient.getRegionData();
                         if (regionData == null) {
-                        logger.fine("Nothing to transfer");
+                            logger.fine("Nothing to transfer");
                             return;
                         }
 
@@ -102,7 +109,7 @@ public class RegionDataHandler extends Thread {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } while (true);

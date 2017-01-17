@@ -19,10 +19,8 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
-import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
 import com.giorgosgaganis.filesynchronizer.net.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
-import com.google.common.hash.HashCode;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -132,15 +130,16 @@ public class DirectorySynchronizer {
             for (Region region : file.getRegions().values()) {
 
                 scanRegion(region, channel);
+                logger.info("quick digest = " + region.getQuickDigest());
                 if (logger.isLoggable(Level.FINER)) {
                     logger.finer("Calculated fast digest[" + region.getQuickDigest()
                             + "] for file [" + file.getName() + "]" + region.getOffset()
                             + ":" + (region.getOffset() + region.getSize()));
 
-                    String slowDigest = HashCode.fromBytes(region.getSlowDigest()).toString();
-                    logger.finer("Calculated slow digest[" + slowDigest + "] for file ["
-                            + file.getName() + "]" + region.getOffset()
-                            + ":" + (region.getOffset() + region.getSize()));
+//                    String slowDigest = HashCode.fromBytes(region.getSlowDigest()).toString();
+//                    logger.finer("Calculated slow digest[" + slowDigest + "] for file ["
+//                            + file.getName() + "]" + region.getOffset()
+//                            + ":" + (region.getOffset() + region.getSize()));
 
                 }
             }
