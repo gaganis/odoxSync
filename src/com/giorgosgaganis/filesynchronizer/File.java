@@ -40,6 +40,7 @@ public class File {
     private Path absolutePath;
 
     private ConcurrentHashMap<Long, Region> regions = new ConcurrentHashMap<>();
+    private int syncedPercentage;
 
     public File() {
     }
@@ -101,6 +102,14 @@ public class File {
         if (o == null || getClass() != o.getClass()) return false;
         File file = (File) o;
         return Objects.equal(name, file.name);
+    }
+
+    public void setSyncedPercentage(int syncedPercentage) {
+        this.syncedPercentage = syncedPercentage;
+    }
+
+    public int getSyncedPercentage() {
+        return syncedPercentage;
     }
 
     @Override

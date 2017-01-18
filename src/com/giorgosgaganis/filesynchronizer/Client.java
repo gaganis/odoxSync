@@ -67,4 +67,8 @@ public class Client {
             } while (true);
         }).start();
     }
+
+    public int getId() {
+        return id;
+    }
 }

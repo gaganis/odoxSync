@@ -36,8 +36,8 @@ import java.util.logging.Logger;
  */
 public class RestClient {
     private static final Logger logger = Logger.getLogger(RestClient.class.getName());
-//    public static final String SERVER_PATH = "http://localhost:8081/myapp/";
-    public static final String SERVER_PATH = "http://192.168.1.7:8081/myapp/";
+    public static final String SERVER_PATH = "http://localhost:8081/myapp/";
+//    public static final String SERVER_PATH = "http://192.168.1.7:8081/myapp/";
 
     private Client restClient = ClientBuilder.newClient();
     private int clientId;

@@ -101,48 +101,73 @@ public class SyncClient {
 
         file.setAbsolutePath(filePath.toAbsolutePath());
 
-        files.putIfAbsent(file.getId(), file);
+        boolean wasInTheMap  = files.putIfAbsent(file.getId(), file) != null;
 
         try {
             if (Files.notExists(filePath)) {
                 Path parent = filePath.getParent();
                 Files.createDirectories(parent);
 
-                try (
-                        RandomAccessFile randomAccessFile = new RandomAccessFile(file.getAbsolutePath().toFile(), "rw");
-                        FileChannel channel = randomAccessFile.getChannel()
-
-                ) {
-                    RegionCalculator regionCalculator = new RegionCalculator(workingDirectory, file);
-                    regionCalculator.calculateForSize(file.getSize());
-
-
-                    long counter = 0;
-                    for (Region region : file.getRegions().values()) {
-                        long sum = 0;
-                        Hasher hasher = Hashing.sha256().newHasher();
-                        MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, region.getOffset(), region.getSize());
-                        for (long i = 0; i < region.getSize(); i++) {
-                            byte b = (byte) (counter % 127);
-                            mappedByteBuffer.put(b);
-
-                            hasher.putByte(b);
-                            sum += b;
-
-                            counter++;
-                        }
-
-                        region.setQuickDigest(sum);
-
-                        byte[] slowDigest = hasher.hash().asBytes();
-                        region.setSlowDigest(slowDigest);
-
-                        clientRegionMessageHandler.submitClientRegionMessage(clientId, file, region.getOffset(), region.getSize(), sum, slowDigest);
-                    }
-                }
+                RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferWrite(region, hasher, mappedByteBuffer);
+                processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
+            } else if (!wasInTheMap) {
+                RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferRead(region, hasher, mappedByteBuffer);
+                processRegions(file, regionProcessor, "r", FileChannel.MapMode.READ_ONLY);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void processRegions(File file, RegionProcessor regionProcessor, String randomAccessFileMode, FileChannel.MapMode mapMode) throws IOException {
+        try (
+                RandomAccessFile randomAccessFile = new RandomAccessFile(file.getAbsolutePath().toFile(), randomAccessFileMode);
+                FileChannel channel = randomAccessFile.getChannel()
+
+        ) {
+            RegionCalculator regionCalculator = new RegionCalculator(workingDirectory, file);
+            regionCalculator.calculateForSize(file.getSize());
+
+
+            for (Region region : file.getRegions().values()) {
+                Hasher hasher = Hashing.sha256().newHasher();
+                MappedByteBuffer mappedByteBuffer = channel.map(mapMode, region.getOffset(), region.getSize());
+
+                long sum = regionProcessor.processRegion(region, hasher, mappedByteBuffer);
+
+                region.setQuickDigest(sum);
+
+                byte[] slowDigest = hasher.hash().asBytes();
+                region.setSlowDigest(slowDigest);
+
+                clientRegionMessageHandler.submitClientRegionMessage(clientId, file, region.getOffset(), region.getSize(), sum, slowDigest);
+            }
+        }
+    }
+
+    private long processByteBufferWrite(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
+        long counter = 0;
+        long sum = 0;
+        for (long i = 0; i < region.getSize(); i++) {
+            byte b = (byte) (counter % 127);
+            mappedByteBuffer.put(b);
+
+            hasher.putByte(b);
+            sum += b;
+
+            counter++;
+        }
+        return sum;
+    }
+
+    private long processByteBufferRead(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
+        long sum = 0;
+        for (long i = 0; i < region.getSize(); i++) {
+            byte b = mappedByteBuffer.get();
+
+            hasher.putByte(b);
+            sum += b;
+        }
+        return sum;
     }
 }

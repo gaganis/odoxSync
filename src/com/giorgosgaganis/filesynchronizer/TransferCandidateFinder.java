@@ -69,6 +69,9 @@ public class TransferCandidateFinder {
     private void lookAtFile(Client client, Integer clientId, Integer fileId) {
         File clientFile = client.files.get(fileId);
         if (clientFile != null) {
+            int allCount = 0;
+            int toTransferCount = 0;
+
             for (Long offset : clientFile.getRegions().keySet()
                     .stream()
                     .sorted()
@@ -76,27 +79,39 @@ public class TransferCandidateFinder {
                 logger.finer("Looking candidates for client ["
                         + clientId + "] and file ["
                         + fileId + "] and region " + offset + "]");
-                lookAtRegion(clientFile, client, fileId, offset);
+                boolean doTranser = lookAtRegion(clientFile, client, fileId, offset);
+
+                if (doTranser) {
+                    toTransferCount++;
+                }
+                allCount++;
             }
+
+            if(allCount > 0) {
+                int syncedPercentage = (allCount - toTransferCount) * 100 / allCount;
+                clientFile.setSyncedPercentage(syncedPercentage);
+            }
+
         }
     }
 
-    private void lookAtRegion(File clientFile, Client client, Integer fileId, Long offset) {
+    private boolean lookAtRegion(File clientFile, Client client, Integer fileId, Long offset) {
+        boolean doTransfer = false;
+
         Region clientRegion = clientFile.getRegions().get(offset);
         if (clientRegion != null) {
             Region serverRegion = files.get(fileId).getRegions().get(offset);
 
             if (serverRegion == null) {
-                return;
+                return doTransfer;
             }
 
-            boolean doTransfer = false;
             if (clientRegion.getQuickDigest() != serverRegion.getQuickDigest()) {
                 doTransfer = true;
             } else {
-                if(serverRegion.getSlowDigest() == null) {
+                if (serverRegion.getSlowDigest() == null) {
                     serverRegion.setDoSlowScan(true);
-                }else {
+                } else {
                     for (int i = 0; i < clientRegion.getSlowDigest().length; i++) {
                         if (clientRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
                             doTransfer = true;
@@ -122,14 +137,14 @@ public class TransferCandidateFinder {
                 }
             }
         }
+        return doTransfer;
     }
 
     private void removeFromOfferedIfExpired(Client client, TransferCandidate transferCandidate) {
         int index = client.offeredTransferCandidates.indexOf(transferCandidate);
 
         int expiryDelay = OFFER_EXPIRY_SECONDS * 1000;
-        if(index >= 0 && (client.offeredTransferCandidates.get(index).getOfferedTimeMillis() + expiryDelay) < System.currentTimeMillis())
-        {
+        if (index >= 0 && (client.offeredTransferCandidates.get(index).getOfferedTimeMillis() + expiryDelay) < System.currentTimeMillis()) {
             client.offeredTransferCandidates.remove(index);
         }
     }
