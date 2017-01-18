@@ -106,8 +106,12 @@ public class TransferCandidateFinder {
                 return doTransfer;
             }
 
-            long clientQuickDigest = clientRegion.getQuickDigest();
             long serverQuickDigest = serverRegion.getQuickDigest();
+            if(serverQuickDigest == 0) {
+                return false;
+            }
+
+            long clientQuickDigest = clientRegion.getQuickDigest();
 
             if (clientQuickDigest != serverQuickDigest) {
                 doTransfer = true;

@@ -29,7 +29,7 @@ public class Region {
     private long offset;
     private long size;
 
-    private long quickDigest;
+    private Integer quickDigest = null;
 
     private ConcurrentHashMap<Long, byte[]> slowDigestsMap = new ConcurrentHashMap<>();
 
@@ -51,12 +51,12 @@ public class Region {
         return size;
     }
 
-    public long getQuickDigest() {
+    public Integer getQuickDigest() {
         return quickDigest;
     }
 
 
-    public void setQuickDigest(long quickDigest) {
+    public void setQuickDigest(Integer quickDigest) {
         this.quickDigest = quickDigest;
     }
 

@@ -67,11 +67,13 @@ public class SyncClient {
     }
 
     private void start() {
-        logger.info("Starting sync client");
+        Path root = Paths.get(workingDirectory).toAbsolutePath().normalize();
+        logger.info("Starting sync client at [" + root +"]");
         clientId = restClient.getClientId();
 
         restClient.setClientId(clientId);
         regionDataHandler.setClientId(clientId);
+        regionDataHandler.start();
 
         new Thread(() -> {
             do {
@@ -83,7 +85,6 @@ public class SyncClient {
                 }
             } while (true);
         }).start();
-        regionDataHandler.start();
     }
 
     private void processFiles() {
@@ -133,7 +134,7 @@ public class SyncClient {
                 Hasher hasher = Hashing.sha256().newHasher();
                 MappedByteBuffer mappedByteBuffer = channel.map(mapMode, region.getOffset(), region.getSize());
 
-                long sum = regionProcessor.processRegion(region, hasher, mappedByteBuffer);
+                int sum = regionProcessor.processRegion(region, hasher, mappedByteBuffer);
 
                 region.setQuickDigest(sum);
 
@@ -145,9 +146,9 @@ public class SyncClient {
         }
     }
 
-    private long processByteBufferWrite(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
+    private int processByteBufferWrite(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
         long counter = 0;
-        long sum = 0;
+        int sum = 0;
         for (long i = 0; i < region.getSize(); i++) {
             byte b = (byte) (counter % 127);
             mappedByteBuffer.put(b);
@@ -160,8 +161,8 @@ public class SyncClient {
         return sum;
     }
 
-    private long processByteBufferRead(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
-        long sum = 0;
+    private int processByteBufferRead(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
+        int sum = 0;
         for (long i = 0; i < region.getSize(); i++) {
             byte b = mappedByteBuffer.get();
 

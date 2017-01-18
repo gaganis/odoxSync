@@ -28,5 +28,5 @@ import java.nio.MappedByteBuffer;
  */
 @FunctionalInterface
 public interface RegionProcessor {
-    long processRegion(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer);
+    int processRegion(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer);
 }

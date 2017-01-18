@@ -56,7 +56,7 @@ public class ClientRegionMessageHandler {
         restClient.postClientRegionMessage(clientRegionMessage);
     }
 
-    public void submitClientRegionMessage(int clientId, File file, long offset, long size, long sum, byte[] slowDigest) {
+    public void submitClientRegionMessage(int clientId, File file, long offset, long size, int sum, byte[] slowDigest) {
         Region clientRegion = new Region(offset, size);
         clientRegion.setQuickDigest(sum);
         clientRegion.setSlowDigest(slowDigest);

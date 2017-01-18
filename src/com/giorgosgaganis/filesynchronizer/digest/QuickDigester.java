@@ -23,12 +23,12 @@ import java.nio.MappedByteBuffer;
 /**
  * Created by gaganis on 13/01/17.
  */
-public class LongDigester {
+public class QuickDigester {
 
 
-    private long sum;
+    private int sum;
 
-    public long digest(MappedByteBuffer mappedByteBuffer) {
+    public int digest(MappedByteBuffer mappedByteBuffer) {
         sum = 0;
         do {
             sum += mappedByteBuffer.get();
@@ -37,6 +37,6 @@ public class LongDigester {
     }
 
     public String getStringResult() {
-        return Long.valueOf(sum).toString();
+        return Integer.valueOf(sum).toString();
     }
 }

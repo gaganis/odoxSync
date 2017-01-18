@@ -98,7 +98,7 @@ public class RegionDataHandler extends Thread {
                                 FileChannel channel = randomAccessFile.getChannel();
                         ) {
                             MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
-                            long sum = 0;
+                            int sum = 0;
                             Hasher hasher = Hashing.sha256().newHasher();
                             int counter = 0;
                             while (mappedByteBuffer.hasRemaining() && counter < regionData.bytes.length) {

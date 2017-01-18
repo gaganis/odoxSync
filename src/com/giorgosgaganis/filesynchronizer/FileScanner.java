@@ -18,7 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
+import com.giorgosgaganis.filesynchronizer.digest.QuickDigester;
 import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
 
 import java.io.IOException;
@@ -150,9 +150,9 @@ public class FileScanner {
                 region.getSize());
 
         if (isFast) {
-            LongDigester longDigester = new LongDigester();
+            QuickDigester quickDigester = new QuickDigester();
             region.setQuickDigest(
-                    longDigester.digest(mappedByteBuffer));
+                    quickDigester.digest(mappedByteBuffer));
             if (logger.isLoggable(Level.FINER)) {
                 logger.finer("Calculated fast digest[" + region.getQuickDigest()
                         + "] for file [" + file.getName() + "]" + region.getOffset()
