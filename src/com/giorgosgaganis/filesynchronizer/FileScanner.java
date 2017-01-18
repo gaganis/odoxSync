@@ -18,6 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.giorgosgaganis.filesynchronizer.net.client.Statistics;
 import com.google.common.base.Objects;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -45,6 +46,7 @@ import static com.giorgosgaganis.filesynchronizer.Contants.REGION_SIZE;
 public class FileScanner {
     private static final Logger logger = Logger.getLogger(FileScanner.class.getName());
 
+    private static Statistics statistics = Statistics.INSTANCE;
     private final ConcurrentHashMap<Integer, File> files;
     private final DirectoryScanner ds;
     private boolean isFast;
@@ -208,24 +210,15 @@ public class FileScanner {
         }
         quickDigest = sum;
 
-//        ByteBuffer wrapBuffer = ByteBuffer.wrap(buffer);
-//        do{
-//            sum += wrapBuffer.getInt();
-//        }while(wrapBuffer.remaining() >= 4);
-//        quickDigest = sum;
-//
-//        if (logger.isLoggable(Level.FINER)) {
-//            logger.finer("Calculated fast digest[" + quickDigest
-//                    + "] for file [" + fileName + "]" + offset
-//                    + ":" + (offset + size));
-//        }
         if (logger.isLoggable(Level.FINER)) {
             logger.finer("Calculated fast digest[" + quickDigest
                     + "] for file [" + fileName + "]" + offset
                     + ":" + (offset + size));
         }
 
-        if (!isFast) {
+        if(isFast){
+            statistics.bytesReadFast.addAndGet(buffer.length);
+        } else {
             Hasher hasher = Hashing.sha256().newHasher();
             hasher.putBytes(buffer);
             slowDigest = hasher.hash().asBytes();
@@ -235,6 +228,7 @@ public class FileScanner {
                         + fileName + "]" + offset
                         + ":" + (offset + size));
             }
+            statistics.bytesReadSlow.addAndGet(buffer.length);
         }
         return new DigestResult(quickDigest, slowDigest);
     }

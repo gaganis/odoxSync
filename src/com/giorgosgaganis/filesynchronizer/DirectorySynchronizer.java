@@ -19,11 +19,13 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.net.client.ClientRegionMessage;
+import com.giorgosgaganis.filesynchronizer.net.client.Statistics;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
@@ -52,6 +54,8 @@ public class DirectorySynchronizer {
     public void start(String workingDirectory) {
         this.workingDirectory = workingDirectory;
 
+        startStatisticsPrintThread();
+
         fastFileScanner.setWorkingDirectory(workingDirectory);
         fastFileScanner.scanDirectoryAndFiles();
 
@@ -59,6 +63,46 @@ public class DirectorySynchronizer {
         slowFileScanner.scanDirectoryAndFiles();
 
         transferCandidateFinder.lookForRegionsToTransfer();
+    }
+
+    private void startStatisticsPrintThread() {
+        new Thread(() -> {
+
+            do {
+                AtomicLong counter = Statistics.INSTANCE.bytesTransferred;
+                printStatistic("transfered", counter);
+            } while (true);
+        }).start();
+        new Thread(() -> {
+
+            do {
+                AtomicLong counter = Statistics.INSTANCE.bytesReadFast;
+                printStatistic("read fast", counter);
+            } while (true);
+        }).start();
+        new Thread(() -> {
+
+            do {
+                AtomicLong counter = Statistics.INSTANCE.bytesReadSlow;
+                printStatistic("read slow", counter);
+            } while (true);
+        }).start();
+    }
+
+    private void printStatistic(String statName, AtomicLong bytesTransferred) {
+        long start = System.currentTimeMillis();
+        long startBytes = bytesTransferred.get();
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long duration = System.currentTimeMillis() - start;
+        long endBytes = bytesTransferred.get();
+        long bytes = endBytes - startBytes;
+        long bytesPerSecond = bytes * 1000 / duration;
+        System.out.println(statName + " bytes [" + humanReadableByteCount(endBytes, false)
+                + "], bytes/s [" + humanReadableByteCount(bytesPerSecond, false) + "]");
     }
 
 
@@ -99,5 +143,13 @@ public class DirectorySynchronizer {
 
         clientRegions.put(region.getOffset(), region);
         logger.fine("Added client region " + region);
+    }
+
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 }

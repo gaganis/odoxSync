@@ -22,6 +22,7 @@ import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.TransferCandidate;
+import com.giorgosgaganis.filesynchronizer.net.client.Statistics;
 import org.glassfish.grizzly.http.server.Response;
 
 import javax.ws.rs.GET;
@@ -98,6 +99,9 @@ public class RegionData {
                         mappedByteBuffer.get(arrays);
                         outputStream.write(arrays);
                     } while (mappedByteBuffer.hasRemaining());
+
+                    Statistics.INSTANCE
+                            .bytesTransferred.addAndGet(arrays.length);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "data transmision failed", e);
                     e.printStackTrace();

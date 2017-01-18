@@ -28,7 +28,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
@@ -36,8 +35,7 @@ import java.util.logging.Logger;
  */
 public class RegionDataHandler extends Thread {
     private static final Logger logger = Logger.getLogger(RegionDataHandler.class.getName());
-
-    private AtomicLong bytesTransferred = new AtomicLong(0);
+    private final Statistics statistics = Statistics.INSTANCE;
 
     private RestClient restClient;
     private ClientRegionMessageHandler clientRegionMessageHandler;
@@ -50,37 +48,12 @@ public class RegionDataHandler extends Thread {
         this.files = files;
     }
 
-    public static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
-    }
-
     @Override
     public void run() {
         logger.info("Starting Data Transfer Thread");
-        new Thread(() -> {
 
-            do {
-                long start = System.currentTimeMillis();
-                long startBytes = bytesTransferred.get();
-                try {
-                    Thread.sleep(30000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                long duration = System.currentTimeMillis() - start;
-                long endBytes = bytesTransferred.get();
-                long bytes = endBytes - startBytes;
-                long bytesPerSecond = bytes * 1000 / duration;
-                logger.info("bytes [" + humanReadableByteCount(endBytes, false)
-                        + "], bytes/s [" + humanReadableByteCount(bytesPerSecond, false) + "]");
-            } while (true);
-        }).start();
 
-        for (int threadCounter = 0; threadCounter < 4; threadCounter++) {
+        for (int threadCounter = 0; threadCounter < 3; threadCounter++) {
 
             new Thread(() -> {
                 do {
@@ -103,7 +76,7 @@ public class RegionDataHandler extends Thread {
                             MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
                             Hasher hasher = Hashing.sha256().newHasher();
                             mappedByteBuffer.put(regionData.bytes);
-                            bytesTransferred.addAndGet(regionData.size);
+                            statistics.bytesTransferred.addAndGet(regionData.size);
                             hasher.putBytes(regionData.bytes);
 
                             int sum = 0;
