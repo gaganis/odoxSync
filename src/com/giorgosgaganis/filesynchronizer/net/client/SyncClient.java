@@ -164,16 +164,12 @@ public class SyncClient {
     }
 
     private int processByteBufferWrite(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
-        long counter = 0;
         int sum = 0;
         for (int i = 0; i < region.getSize(); i += Contants.BYTE_SKIP_LENGHT) {
-            byte b = (byte) (counter % 127);
+            byte b = 0;
             mappedByteBuffer.put(i, b);
 
             hasher.putByte(b);
-            sum += b;
-
-            counter++;
         }
         return sum;
     }
