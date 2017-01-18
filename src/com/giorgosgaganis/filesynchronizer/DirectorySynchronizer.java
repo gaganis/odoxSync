@@ -48,7 +48,6 @@ public class DirectorySynchronizer {
 
     public static final DirectorySynchronizer INSTANCE = new DirectorySynchronizer();
 
-    private final AtomicInteger fileIdCounter = new AtomicInteger(1);
     public final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
     public final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
@@ -58,15 +57,19 @@ public class DirectorySynchronizer {
             files,
             clients);
 
+    private final FileScanner fileScanner = new FileScanner(files);
+
     public String workingDirectory;
 
 
     public void start(String workingDirectory) {
         this.workingDirectory = workingDirectory;
 
+        fileScanner.setWorkingDirectory(workingDirectory);
+
         new Thread(() -> {
             do {
-                scanDirectoryAndFiles();
+                fileScanner.scanDirectoryAndFiles();
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -77,115 +80,7 @@ public class DirectorySynchronizer {
         transferCandidateFinder.lookForRegionsToTransfer();
     }
 
-    private void scanDirectoryAndFiles() {
-        DirectoryScanner ds = new DirectoryScanner(files, fileIdCounter);
-        ds.scan(workingDirectory);
 
-        ForkJoinPool forkJoinPool = new ForkJoinPool(2);
-        try {
-            forkJoinPool.submit(() ->
-                    //parallel task here, for example
-                    files.values().parallelStream().forEach(this::processFile)
-            ).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void processFile(File file) {
-        try {
-
-            boolean doScan = file.getRegions()
-                    .values()
-                    .stream()
-                    .filter(Region::isDoSlowScan)
-                    .findFirst()
-                    .isPresent();
-
-            Path path = Paths.get(workingDirectory, file.getName());
-            FileTime lastModifiedTime = Files.getLastModifiedTime(path);
-
-            if (lastModifiedTime.compareTo(file.getLastModified()) == 0) {
-                logger.fine(" File has not been modified [" + file.getName() + "]");
-            } else {
-                doScan = true;
-            }
-            file.setLastModified(lastModifiedTime);
-
-            long size = Files.size(path);
-            if (size != file.getSize()) {
-                logger.fine("Recalculation regions for [" + file.getName() + "]");
-                reCalculateRegions(file);
-                doScan = true;
-            }
-
-            if (doScan) {
-                logger.info("Starting scan for [" + file.getName() + "]");
-                scanFile(file);
-                logger.info("Finished scan for [" + file.getName() + "]");
-            }
-
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Unable to scan file [" + file.getName() + "]", e);
-        }
-    }
-
-    private void scanFile(File file) throws IOException {
-        Path filePath = Paths.get(workingDirectory, file.getName());
-        try (
-                RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
-                FileChannel channel = randomAccessFile.getChannel()
-        ) {
-            for (Region region : file.getRegions().values()) {
-
-                scanRegion(region, channel);
-                if (region.isDoSlowScan()) {
-                    String slowDigest = HashCode.fromBytes(region.getSlowDigest()).toString();
-                    logger.info("Calculated slow digest[" + slowDigest + "] for file ["
-                            + file.getName() + "]" + region.getOffset()
-                            + ":" + (region.getOffset() + region.getSize()));
-                }
-                if (logger.isLoggable(Level.FINER)) {
-                    logger.finer("Calculated fast digest[" + region.getQuickDigest()
-                            + "] for file [" + file.getName() + "]" + region.getOffset()
-                            + ":" + (region.getOffset() + region.getSize()));
-
-
-                }
-            }
-        }
-    }
-
-    private void scanRegion(Region region, FileChannel channel) throws IOException {
-        MappedByteBuffer mappedByteBuffer = channel.map(
-                FileChannel.MapMode.READ_ONLY,
-                region.getOffset(),
-                region.getSize());
-
-        LongDigester longDigester = new LongDigester();
-        region.setQuickDigest(
-                longDigester.digest(mappedByteBuffer));
-
-
-        if (region.isDoSlowScan()) {
-            mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY,
-                    region.getOffset(),
-                    region.getSize());
-
-            ShaDigester shaDigester = new ShaDigester();
-            region.setSlowDigest(
-                    shaDigester.digest(mappedByteBuffer)
-            );
-        }
-
-    }
-
-    private void reCalculateRegions(File file) throws IOException {
-        RegionCalculator regionCalculator = new RegionCalculator(workingDirectory, file);
-        regionCalculator.calculate();
-    }
 
     public static void main(String[] args) throws IOException {
         LoggingUtils.configureLogging();

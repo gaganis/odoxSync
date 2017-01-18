@@ -36,11 +36,10 @@ public class DirectoryScanner {
     private static final Logger logger = Logger.getLogger(DirectoryScanner.class.getName());
 
     private final ConcurrentHashMap<Integer, File> files;
-    private final AtomicInteger fileIdCounter;
+    private final AtomicInteger fileIdCounter = new AtomicInteger(1);
 
-    public DirectoryScanner(ConcurrentHashMap<Integer, File> files, AtomicInteger fileIdCounter) {
+    public DirectoryScanner(ConcurrentHashMap<Integer, File> files) {
         this.files = files;
-        this.fileIdCounter = fileIdCounter;
     }
 
     public void scan(String workingDirectory) {
@@ -78,7 +77,7 @@ public class DirectoryScanner {
         LoggingUtils.configureLogging();
 
         Path root = Paths.get("");
-        DirectoryScanner ds = new DirectoryScanner(new ConcurrentHashMap<>(), new AtomicInteger(1));
+        DirectoryScanner ds = new DirectoryScanner(new ConcurrentHashMap<>());
         ds.scan(".");
         ds.scan(".");
     }
