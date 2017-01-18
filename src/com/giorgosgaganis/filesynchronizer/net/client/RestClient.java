@@ -51,7 +51,7 @@ public class RestClient {
         Collection<File> files = invocationBuilder.get(new GenericType<Collection<File>>() {
         });
 
-        logger.info("Retrieved files from server");
+        logger.fine("Retrieved files from server");
         if (logger.isLoggable(Level.FINER)) {
             logger.finest("Files collection content " + files);
         }

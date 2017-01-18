@@ -18,11 +18,25 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
- * Created by gaganis on 14/01/17.
+ * Created by gaganis on 18/01/17.
  */
-public class Contants {
-    public static final long REGION_SIZE = 0x100000;
-//    public static final int BYTE_SKIP_LENGHT = 64;
-    public static final int BYTE_SKIP_LENGHT = 1;
+public class DigestResult {
+    final Integer quickDigest;
+    final byte[] slowDigest;
+
+    public DigestResult(Integer quickDigest, byte[] slowDigest) {
+        this.quickDigest = quickDigest;
+        this.slowDigest = slowDigest;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("quickDigest", quickDigest)
+                .append("slowDigest", slowDigest)
+                .toString();
+    }
 }

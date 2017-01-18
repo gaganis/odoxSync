@@ -18,11 +18,11 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.client;
 
+import com.giorgosgaganis.filesynchronizer.Contants;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -60,12 +60,14 @@ public class RegionDataHandler extends Thread {
 
     @Override
     public void run() {
+        logger.info("Starting Data Transfer Thread");
         new Thread(() -> {
+
             do {
                 long start = System.currentTimeMillis();
                 long startBytes = bytesTransferred.get();
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(30000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -78,11 +80,12 @@ public class RegionDataHandler extends Thread {
             } while (true);
         }).start();
 
-        for (int i = 0; i < 4; i++) {
+        for (int threadCounter = 0; threadCounter < 4; threadCounter++) {
 
             new Thread(() -> {
                 do {
                     try {
+                        logger.fine("Requesting region data");
                         RegionDataParams regionData = restClient.getRegionData();
                         if (regionData == null) {
                             logger.fine("Nothing to transfer");
@@ -98,17 +101,17 @@ public class RegionDataHandler extends Thread {
                                 FileChannel channel = randomAccessFile.getChannel();
                         ) {
                             MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
-                            int sum = 0;
                             Hasher hasher = Hashing.sha256().newHasher();
-                            int counter = 0;
-                            while (mappedByteBuffer.hasRemaining() && counter < regionData.bytes.length) {
-                                byte b = regionData.bytes[counter];
-                                mappedByteBuffer.put(b);
-                                bytesTransferred.incrementAndGet();
-                                hasher.putByte(b);
+                            mappedByteBuffer.put(regionData.bytes);
+                            bytesTransferred.addAndGet(regionData.size);
+                            hasher.putBytes(regionData.bytes);
+
+                            int sum = 0;
+                            for (int i = 0; i < regionData.bytes.length; i += Contants.BYTE_SKIP_LENGHT) {
+                                byte b = regionData.bytes[i];
                                 sum += b;
-                                counter++;
                             }
+
                             clientRegionMessageHandler.submitClientRegionMessage(clientId, file, regionData.offset, regionData.size, sum, hasher.hash().asBytes());
                             regionData.response.close();
                         } catch (Exception e) {

@@ -31,7 +31,7 @@ public class Region {
 
     private Integer quickDigest = null;
 
-    private ConcurrentHashMap<Long, byte[]> slowDigestsMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, byte[]> slowDigestsMap = new ConcurrentHashMap<>();
 
     private byte[] slowDigest = null;
 
@@ -60,7 +60,7 @@ public class Region {
         this.quickDigest = quickDigest;
     }
 
-    public ConcurrentHashMap<Long, byte[]> getSlowDigestsMap() {
+    public ConcurrentHashMap<Integer, byte[]> getSlowDigestsMap() {
         return slowDigestsMap;
     }
 

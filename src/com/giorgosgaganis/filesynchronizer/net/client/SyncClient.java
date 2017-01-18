@@ -18,6 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer.net.client;
 
+import com.giorgosgaganis.filesynchronizer.Contants;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
@@ -32,8 +33,10 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 /**
@@ -50,6 +53,8 @@ public class SyncClient {
     private RestClient restClient = new RestClient();
     private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
     private RegionDataHandler regionDataHandler = new RegionDataHandler(restClient, clientRegionMessageHandler, files);
+
+    private ExecutorService fileExecutorService = Executors.newFixedThreadPool(2);
 
 
     public SyncClient(String workingDirectory) {
@@ -73,7 +78,7 @@ public class SyncClient {
 
         restClient.setClientId(clientId);
         regionDataHandler.setClientId(clientId);
-        regionDataHandler.start();
+//        regionDataHandler.start();
 
         new Thread(() -> {
             do {
@@ -90,7 +95,19 @@ public class SyncClient {
     private void processFiles() {
         Collection<File> files = restClient.getFiles();
 
-        files.stream().parallel().forEach(this::processFile);
+        List<Future<?>> futureList = new ArrayList<>();
+        files.stream().forEach((File file) -> futureList.add(fileExecutorService.submit(() -> processFile(file))));
+        for (Future<?> future : futureList) {
+            //This could be a race. Can we be interrupted before the future finishes execution?
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        regionDataHandler.start();
     }
 
 
@@ -113,7 +130,7 @@ public class SyncClient {
                 processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             } else if (!wasInTheMap) {
                 RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferRead(region, hasher, mappedByteBuffer);
-                processRegions(file, regionProcessor, "r", FileChannel.MapMode.READ_ONLY);
+                processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -149,9 +166,9 @@ public class SyncClient {
     private int processByteBufferWrite(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
         long counter = 0;
         int sum = 0;
-        for (long i = 0; i < region.getSize(); i++) {
+        for (int i = 0; i < region.getSize(); i += Contants.BYTE_SKIP_LENGHT) {
             byte b = (byte) (counter % 127);
-            mappedByteBuffer.put(b);
+            mappedByteBuffer.put(i, b);
 
             hasher.putByte(b);
             sum += b;
@@ -162,11 +179,11 @@ public class SyncClient {
     }
 
     private int processByteBufferRead(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
+        byte[] buffer = new byte[mappedByteBuffer.remaining()];
+        mappedByteBuffer.get(buffer);
         int sum = 0;
-        for (long i = 0; i < region.getSize(); i++) {
-            byte b = mappedByteBuffer.get();
-
-            hasher.putByte(b);
+        for (int i = 0; i < buffer.length; i += Contants.BYTE_SKIP_LENGHT) {
+            byte b = buffer[i];
             sum += b;
         }
         return sum;

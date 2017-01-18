@@ -28,14 +28,6 @@ public class QuickDigester {
 
     private int sum;
 
-    public int digest(MappedByteBuffer mappedByteBuffer) {
-        sum = 0;
-        do {
-            sum += mappedByteBuffer.get();
-        } while (mappedByteBuffer.hasRemaining());
-        return sum;
-    }
-
     public String getStringResult() {
         return Integer.valueOf(sum).toString();
     }

@@ -47,7 +47,7 @@ public class TransferCandidateFinder {
                 }
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -58,7 +58,7 @@ public class TransferCandidateFinder {
     private void lookAtClient(Integer clientId) {
         Client client = clients.get(clientId);
         if (client != null) {
-            for (Integer fileId : client.files.keySet()) {
+            for (Integer fileId : files.keySet()) {
                 logger.finer("Looking candidates for client ["
                         + clientId + "] and file [" + fileId + "]");
                 lookAtFile(client, clientId, fileId);
@@ -67,21 +67,22 @@ public class TransferCandidateFinder {
     }
 
     private void lookAtFile(Client client, Integer clientId, Integer fileId) {
-        File clientFile = client.files.get(fileId);
-        if (clientFile != null) {
+        File serverFile = files.get(fileId);
+        if (serverFile != null) {
             int allCount = 0;
             int toTransferCount = 0;
 
-            for (Long offset : clientFile.getRegions().keySet()
+            for (Long offset : serverFile.getRegions().keySet()
                     .stream()
                     .sorted()
                     .collect(Collectors.toList())) {
                 logger.finer("Looking candidates for client ["
                         + clientId + "] and file ["
                         + fileId + "] and region " + offset + "]");
-                boolean doTranser = lookAtRegion(clientFile, client, fileId, offset);
+                boolean doTranser = lookAtRegion(serverFile, client, fileId, offset);
 
-                if (doTranser) {
+                Region region = serverFile.getRegions().get(offset);
+                if (doTranser || region.getQuickDigest() == null) {
                     toTransferCount++;
                 }
                 allCount++;
@@ -89,37 +90,37 @@ public class TransferCandidateFinder {
 
             if (allCount > 0) {
                 int syncedPercentage = (allCount - toTransferCount) * 100 / allCount;
-                clientFile.setSyncedPercentage(syncedPercentage);
+                client.getFiles().get(fileId).setSyncedPercentage(syncedPercentage);
             }
 
         }
     }
 
-    private boolean lookAtRegion(File clientFile, Client client, Integer fileId, Long offset) {
+    private boolean lookAtRegion(File serverFile, Client client, Integer fileId, Long offset) {
         boolean doTransfer = false;
 
-        Region clientRegion = clientFile.getRegions().get(offset);
-        if (clientRegion != null) {
-            Region serverRegion = files.get(fileId).getRegions().get(offset);
+        Region servRegion = serverFile.getRegions().get(offset);
+        if (servRegion != null) {
+            Region clientRegion = client.files.get(fileId).getRegions().get(offset);
 
-            if (serverRegion == null) {
+            if (clientRegion == null) {
                 return doTransfer;
             }
 
-            long serverQuickDigest = serverRegion.getQuickDigest();
-            if(serverQuickDigest == 0) {
+            Integer clientRegionQuickDigest = clientRegion.getQuickDigest();
+            if(clientRegionQuickDigest == 0) {
                 return false;
             }
 
-            long clientQuickDigest = clientRegion.getQuickDigest();
+            int clientQuickDigest = servRegion.getQuickDigest();
 
-            if (clientQuickDigest != serverQuickDigest) {
+            if (clientQuickDigest != clientRegionQuickDigest) {
                 doTransfer = true;
             } else {
-                byte[] bytes = serverRegion.getSlowDigestsMap().get(serverQuickDigest);
+                byte[] bytes = clientRegion.getSlowDigestsMap().get(clientRegionQuickDigest);
                 if (bytes != null) {
                     for (int i = 0; i < bytes.length; i++) {
-                        if (clientRegion.getSlowDigest()[i] != bytes[i]) {
+                        if (servRegion.getSlowDigest()[i] != bytes[i]) {
                             doTransfer = true;
                             logger.info("Collision detected");
                         }
@@ -128,7 +129,7 @@ public class TransferCandidateFinder {
             }
 
             if (doTransfer) {
-                TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
+                TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, clientRegion.getSize());
                 try {
 
                     //TODO this is contains a race since is is a unsynchronized compare and set idiom
