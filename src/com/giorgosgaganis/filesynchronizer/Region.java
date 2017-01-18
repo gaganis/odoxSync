@@ -20,7 +20,7 @@ package com.giorgosgaganis.filesynchronizer;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import static com.google.common.base.MoreObjects.toStringHelper;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -31,7 +31,8 @@ public class Region {
 
     private long quickDigest;
 
-    private boolean doSlowScan = false;
+    private ConcurrentHashMap<Long, byte[]> slowDigestsMap = new ConcurrentHashMap<>();
+
     private byte[] slowDigest = null;
 
     public Region() {
@@ -59,20 +60,16 @@ public class Region {
         this.quickDigest = quickDigest;
     }
 
+    public ConcurrentHashMap<Long, byte[]> getSlowDigestsMap() {
+        return slowDigestsMap;
+    }
+
     public byte[] getSlowDigest() {
         return slowDigest;
     }
 
     public void setSlowDigest(byte[] slowDigest) {
         this.slowDigest = slowDigest;
-    }
-
-    public boolean isDoSlowScan() {
-        return doSlowScan;
-    }
-
-    public void setDoSlowScan(boolean doSlowScan) {
-        this.doSlowScan = doSlowScan;
     }
 
     @Override
@@ -84,5 +81,4 @@ public class Region {
                 .append("slowDigest", slowDigest)
                 .toString();
     }
-
 }

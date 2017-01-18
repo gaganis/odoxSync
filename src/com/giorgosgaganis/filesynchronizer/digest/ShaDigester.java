@@ -29,13 +29,24 @@ import java.nio.MappedByteBuffer;
 public class ShaDigester {
 
 
+    private long sum;
     private Hasher hasher;
 
-    public byte[] digest(MappedByteBuffer mappedByteBuffer) {
+    public void digest(MappedByteBuffer mappedByteBuffer) {
+        sum = 0;
         hasher = Hashing.sha256().newHasher();
         do {
-            hasher.putByte(mappedByteBuffer.get());
+            byte b = mappedByteBuffer.get();
+            hasher.putByte(b);
+            sum += b;
         } while (mappedByteBuffer.hasRemaining());
+    }
+
+    public long getFastDigest() {
+        return sum;
+    }
+
+    public byte[] getSlowDigest() {
         return hasher.hash().asBytes();
     }
 

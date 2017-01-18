@@ -20,7 +20,6 @@ package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
 import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
-import com.google.common.hash.HashCode;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -44,43 +43,51 @@ public class FileScanner {
 
     private final ConcurrentHashMap<Integer, File> files;
     private final DirectoryScanner ds;
+    private boolean isFast;
 
     private String workingDirectory;
 
-    private boolean firstScan = true;
+    private volatile int scanCount = 0;
 
-    public FileScanner(ConcurrentHashMap<Integer, File> files) {
+    public FileScanner(ConcurrentHashMap<Integer, File> files, boolean isFast) {
         this.files = files;
         ds = new DirectoryScanner(files);
+        this.isFast = isFast;
     }
 
     void scanDirectoryAndFiles() {
+        new Thread(() -> {
+            do {
+                ds.scan(workingDirectory);
 
-        ds.scan(workingDirectory);
-
-        ForkJoinPool forkJoinPool = new ForkJoinPool(2);
-        try {
-            forkJoinPool.submit(() ->
-                    //parallel task here, for example
-                    files.values().parallelStream().forEach(this::processFile)
-            ).get();
-            firstScan = false;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+                ForkJoinPool forkJoinPool = new ForkJoinPool(2);
+                try {
+                    forkJoinPool.submit(() -> {
+                                if (isFast) {
+                                    files.values().parallelStream().forEach(this::processFileFast);
+                                } else {
+                                    files.values().parallelStream().forEach(this::processFileSlow);
+                                }
+                            }
+                    ).get();
+                    scanCount++;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                }
+            } while (true);
+        }).start();
     }
 
-    private void processFile(File file) {
+    private void processFileFast(File file) {
         try {
 
-            boolean doScan = file.getRegions()
-                    .values()
-                    .stream()
-                    .filter(Region::isDoSlowScan)
-                    .findFirst()
-                    .isPresent();
+            boolean doScan = false;
 
             Path path = Paths.get(workingDirectory, file.getName());
             FileTime lastModifiedTime = Files.getLastModifiedTime(path);
@@ -101,7 +108,7 @@ public class FileScanner {
 
             if (doScan) {
                 logger.info("Starting scan for [" + file.getName() + "]");
-                scanFile(file);
+                scanFile(file, true);
                 logger.info("Finished scan for [" + file.getName() + "]");
             }
 
@@ -110,7 +117,18 @@ public class FileScanner {
         }
     }
 
-    private void scanFile(File file) throws IOException {
+    private void processFileSlow(File file) {
+        try {
+            logger.info("Starting scan for [" + file.getName() + "]");
+            scanFile(file, false);
+            logger.info("Finished scan for [" + file.getName() + "]");
+
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Unable to scan file [" + file.getName() + "]", e);
+        }
+    }
+
+    private void scanFile(File file, boolean isFast) throws IOException {
         Path filePath = Paths.get(workingDirectory, file.getName());
         try (
                 RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
@@ -118,44 +136,46 @@ public class FileScanner {
         ) {
             for (Region region : file.getRegions().values()) {
 
-                scanRegion(region, channel);
-                if (region.isDoSlowScan()) {
-                    String slowDigest = HashCode.fromBytes(region.getSlowDigest()).toString();
-                    logger.info("Calculated slow digest[" + slowDigest + "] for file ["
-                            + file.getName() + "]" + region.getOffset()
-                            + ":" + (region.getOffset() + region.getSize()));
-                }
-                if (logger.isLoggable(Level.FINER)) {
-                    logger.finer("Calculated fast digest[" + region.getQuickDigest()
-                            + "] for file [" + file.getName() + "]" + region.getOffset()
-                            + ":" + (region.getOffset() + region.getSize()));
-
-
+                if(isFast || !region.getSlowDigestsMap().containsKey(region.getQuickDigest())) {
+                    scanRegion(file, region, channel, isFast);
                 }
             }
         }
     }
 
-    private void scanRegion(Region region, FileChannel channel) throws IOException {
+    private void scanRegion(File file, Region region, FileChannel channel, boolean isFast) throws IOException {
         MappedByteBuffer mappedByteBuffer = channel.map(
                 FileChannel.MapMode.READ_ONLY,
                 region.getOffset(),
                 region.getSize());
 
-        LongDigester longDigester = new LongDigester();
-        region.setQuickDigest(
-                longDigester.digest(mappedByteBuffer));
+        if (isFast) {
+            LongDigester longDigester = new LongDigester();
+            region.setQuickDigest(
+                    longDigester.digest(mappedByteBuffer));
+            if (logger.isLoggable(Level.FINER)) {
+                logger.finer("Calculated fast digest[" + region.getQuickDigest()
+                        + "] for file [" + file.getName() + "]" + region.getOffset()
+                        + ":" + (region.getOffset() + region.getSize()));
+            }
 
-
-        if (region.isDoSlowScan()) {
+        } else {
             mappedByteBuffer = channel.map(FileChannel.MapMode.READ_ONLY,
                     region.getOffset(),
                     region.getSize());
 
             ShaDigester shaDigester = new ShaDigester();
-            region.setSlowDigest(
-                    shaDigester.digest(mappedByteBuffer)
-            );
+            shaDigester.digest(mappedByteBuffer);
+
+            region.getSlowDigestsMap()
+                    .put(shaDigester.getFastDigest(),
+                            shaDigester.getSlowDigest());
+
+            if (logger.isLoggable(Level.FINER)) {
+                logger.finer("Calculated slow digest[" + mappedByteBuffer + "] for file ["
+                        + file.getName() + "]" + region.getOffset()
+                        + ":" + (region.getOffset() + region.getSize()));
+            }
         }
 
     }

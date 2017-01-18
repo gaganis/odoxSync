@@ -87,7 +87,7 @@ public class TransferCandidateFinder {
                 allCount++;
             }
 
-            if(allCount > 0) {
+            if (allCount > 0) {
                 int syncedPercentage = (allCount - toTransferCount) * 100 / allCount;
                 clientFile.setSyncedPercentage(syncedPercentage);
             }
@@ -106,14 +106,16 @@ public class TransferCandidateFinder {
                 return doTransfer;
             }
 
-            if (clientRegion.getQuickDigest() != serverRegion.getQuickDigest()) {
+            long clientQuickDigest = clientRegion.getQuickDigest();
+            long serverQuickDigest = serverRegion.getQuickDigest();
+
+            if (clientQuickDigest != serverQuickDigest) {
                 doTransfer = true;
             } else {
-                if (serverRegion.getSlowDigest() == null) {
-                    serverRegion.setDoSlowScan(true);
-                } else {
-                    for (int i = 0; i < clientRegion.getSlowDigest().length; i++) {
-                        if (clientRegion.getSlowDigest()[i] != serverRegion.getSlowDigest()[i]) {
+                byte[] bytes = serverRegion.getSlowDigestsMap().get(serverQuickDigest);
+                if (bytes != null) {
+                    for (int i = 0; i < bytes.length; i++) {
+                        if (clientRegion.getSlowDigest()[i] != bytes[i]) {
                             doTransfer = true;
                             logger.info("Collision detected");
                         }

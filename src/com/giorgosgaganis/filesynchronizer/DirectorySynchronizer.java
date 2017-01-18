@@ -18,26 +18,12 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import com.giorgosgaganis.filesynchronizer.digest.LongDigester;
-import com.giorgosgaganis.filesynchronizer.digest.ShaDigester;
 import com.giorgosgaganis.filesynchronizer.net.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
-import com.google.common.hash.HashCode;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -57,7 +43,8 @@ public class DirectorySynchronizer {
             files,
             clients);
 
-    private final FileScanner fileScanner = new FileScanner(files);
+    private final FileScanner fastFileScanner = new FileScanner(files, true);
+    private final FileScanner slowFileScanner = new FileScanner(files, false);
 
     public String workingDirectory;
 
@@ -65,21 +52,14 @@ public class DirectorySynchronizer {
     public void start(String workingDirectory) {
         this.workingDirectory = workingDirectory;
 
-        fileScanner.setWorkingDirectory(workingDirectory);
+        fastFileScanner.setWorkingDirectory(workingDirectory);
+        fastFileScanner.scanDirectoryAndFiles();
 
-        new Thread(() -> {
-            do {
-                fileScanner.scanDirectoryAndFiles();
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                }
-            } while (true);
-        }).start();
+        slowFileScanner.setWorkingDirectory(workingDirectory);
+        slowFileScanner.scanDirectoryAndFiles();
 
         transferCandidateFinder.lookForRegionsToTransfer();
     }
-
 
 
     public static void main(String[] args) throws IOException {
