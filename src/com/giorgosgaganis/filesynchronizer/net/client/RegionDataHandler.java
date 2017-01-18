@@ -20,6 +20,7 @@ package com.giorgosgaganis.filesynchronizer.net.client;
 
 import com.giorgosgaganis.filesynchronizer.Contants;
 import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 

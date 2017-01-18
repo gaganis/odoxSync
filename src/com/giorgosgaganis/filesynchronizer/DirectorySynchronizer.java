@@ -19,7 +19,7 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.net.client.ClientRegionMessage;
-import com.giorgosgaganis.filesynchronizer.net.client.Statistics;
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 
 import java.io.IOException;

@@ -18,7 +18,7 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import com.giorgosgaganis.filesynchronizer.net.client.Statistics;
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import com.google.common.base.Objects;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;

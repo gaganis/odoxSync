@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.net.client;
+package com.giorgosgaganis.filesynchronizer.utils;
 
 import java.util.concurrent.atomic.AtomicLong;
 

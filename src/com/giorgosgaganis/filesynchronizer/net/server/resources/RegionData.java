@@ -22,7 +22,7 @@ import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.TransferCandidate;
-import com.giorgosgaganis.filesynchronizer.net.client.Statistics;
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import org.glassfish.grizzly.http.server.Response;
 
 import javax.ws.rs.GET;
