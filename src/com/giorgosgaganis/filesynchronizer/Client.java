@@ -27,7 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by gaganis on 14/01/17.
  */
 public class Client {
-    public static final double OFFER_EXPIRATION_SECONDS = 30;
+    public static final double OFFER_EXPIRATION_SECONDS = 5;
     private final int id;
     public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
             new LinkedBlockingQueue<>();
@@ -49,22 +49,17 @@ public class Client {
     public void removeExpiredOffers() {
         new Thread(() -> {
             do {
-                CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = this.offeredTransferCandidates;
-
                 try {
                     Thread.sleep(1000);
-
 
                     long time = System.currentTimeMillis();
                     Iterator<TransferCandidate> iterator = offeredTransferCandidates.iterator();
                     while (iterator.hasNext()) {
                         TransferCandidate offer = iterator.next();
                         if (time < (offer.getOfferedTimeMillis() + OFFER_EXPIRATION_SECONDS * 1000)) {
-                            break;
+                            iterator.remove();
                         }
-                        iterator.remove();
                     }
-
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

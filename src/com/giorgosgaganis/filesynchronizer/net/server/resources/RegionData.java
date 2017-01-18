@@ -109,6 +109,7 @@ public class RegionData {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return outputStream -> {
+        };
     }
 }
