@@ -114,16 +114,13 @@ public class TransferCandidateFinder {
                 return doTransfer;
             }
 
-            Integer clientRegionQuickDigest = clientRegion.getQuickDigest();
-            if (clientRegionQuickDigest == 0) {
-                return false;
-            }
-
-            if(servRegion.getQuickDigest() == null ) {
+            if(servRegion.getQuickDigest() == null
+                    || servRegion.getQuickDigest() == 0) {
                 return false;
             }
             int clientQuickDigest = servRegion.getQuickDigest();
 
+            Integer clientRegionQuickDigest = clientRegion.getQuickDigest();
             if (clientQuickDigest != clientRegionQuickDigest) {
                 doTransfer = true;
             } else {

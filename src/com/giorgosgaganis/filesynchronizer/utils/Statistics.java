@@ -18,8 +18,6 @@
  */
 package com.giorgosgaganis.filesynchronizer.utils;
 
-import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Statistics {
@@ -45,7 +43,15 @@ public class Statistics {
         long endBytes = bytesTransferred.get();
         long bytes = endBytes - startBytes;
         long bytesPerSecond = bytes * 1000 / duration;
-        System.out.println(statName + " bytes [" + DirectorySynchronizer.humanReadableByteCount(endBytes, false)
-                + "], bytes/s [" + DirectorySynchronizer.humanReadableByteCount(bytesPerSecond, false) + "]");
+        System.out.println(statName + " bytes [" + humanReadableByteCount(endBytes, false)
+                + "], bytes/s [" + humanReadableByteCount(bytesPerSecond, false) + "]");
+    }
+
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 }

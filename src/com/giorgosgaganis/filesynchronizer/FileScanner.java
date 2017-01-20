@@ -90,6 +90,9 @@ public class FileScanner {
         new Thread(() -> {
             do {
                 ds.scan(workingDirectory);
+                long fastBytesAtStart = Statistics.INSTANCE.bytesReadFast.get();
+                long startTime = System.currentTimeMillis();
+
 
                 ForkJoinPool forkJoinPool = new ForkJoinPool(2);
                 try {
@@ -102,6 +105,12 @@ public class FileScanner {
                             }
                     ).get();
                     scanCount++;
+
+                    long duration = System.currentTimeMillis() - startTime;
+                    long speed = (Statistics.INSTANCE.bytesReadFast.get() - fastBytesAtStart ) * 1000 / duration;
+
+                    logger.info("Finished ["+scanCount + "] scan in ["
+                            + duration/1000 + "] at ["  +Statistics.humanReadableByteCount(speed, false) +"]");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
