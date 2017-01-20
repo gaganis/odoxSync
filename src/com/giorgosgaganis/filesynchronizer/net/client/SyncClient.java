@@ -78,7 +78,7 @@ public class SyncClient {
 
         restClient.setClientId(clientId);
         regionDataHandler.setClientId(clientId);
-//        regionDataHandler.start();
+        regionDataHandler.start();
 
         new Thread(() -> {
             do {
@@ -107,7 +107,6 @@ public class SyncClient {
                 e.printStackTrace();
             }
         }
-        regionDataHandler.start();
     }
 
 

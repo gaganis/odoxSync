@@ -29,6 +29,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
@@ -53,6 +54,7 @@ public class RegionDataHandler extends Thread {
     public void run() {
         logger.info("Starting Data Transfer Thread");
 
+        startStatisticsThread();
 
         for (int threadCounter = 0; threadCounter < 3; threadCounter++) {
 
@@ -63,7 +65,7 @@ public class RegionDataHandler extends Thread {
                         RegionDataParams regionData = restClient.getRegionData();
                         if (regionData == null) {
                             logger.fine("Nothing to transfer");
-                            return;
+                            continue;
                         }
 
                         logger.fine("Starting to copy region [" + regionData + "]");
@@ -97,6 +99,16 @@ public class RegionDataHandler extends Thread {
                 } while (true);
             }).start();
         }
+    }
+
+    private void startStatisticsThread() {
+        new Thread(() -> {
+
+            do {
+                AtomicLong counter = Statistics.INSTANCE.bytesTransferred;
+                Statistics.printStatistic("transfered", counter);
+            } while (true);
+        }).start();
     }
 
     public void setClientId(int clientId) {

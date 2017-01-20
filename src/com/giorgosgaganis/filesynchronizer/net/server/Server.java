@@ -61,9 +61,8 @@ public class Server {
         String workingDirectory = args.length > 0 ? args[0] : ".";
         final HttpServer server = startServer(workingDirectory);
         System.out.println(String.format("Jersey app started with WADL available at "
-                + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
-        System.in.read();
-        server.stop();
+                + "%sapplication.wadl\n", BASE_URI));
+
     }
 }
 

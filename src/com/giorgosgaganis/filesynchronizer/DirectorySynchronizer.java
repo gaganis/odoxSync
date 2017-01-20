@@ -70,39 +70,23 @@ public class DirectorySynchronizer {
 
             do {
                 AtomicLong counter = Statistics.INSTANCE.bytesTransferred;
-                printStatistic("transfered", counter);
+                Statistics.printStatistic("transfered", counter);
             } while (true);
         }).start();
         new Thread(() -> {
 
             do {
                 AtomicLong counter = Statistics.INSTANCE.bytesReadFast;
-                printStatistic("read fast", counter);
+                Statistics.printStatistic("read fast", counter);
             } while (true);
         }).start();
         new Thread(() -> {
 
             do {
                 AtomicLong counter = Statistics.INSTANCE.bytesReadSlow;
-                printStatistic("read slow", counter);
+                Statistics.printStatistic("read slow", counter);
             } while (true);
         }).start();
-    }
-
-    private void printStatistic(String statName, AtomicLong bytesTransferred) {
-        long start = System.currentTimeMillis();
-        long startBytes = bytesTransferred.get();
-        try {
-            Thread.sleep(30000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        long duration = System.currentTimeMillis() - start;
-        long endBytes = bytesTransferred.get();
-        long bytes = endBytes - startBytes;
-        long bytesPerSecond = bytes * 1000 / duration;
-        System.out.println(statName + " bytes [" + humanReadableByteCount(endBytes, false)
-                + "], bytes/s [" + humanReadableByteCount(bytesPerSecond, false) + "]");
     }
 
 
@@ -129,20 +113,25 @@ public class DirectorySynchronizer {
 
     public void addClientRegion(ClientRegionMessage clientRegionMessage) {
 
-        int clientId = clientRegionMessage.getClientId();
-        int fileId = clientRegionMessage.getFileId();
+        try {
+            int clientId = clientRegionMessage.getClientId();
+            int fileId = clientRegionMessage.getFileId();
 
-        String fileName = files.get(fileId).getName();
+            String fileName = files.get(fileId).getName();
 
-        Client client = clients.get(clientId);
+            Client client = clients.get(clientId);
 
-        client.files.putIfAbsent(fileId, new File(fileName));
-        File file = client.files.get(fileId);
-        ConcurrentHashMap<Long, Region> clientRegions = file.getRegions();
-        Region region = clientRegionMessage.getRegion();
+            client.files.putIfAbsent(fileId, new File(fileName));
+            File file = client.files.get(fileId);
+            ConcurrentHashMap<Long, Region> clientRegions = file.getRegions();
+            Region region = clientRegionMessage.getRegion();
 
-        clientRegions.put(region.getOffset(), region);
-        logger.fine("Added client region " + region);
+            clientRegions.put(region.getOffset(), region);
+            logger.fine("Added client region " + region);
+        }catch(Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public static String humanReadableByteCount(long bytes, boolean si) {

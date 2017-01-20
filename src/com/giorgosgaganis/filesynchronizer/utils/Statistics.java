@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer.utils;
 
+import com.giorgosgaganis.filesynchronizer.DirectorySynchronizer;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Statistics {
@@ -29,5 +31,21 @@ public class Statistics {
     public AtomicLong bytesReadSlow = new AtomicLong(0);
 
     private Statistics(){
+    }
+
+    public static void printStatistic(String statName, AtomicLong bytesTransferred) {
+        long start = System.currentTimeMillis();
+        long startBytes = bytesTransferred.get();
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long duration = System.currentTimeMillis() - start;
+        long endBytes = bytesTransferred.get();
+        long bytes = endBytes - startBytes;
+        long bytesPerSecond = bytes * 1000 / duration;
+        System.out.println(statName + " bytes [" + DirectorySynchronizer.humanReadableByteCount(endBytes, false)
+                + "], bytes/s [" + DirectorySynchronizer.humanReadableByteCount(bytesPerSecond, false) + "]");
     }
 }

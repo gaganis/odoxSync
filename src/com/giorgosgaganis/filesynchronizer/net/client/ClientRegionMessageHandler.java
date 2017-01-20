@@ -32,10 +32,6 @@ import java.util.logging.Logger;
 public class ClientRegionMessageHandler {
     private static final Logger logger = Logger.getLogger(ClientRegionMessageHandler.class.getName());
 
-    public static final int MAX_REGION_THREADS = 4;
-
-    private ExecutorService executorService = Executors.newFixedThreadPool(MAX_REGION_THREADS);
-
     private final RestClient restClient;
 
     public ClientRegionMessageHandler(RestClient restClient) {
@@ -48,7 +44,7 @@ public class ClientRegionMessageHandler {
                     + clientRegionMessage + "]");
         }
 
-        executorService.submit(() -> transferClientRegionMessage(clientRegionMessage));
+        transferClientRegionMessage(clientRegionMessage);
 
     }
 

@@ -41,14 +41,14 @@ public class TransferCandidateFinder {
     public void lookForRegionsToTransfer() {
         new Thread(() -> {
             do {
-                for (Integer clientId : clients.keySet()) {
-                    logger.finer("Looking candidates for client [" + clientId + "]");
-                    lookAtClient(clientId);
-                }
-
                 try {
+                    for (Integer clientId : clients.keySet()) {
+                        logger.finer("Looking candidates for client [" + clientId + "]");
+                        lookAtClient(clientId);
+                    }
+
                     Thread.sleep(2000);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             } while (true);
@@ -90,7 +90,10 @@ public class TransferCandidateFinder {
 
             if (allCount > 0) {
                 int syncedPercentage = (allCount - toTransferCount) * 100 / allCount;
-                client.getFiles().get(fileId).setSyncedPercentage(syncedPercentage);
+                File clientFile = client.getFiles().get(fileId);
+                if(clientFile != null) {
+                    clientFile.setSyncedPercentage(syncedPercentage);
+                }
             }
 
         }
@@ -101,17 +104,24 @@ public class TransferCandidateFinder {
 
         Region servRegion = serverFile.getRegions().get(offset);
         if (servRegion != null) {
-            Region clientRegion = client.files.get(fileId).getRegions().get(offset);
+            File clientFile = client.files.get(fileId);
+            if(clientFile == null){
+                return false;
+            }
+            Region clientRegion = clientFile.getRegions().get(offset);
 
             if (clientRegion == null) {
                 return doTransfer;
             }
 
             Integer clientRegionQuickDigest = clientRegion.getQuickDigest();
-            if(clientRegionQuickDigest == 0) {
+            if (clientRegionQuickDigest == 0) {
                 return false;
             }
 
+            if(servRegion.getQuickDigest() == null ) {
+                return false;
+            }
             int clientQuickDigest = servRegion.getQuickDigest();
 
             if (clientQuickDigest != clientRegionQuickDigest) {
