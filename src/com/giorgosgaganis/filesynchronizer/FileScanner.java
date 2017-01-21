@@ -31,9 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -170,6 +168,8 @@ public class FileScanner {
 
     private void scanFile(File file, boolean isFast) throws IOException {
         Path filePath = Paths.get(workingDirectory, file.getName());
+
+        FileProcessor fileProcessor = new FileProcessor();
         try (
                 RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
                 FileChannel channel = randomAccessFile.getChannel()
@@ -207,40 +207,14 @@ public class FileScanner {
                 offset,
                 size);
 
-        Integer quickDigest = null;
-        byte[] slowDigest = null;
 
         byte[] buffer = new byte[mappedByteBuffer.remaining()];
         mappedByteBuffer.get(buffer);
-        int sum = 0;
-        for (int i = 0; i < buffer.length; i += BYTE_SKIP_LENGHT) {
-            byte b = buffer[i];
-            sum += b;
-        }
-        quickDigest = sum;
 
-        if (logger.isLoggable(Level.FINER)) {
-            logger.finer("Calculated fast digest[" + quickDigest
-                    + "] for file [" + fileName + "]" + offset
-                    + ":" + (offset + size));
-        }
-
-        if(isFast){
-            statistics.bytesReadFast.addAndGet(buffer.length);
-        } else {
-            Hasher hasher = Hashing.sha256().newHasher();
-            hasher.putBytes(buffer);
-            slowDigest = hasher.hash().asBytes();
-
-            if (logger.isLoggable(Level.FINER)) {
-                logger.finer("Calculated slow digest[" + mappedByteBuffer + "] for file ["
-                        + fileName + "]" + offset
-                        + ":" + (offset + size));
-            }
-            statistics.bytesReadSlow.addAndGet(buffer.length);
-        }
-        return new DigestResult(quickDigest, slowDigest);
+        return processBytes(isFast, offset, size, fileName, mappedByteBuffer, buffer);
     }
+
+
 
 
     private void reCalculateRegions(File file) throws IOException {
