@@ -32,10 +32,18 @@ import static com.giorgosgaganis.filesynchronizer.Contants.BYTE_SKIP_LENGHT;
  * Created by gaganis on 20/01/17.
  */
 public class FileProcessor {
-    private static final Logger logger = Logger.getLogger(FastFileProcessor.class.getName());
+    private static final Logger logger = Logger.getLogger(FileProcessor.class.getName());
 
     private static Statistics statistics = Statistics.INSTANCE;
-    private static DigestResult processBytes(boolean isFast, long offset, long size, String fileName, MappedByteBuffer mappedByteBuffer, byte[] buffer) {
+    private static DigestResult digestResult;
+    private final File file;
+
+    public FileProcessor(File file) {
+        this.file = file;
+    }
+
+    private static void processBytes(boolean isFast, long offset, long size, String fileName, MappedByteBuffer mappedByteBuffer, byte[] buffer) {
+
 
         Integer quickDigest = calculateFastDigest(offset, size, fileName, buffer);
 
@@ -43,19 +51,19 @@ public class FileProcessor {
         if(isFast){
             statistics.bytesReadFast.addAndGet(buffer.length);
         } else {
-            slowDigest = calculateSlowDigest(offset, size, fileName, mappedByteBuffer, buffer);
+            slowDigest = calculateSlowDigest(offset, size, fileName, buffer);
             statistics.bytesReadSlow.addAndGet(buffer.length);
         }
-        return new DigestResult(quickDigest, slowDigest);
+        digestResult = new DigestResult(quickDigest, slowDigest);
     }
 
-    private static byte[] calculateSlowDigest(long offset, long size, String fileName, MappedByteBuffer mappedByteBuffer, byte[] buffer) {
+    private static byte[] calculateSlowDigest(long offset, long size, String fileName, byte[] buffer) {
         byte[] slowDigest;Hasher hasher = Hashing.sha256().newHasher();
         hasher.putBytes(buffer);
         slowDigest = hasher.hash().asBytes();
 
         if (logger.isLoggable(Level.FINER)) {
-            logger.finer("Calculated slow digest[" + mappedByteBuffer + "] for file ["
+            logger.finer("Calculated slow digest[" + slowDigest + "] for file ["
                     + fileName + "]" + offset
                     + ":" + (offset + size));
         }
@@ -77,5 +85,8 @@ public class FileProcessor {
                     + ":" + (offset + size));
         }
         return quickDigest;
+    }
+
+    public void process(byte[] buffer) {
     }
 }

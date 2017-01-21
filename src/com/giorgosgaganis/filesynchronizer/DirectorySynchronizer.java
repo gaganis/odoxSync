@@ -45,8 +45,8 @@ public class DirectorySynchronizer {
             files,
             clients);
 
-    private final FileScanner fastFileScanner = new FileScanner(files, true);
-    private final FileScanner slowFileScanner = new FileScanner(files, false);
+    private final DirectoryScanner fastDirectoryScanner = new DirectoryScanner(files, true);
+    private final DirectoryScanner slowDirectoryScanner = new DirectoryScanner(files, false);
 
     public String workingDirectory;
 
@@ -56,11 +56,11 @@ public class DirectorySynchronizer {
 
         startStatisticsPrintThread();
 
-        fastFileScanner.setWorkingDirectory(workingDirectory);
-        fastFileScanner.scanDirectoryAndFiles();
+        fastDirectoryScanner.setWorkingDirectory(workingDirectory);
+        fastDirectoryScanner.scanDirectoryAndFiles();
 
-        slowFileScanner.setWorkingDirectory(workingDirectory);
-        slowFileScanner.scanDirectoryAndFiles();
+        slowDirectoryScanner.setWorkingDirectory(workingDirectory);
+        slowDirectoryScanner.scanDirectoryAndFiles();
 
         transferCandidateFinder.lookForRegionsToTransfer();
     }
