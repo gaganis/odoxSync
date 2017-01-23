@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidate;
+
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -34,7 +36,7 @@ public class Client {
 
     public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
 
-    ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
 
     public Client(int id) {

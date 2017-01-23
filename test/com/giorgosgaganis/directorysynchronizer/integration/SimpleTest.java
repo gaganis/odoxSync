@@ -1,7 +1,7 @@
 package com.giorgosgaganis.directorysynchronizer.integration;
 
-import com.giorgosgaganis.filesynchronizer.net.client.SyncClient;
-import com.giorgosgaganis.filesynchronizer.net.server.Server;
+import com.giorgosgaganis.filesynchronizer.client.SyncClient;
+import com.giorgosgaganis.filesynchronizer.server.net.MainServer;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -23,7 +23,7 @@ public class SimpleTest {
 
         new Thread(() -> {
             try {
-                Server.main(new String[]{SOURCE_DIR});
+                MainServer.main(new String[]{SOURCE_DIR});
             } catch (IOException e) {
                 e.printStackTrace();
             }
