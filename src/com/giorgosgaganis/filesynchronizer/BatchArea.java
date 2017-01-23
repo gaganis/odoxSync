@@ -21,11 +21,11 @@ package com.giorgosgaganis.filesynchronizer;
 /**
  * Created by gaganis on 21/01/17.
  */
-public class FileArea {
+public class BatchArea {
     long size;
     long offset;
 
-    public FileArea(long size, long offset) {
+    public BatchArea(long size, long offset) {
         this.size = size;
         this.offset = offset;
     }

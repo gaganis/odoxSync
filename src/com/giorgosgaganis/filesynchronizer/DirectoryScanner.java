@@ -146,7 +146,9 @@ public class DirectoryScanner {
 
             if (doScan) {
                 logger.fine("Starting scan for [" + file.getName() + "]");
-                FileScanner fileScanner = new FileScanner();
+                FastDigestHandler fastDigestHandler = new FileRegionHashMapDigestHandler();
+                FileByteArrayHandler fileByteArrayHandler = new FastFileByteArrayHandler(fastDigestHandler);
+                FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
                 fileScanner.scanFile(file, true);
                 logger.fine("Finished scan for [" + file.getName() + "]");
             }
@@ -159,7 +161,8 @@ public class DirectoryScanner {
     private void processFileSlow(File file) {
         try {
             logger.fine("Starting scan for [" + file.getName() + "]");
-            FileScanner fileScanner = new FileScanner();
+            FileByteArrayHandler fileByteArrayHandler = new SlowFileByteArrayHandler();
+            FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
             fileScanner.scanFile(file, false);
             logger.fine("Finished scan for [" + file.getName() + "]");
 

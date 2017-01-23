@@ -22,11 +22,11 @@ import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-import java.nio.MappedByteBuffer;
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.giorgosgaganis.filesynchronizer.Contants.BYTE_SKIP_LENGHT;
+import java.util.stream.Collectors;
 
 /**
  * Created by gaganis on 20/01/17.
@@ -34,59 +34,55 @@ import static com.giorgosgaganis.filesynchronizer.Contants.BYTE_SKIP_LENGHT;
 public class FileProcessor {
     private static final Logger logger = Logger.getLogger(FileProcessor.class.getName());
 
+    public static final int BATCH_SIZE = 32;
+
     private static Statistics statistics = Statistics.INSTANCE;
-    private static DigestResult digestResult;
     private final File file;
+    private final ConcurrentHashMap<Long, Region> regions;
 
-    public FileProcessor(File file) {
+    private final LinkedList<Long> regionsToProcess;
+
+    private final LinkedList<Long> currentBatchRegions = new LinkedList<>();
+
+    private final FileByteArrayHandler fileByteArrayHandler;
+
+    public FileProcessor(FileByteArrayHandler fileByteArrayHandler, File file) {
         this.file = file;
-    }
-
-    private static void processBytes(boolean isFast, long offset, long size, String fileName, MappedByteBuffer mappedByteBuffer, byte[] buffer) {
-
-
-        Integer quickDigest = calculateFastDigest(offset, size, fileName, buffer);
-
-        byte[] slowDigest = null;
-        if(isFast){
-            statistics.bytesReadFast.addAndGet(buffer.length);
-        } else {
-            slowDigest = calculateSlowDigest(offset, size, fileName, buffer);
-            statistics.bytesReadSlow.addAndGet(buffer.length);
-        }
-        digestResult = new DigestResult(quickDigest, slowDigest);
-    }
-
-    private static byte[] calculateSlowDigest(long offset, long size, String fileName, byte[] buffer) {
-        byte[] slowDigest;Hasher hasher = Hashing.sha256().newHasher();
-        hasher.putBytes(buffer);
-        slowDigest = hasher.hash().asBytes();
-
-        if (logger.isLoggable(Level.FINER)) {
-            logger.finer("Calculated slow digest[" + slowDigest + "] for file ["
-                    + fileName + "]" + offset
-                    + ":" + (offset + size));
-        }
-        return slowDigest;
-    }
-
-    private static Integer calculateFastDigest(long offset, long size, String fileName, byte[] buffer) {
-        Integer quickDigest = null;
-        int sum = 0;
-        for (int i = 0; i < buffer.length; i += BYTE_SKIP_LENGHT) {
-            byte b = buffer[i];
-            sum += b;
-        }
-        quickDigest = sum;
-
-        if (logger.isLoggable(Level.FINER)) {
-            logger.finer("Calculated fast digest[" + quickDigest
-                    + "] for file [" + fileName + "]" + offset
-                    + ":" + (offset + size));
-        }
-        return quickDigest;
+        regions = file.getRegions();
+        this.fileByteArrayHandler = fileByteArrayHandler;
+        regionsToProcess = regions.keySet()
+                .stream()
+                .sorted()
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     public void process(byte[] buffer) {
+
+        for (Long currentBatchRegionOffset : currentBatchRegions) {
+
+            Region currentRegion = regions.get(currentBatchRegionOffset);
+
+            fileByteArrayHandler.handleBytes(buffer, file, currentRegion);
+        }
+    }
+
+    public boolean hasNextBatchArea() {
+        return !regionsToProcess.isEmpty();
+    }
+
+    public BatchArea nextBatchArea() {
+        currentBatchRegions.clear();
+
+        Long firstRegionOffset = regionsToProcess.remove();
+        long size = regions.get(firstRegionOffset).getSize();
+        currentBatchRegions.add(firstRegionOffset);
+
+        for (int i = 1; i < BATCH_SIZE && !regionsToProcess.isEmpty(); i++) {
+            Long regionOffset = regionsToProcess.remove();
+            size += regions.get(regionOffset).getSize();
+
+            currentBatchRegions.add(regionOffset);
+        }
+        return new BatchArea(firstRegionOffset, size);
     }
 }
