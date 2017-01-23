@@ -18,15 +18,11 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import com.giorgosgaganis.filesynchronizer.utils.Statistics;
-
 public class FileRegionHashMapDigestHandler implements FastDigestHandler {
-    private static Statistics statistics = Statistics.INSTANCE;
 
     @Override
     public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest) {
         Region region = file.getRegions().get(currentRegion.getOffset());
         region.setQuickDigest(fastDigest);
-        statistics.bytesReadFast.addAndGet(buffer.length);
     }
 }

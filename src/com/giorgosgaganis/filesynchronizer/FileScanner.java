@@ -18,12 +18,16 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
@@ -42,7 +46,7 @@ public class FileScanner {
     }
 
     void scanFile(File file, boolean isFast) throws IOException {
-        FileProcessor fileProcessor = new FileProcessor(fileByteArrayHandler, file);
+        FileProcessor fileProcessor = new FastFileProcessor(fileByteArrayHandler, file);
 
         Path filePath = Paths.get(workingDirectory, file.getName());
         try (
@@ -59,15 +63,16 @@ public class FileScanner {
                         batchArea.size);
                 byte[] buffer = new byte[mappedByteBuffer.remaining()];
                 mappedByteBuffer.get(buffer);
-                fileProcessor.process(buffer);
+                fileProcessor.process(buffer, batchArea);
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
 
-        String workingDirectory = "/home/gaganis/IdeaProjects/DirectorySynchronizer/testdata/source";
-        File file = new File("ubuntu-16.04.1-desktop-amd64.iso");
+        long start = System.currentTimeMillis();
+        String workingDirectory = ".";
+        File file = new File("testdata/source/ubuntu-16.04.1-desktop-amd64.iso");
 
         RegionCalculator rc = new RegionCalculator(workingDirectory, file);
 
@@ -75,5 +80,14 @@ public class FileScanner {
         FileScanner scanner = new FileScanner(workingDirectory,
                 new FastFileByteArrayHandler(new ConsolePrintingFastDigestHandler()));
         scanner.scanFile(file, true);
+        long elapsedTime = System.currentTimeMillis() - start;
+        System.out.println("System.currentTimeMillis() - start = " + elapsedTime);
+
+        long bytesReadFast = Statistics.INSTANCE.bytesReadFast.get();
+        System.out.println("bytesReadFast = " + bytesReadFast);
+        String speed = Statistics.humanReadableByteCount(bytesReadFast / elapsedTime * 1000, false);
+
+        System.out.println("speed = " + speed);
+        System.out.println("Files.size(Paths.get(workingDirectory,file.getName())) = " + Files.size(Paths.get(workingDirectory,file.getName())));
     }
 }

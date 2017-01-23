@@ -22,7 +22,7 @@ public class FileProcessorBatchTest {
 
     @Test
     public void file_with_exact_batchsize() throws IOException {
-        long fileSize = Contants.REGION_SIZE * FileProcessor.BATCH_SIZE;
+        long fileSize = Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE;
         FileProcessor fp = getFileProcessorForFileSize(fileSize);
 
 
@@ -32,7 +32,7 @@ public class FileProcessorBatchTest {
 
     @Test
     public void file_larger_than_batchsize() throws IOException {
-        long fileSize = Contants.REGION_SIZE * FileProcessor.BATCH_SIZE + 1;
+        long fileSize = Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE + 1;
         FileProcessor fp = getFileProcessorForFileSize(fileSize);
 
 
@@ -44,7 +44,7 @@ public class FileProcessorBatchTest {
 
     @Test
     public void file_larger_than_2times_batchsize() throws IOException {
-        long fileSize = ((Contants.REGION_SIZE * FileProcessor.BATCH_SIZE) * 2) + 1;
+        long fileSize = ((Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE) * 2) + 1;
         FileProcessor fp = getFileProcessorForFileSize(fileSize);
 
 
@@ -64,7 +64,7 @@ public class FileProcessorBatchTest {
 
         rc.calculateForSize(fileSize);
 
-        return new FileProcessor(
+        return new SlowFileProcessor(
                 null,
                 file);
     }

@@ -18,71 +18,13 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
-import com.giorgosgaganis.filesynchronizer.utils.Statistics;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
-
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 /**
- * Created by gaganis on 20/01/17.
+ * Created by gaganis on 23/01/17.
  */
-public class FileProcessor {
-    private static final Logger logger = Logger.getLogger(FileProcessor.class.getName());
+public interface FileProcessor {
+    void process(byte[] buffer, BatchArea batchArea);
 
-    public static final int BATCH_SIZE = 32;
+    boolean hasNextBatchArea();
 
-    private static Statistics statistics = Statistics.INSTANCE;
-    private final File file;
-    private final ConcurrentHashMap<Long, Region> regions;
-
-    private final LinkedList<Long> regionsToProcess;
-
-    private final LinkedList<Long> currentBatchRegions = new LinkedList<>();
-
-    private final FileByteArrayHandler fileByteArrayHandler;
-
-    public FileProcessor(FileByteArrayHandler fileByteArrayHandler, File file) {
-        this.file = file;
-        regions = file.getRegions();
-        this.fileByteArrayHandler = fileByteArrayHandler;
-        regionsToProcess = regions.keySet()
-                .stream()
-                .sorted()
-                .collect(Collectors.toCollection(LinkedList::new));
-    }
-
-    public void process(byte[] buffer) {
-
-        for (Long currentBatchRegionOffset : currentBatchRegions) {
-
-            Region currentRegion = regions.get(currentBatchRegionOffset);
-
-            fileByteArrayHandler.handleBytes(buffer, file, currentRegion);
-        }
-    }
-
-    public boolean hasNextBatchArea() {
-        return !regionsToProcess.isEmpty();
-    }
-
-    public BatchArea nextBatchArea() {
-        currentBatchRegions.clear();
-
-        Long firstRegionOffset = regionsToProcess.remove();
-        long size = regions.get(firstRegionOffset).getSize();
-        currentBatchRegions.add(firstRegionOffset);
-
-        for (int i = 1; i < BATCH_SIZE && !regionsToProcess.isEmpty(); i++) {
-            Long regionOffset = regionsToProcess.remove();
-            size += regions.get(regionOffset).getSize();
-
-            currentBatchRegions.add(regionOffset);
-        }
-        return new BatchArea(firstRegionOffset, size);
-    }
+    BatchArea nextBatchArea();
 }

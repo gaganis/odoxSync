@@ -18,15 +18,19 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import java.util.LinkedList;
+
 /**
  * Created by gaganis on 21/01/17.
  */
 public class BatchArea {
-    long size;
-    long offset;
+    final long size;
+    final long offset;
+    final LinkedList<Long> currentBatchRegions;
 
-    public BatchArea(long size, long offset) {
-        this.size = size;
+    public BatchArea(long offset, long size, LinkedList<Long> currentBatchRegions) {
         this.offset = offset;
+        this.size = size;
+        this.currentBatchRegions = currentBatchRegions;
     }
 }

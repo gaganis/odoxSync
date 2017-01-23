@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  * Created by gaganis on 23/01/17.
  */
 public class SlowFileByteArrayHandler implements FileByteArrayHandler {
-    private static final Logger logger = Logger.getLogger(FileProcessor.class.getName());
+    private static final Logger logger = Logger.getLogger(SlowFileProcessor.class.getName());
 
     private static Statistics statistics = Statistics.INSTANCE;
 

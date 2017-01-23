@@ -18,6 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +29,9 @@ import static com.giorgosgaganis.filesynchronizer.Contants.BYTE_SKIP_LENGHT;
  * Created by gaganis on 23/01/17.
  */
 public class FastFileByteArrayHandler implements FileByteArrayHandler {
-    private static final Logger logger = Logger.getLogger(FileProcessor.class.getName());
+    private static final Logger logger = Logger.getLogger(SlowFileProcessor.class.getName());
+
+    private static Statistics statistics = Statistics.INSTANCE;
 
     private final FastDigestHandler fastDigestHandler;
 
@@ -40,6 +44,7 @@ public class FastFileByteArrayHandler implements FileByteArrayHandler {
 
         Integer fastDigest = calculateFastDigest(currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
         fastDigestHandler.handleFastDigest(buffer, file, currentRegion, fastDigest);
+        statistics.bytesReadFast.addAndGet(currentRegion.getSize());
     }
 
 
