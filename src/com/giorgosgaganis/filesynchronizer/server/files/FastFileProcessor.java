@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class FastFileProcessor implements FileProcessor {
     private static final Logger logger = Logger.getLogger(FastFileProcessor.class.getName());
 
-    public static final int SAMPLE_LENGTH = 0x1000;
+    public static final int SAMPLE_SIZE = 0x1000;
 
     private final File file;
     private final ConcurrentHashMap<Long, Region> regions;
@@ -75,11 +75,10 @@ public class FastFileProcessor implements FileProcessor {
     }
 
     protected BatchArea getSample(LinkedList<Long> currentBatchRegions, Long regionOffset, Region region) {
-        long sampleSize = region.getSize() <= SAMPLE_LENGTH ? region.getSize() : SAMPLE_LENGTH;
-        currentBatchRegions.add(regionOffset);
-
+        long sampleSize = region.getSize() <= SAMPLE_SIZE ? region.getSize() : SAMPLE_SIZE;
         long offset = regionOffset + region.getSize() - sampleSize;
 
+        currentBatchRegions.add(regionOffset);
         return new BatchArea(offset, sampleSize, currentBatchRegions);
     }
 }

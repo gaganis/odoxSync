@@ -111,14 +111,11 @@ public class DirectoryScanner {
 
                     logger.info("Finished [" + scanCount + "] scan in ["
                             + duration / 1000 + "] at [" + Statistics.humanReadableByteCount(speed, false) + "]");
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
                     e.printStackTrace();
-                }
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
                 }
             } while (true);
         }).start();

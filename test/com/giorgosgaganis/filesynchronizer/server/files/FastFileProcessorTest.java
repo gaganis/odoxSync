@@ -21,8 +21,8 @@ public class FastFileProcessorTest {
         long key = 0L;
         BatchArea sample = getBatchArea(key);
 
-        assertThat(sample.size).isEqualTo(FastFileProcessor.SAMPLE_LENGTH);
-        assertThat(sample.offset).isEqualTo(Contants.REGION_SIZE - FastFileProcessor.SAMPLE_LENGTH);
+        assertThat(sample.size).isEqualTo(FastFileProcessor.SAMPLE_SIZE);
+        assertThat(sample.offset).isEqualTo(Contants.REGION_SIZE - FastFileProcessor.SAMPLE_SIZE);
     }
 
     @Test
@@ -30,8 +30,8 @@ public class FastFileProcessorTest {
         long key = Contants.REGION_SIZE;
         BatchArea sample = getBatchArea(key);
 
-        assertThat(sample.size).isEqualTo(FastFileProcessor.SAMPLE_LENGTH);
-        assertThat(sample.offset).isEqualTo((Contants.REGION_SIZE * 2) - FastFileProcessor.SAMPLE_LENGTH);
+        assertThat(sample.size).isEqualTo(FastFileProcessor.SAMPLE_SIZE);
+        assertThat(sample.offset).isEqualTo((Contants.REGION_SIZE * 2) - FastFileProcessor.SAMPLE_SIZE);
     }
 
     private BatchArea getBatchArea(long key) throws IOException {

@@ -49,26 +49,30 @@ public class SyncClient {
     private final String workingDirectory;
     private int clientId = -1;
 
-    private ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
-    private RestClient restClient = new RestClient();
-    private ClientRegionMessageHandler clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
-    private RegionDataHandler regionDataHandler = new RegionDataHandler(restClient, clientRegionMessageHandler, files);
+    private final RestClient restClient;
+    private final ClientRegionMessageHandler clientRegionMessageHandler;
+    private final RegionDataHandler regionDataHandler;
 
     private ExecutorService fileExecutorService = Executors.newFixedThreadPool(2);
 
 
-    public SyncClient(String workingDirectory) {
+    public SyncClient(String hostPort, String workingDirectory) {
         this.workingDirectory = workingDirectory;
+        restClient = new RestClient(hostPort);
+        clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
+        regionDataHandler = new RegionDataHandler(restClient, clientRegionMessageHandler, files);
     }
 
 
     public static void main(String[] args) throws IOException {
 
-        String workingDirectory = args.length > 0 ? args[0] : ".";
+        String hostPort = args.length > 0 ? args[0] : "192.168.1.7:8081";
+        String workingDirectory = args.length > 1 ? args[0] : ".";
         LoggingUtils.configureLogging();
 
-        SyncClient syncClient = new SyncClient(workingDirectory);
+        SyncClient syncClient = new SyncClient(hostPort, workingDirectory);
         syncClient.start();
     }
 
@@ -129,12 +133,10 @@ public class SyncClient {
                 RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferWrite(region, hasher, mappedByteBuffer);
                 processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             } else if (!wasInTheMap) {
-                FastDigestHandler fastDigestHandler = new FileRegionHashMapDigestHandler();
+                FastDigestHandler fastDigestHandler = new ClientRegionMessageFastDigestHandler(clientId, clientRegionMessageHandler);
                 FileByteArrayHandler fileByteArrayHandler = new FastFileByteArrayHandler(fastDigestHandler);
                 FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
                 fileScanner.scanFile(file);
-                RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferRead(region, hasher, mappedByteBuffer);
-                processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -168,24 +170,12 @@ public class SyncClient {
     }
 
     private int processByteBufferWrite(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
-        int sum = 0;
         for (int i = 0; i < region.getSize(); i++) {
             byte b = 0;
-            mappedByteBuffer.put(i, b);
 
+            mappedByteBuffer.put(i, b);
             hasher.putByte(b);
         }
-        return sum;
-    }
-
-    private int processByteBufferRead(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
-        byte[] buffer = new byte[mappedByteBuffer.remaining()];
-        mappedByteBuffer.get(buffer);
-        int sum = 0;
-        for (int i = 0; i < buffer.length; i++) {
-            byte b = buffer[i];
-            sum += b;
-        }
-        return sum;
+        return 0;
     }
 }

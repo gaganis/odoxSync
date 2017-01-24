@@ -18,7 +18,6 @@
  */
 package com.giorgosgaganis.filesynchronizer.client;
 
-import com.giorgosgaganis.filesynchronizer.Contants;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
@@ -32,6 +31,8 @@ import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+
+import static com.giorgosgaganis.filesynchronizer.server.files.FastFileProcessor.SAMPLE_SIZE;
 
 /**
  * Created by gaganis on 15/01/17.
@@ -83,8 +84,11 @@ public class RegionDataHandler extends Thread {
                             statistics.bytesTransferred.addAndGet(regionData.size);
                             hasher.putBytes(regionData.bytes);
 
+                            long sampleSize = regionData.size <= SAMPLE_SIZE ? regionData.size : SAMPLE_SIZE;
+                            int offset = (int) (regionData.size - sampleSize);
+
                             int sum = 0;
-                            for (int i = 0; i < regionData.bytes.length; i++) {
+                            for (int i = offset; i < regionData.bytes.length; i++) {
                                 byte b = regionData.bytes[i];
                                 sum += b;
                             }
