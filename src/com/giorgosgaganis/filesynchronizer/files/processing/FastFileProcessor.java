@@ -16,10 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files;
+package com.giorgosgaganis.filesynchronizer.files.processing;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.giorgosgaganis.filesynchronizer.files.BatchArea;
+import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,12 +41,12 @@ public class FastFileProcessor implements FileProcessor {
 
     private final LinkedList<Long> regionsToProcess;
 
-    private final FileByteArrayHandler fileByteArrayHandler;
+    private final FastFileByteArrayHandler fileByteArrayHandler;
 
-    public FastFileProcessor(FileByteArrayHandler fileByteArrayHandler, File file) {
+    public FastFileProcessor(FastDigestHandler fastDigestHandler, File file) {
         this.file = file;
         regions = file.getRegions();
-        this.fileByteArrayHandler = fileByteArrayHandler;
+        this.fileByteArrayHandler = new FastFileByteArrayHandler(fastDigestHandler);
         regionsToProcess = regions.keySet()
                 .stream()
                 .sorted()
@@ -74,7 +76,7 @@ public class FastFileProcessor implements FileProcessor {
         return getSample(currentBatchRegions, regionOffset, region);
     }
 
-    protected BatchArea getSample(LinkedList<Long> currentBatchRegions, Long regionOffset, Region region) {
+    public BatchArea getSample(LinkedList<Long> currentBatchRegions, Long regionOffset, Region region) {
         long sampleSize = region.getSize() <= SAMPLE_SIZE ? region.getSize() : SAMPLE_SIZE;
         long offset = regionOffset + region.getSize() - sampleSize;
 

@@ -16,21 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files;
+package com.giorgosgaganis.filesynchronizer.files.processing;
 
-import java.util.LinkedList;
+import com.giorgosgaganis.filesynchronizer.File;
 
 /**
- * Created by gaganis on 21/01/17.
+ * Created by gaganis on 24/01/17.
  */
-public class BatchArea {
-    public final long size;
-    public final long offset;
-    public final LinkedList<Long> currentBatchRegions;
-
-    public BatchArea(long offset, long size, LinkedList<Long> currentBatchRegions) {
-        this.offset = offset;
-        this.size = size;
-        this.currentBatchRegions = currentBatchRegions;
+public class SlowFileProcessorFactory implements FileProcessorFactory {
+    @Override
+    public FileProcessor create(File file) {
+        return new SlowFileProcessor(file);
     }
 }

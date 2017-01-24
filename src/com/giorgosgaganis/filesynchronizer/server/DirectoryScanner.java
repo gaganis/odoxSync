@@ -20,7 +20,9 @@ package com.giorgosgaganis.filesynchronizer.server;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
-import com.giorgosgaganis.filesynchronizer.files.*;
+import com.giorgosgaganis.filesynchronizer.files.FileScanner;
+import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.files.processing.SlowFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.server.files.FileRegionHashMapDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
@@ -42,7 +44,6 @@ import java.util.logging.Logger;
 public class DirectoryScanner {
     private static final Logger logger = Logger.getLogger(DirectoryScanner.class.getName());
 
-    private static Statistics statistics = Statistics.INSTANCE;
     private final ConcurrentHashMap<Integer, File> files;
     private boolean isFast;
 
@@ -148,9 +149,8 @@ public class DirectoryScanner {
             if (doScan) {
                 long startTime = System.currentTimeMillis();
                 logger.fine("Starting scan for [" + file.getName() + "]");
-                FastDigestHandler fastDigestHandler = new FileRegionHashMapDigestHandler();
-                FileByteArrayHandler fileByteArrayHandler = new FastFileByteArrayHandler(fastDigestHandler);
-                FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
+                FileScanner fileScanner = new FileScanner(workingDirectory,
+                        new FastFileProcessorFactory(new FileRegionHashMapDigestHandler()));
                 fileScanner.scanFile(file);
                 long duration = System.currentTimeMillis() - startTime;
                 logger.fine("Finished scan for [" + file.getName() + "] in [" + duration + "ms]");
@@ -164,8 +164,8 @@ public class DirectoryScanner {
     private void processFileSlow(File file) {
         try {
             logger.fine("Starting scan for [" + file.getName() + "]");
-            FileByteArrayHandler fileByteArrayHandler = new SlowFileByteArrayHandler();
-            FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
+
+            FileScanner fileScanner = new FileScanner(workingDirectory, new SlowFileProcessorFactory());
             fileScanner.scanFile(file);
             logger.fine("Finished scan for [" + file.getName() + "]");
 

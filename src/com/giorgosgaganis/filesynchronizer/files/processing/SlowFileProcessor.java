@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files;
+package com.giorgosgaganis.filesynchronizer.files.processing;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.giorgosgaganis.filesynchronizer.files.BatchArea;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.util.LinkedList;
@@ -43,12 +44,11 @@ public class SlowFileProcessor implements FileProcessor {
 
     private final LinkedList<Long> currentBatchRegions = new LinkedList<>();
 
-    private final FileByteArrayHandler fileByteArrayHandler;
+    private final SlowFileByteArrayHandler fileByteArrayHandler = new SlowFileByteArrayHandler();
 
-    public SlowFileProcessor(FileByteArrayHandler fileByteArrayHandler, File file) {
+    public SlowFileProcessor(File file) {
         this.file = file;
         regions = file.getRegions();
-        this.fileByteArrayHandler = fileByteArrayHandler;
         regionsToProcess = regions.keySet()
                 .stream()
                 .sorted()

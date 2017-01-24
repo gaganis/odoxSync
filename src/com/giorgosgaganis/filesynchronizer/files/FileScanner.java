@@ -20,6 +20,9 @@ package com.giorgosgaganis.filesynchronizer.files;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
+import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessor;
+import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
@@ -38,16 +41,17 @@ public class FileScanner {
     private static final Logger logger = Logger.getLogger(FileScanner.class.getName());
 
     private final String workingDirectory;
-    private final FileByteArrayHandler fileByteArrayHandler;
+    private final FileProcessorFactory fileProcessorFactory;
 
 
-    public FileScanner(String workingDirectory, FileByteArrayHandler fileByteArrayHandler) {
+    public FileScanner(String workingDirectory, FileProcessorFactory fileProcessorFactory) {
         this.workingDirectory = workingDirectory;
-        this.fileByteArrayHandler = fileByteArrayHandler;
+        this.fileProcessorFactory = fileProcessorFactory;
     }
 
     public void scanFile(File file) throws IOException {
-        FileProcessor fileProcessor = new FastFileProcessor(fileByteArrayHandler, file);
+
+        FileProcessor fileProcessor = fileProcessorFactory.create(file);
 
         Path filePath = Paths.get(workingDirectory, file.getName());
         try (
@@ -79,7 +83,7 @@ public class FileScanner {
 
         rc.calculate();
         FileScanner scanner = new FileScanner(workingDirectory,
-                new FastFileByteArrayHandler(new ConsolePrintingFastDigestHandler()));
+                new FastFileProcessorFactory(new ConsolePrintingFastDigestHandler()));
         scanner.scanFile(file);
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("System.currentTimeMillis() - start = " + elapsedTime);

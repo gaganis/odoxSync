@@ -23,9 +23,8 @@ import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
 import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
-import com.giorgosgaganis.filesynchronizer.files.FastFileByteArrayHandler;
-import com.giorgosgaganis.filesynchronizer.files.FileByteArrayHandler;
 import com.giorgosgaganis.filesynchronizer.files.FileScanner;
+import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -137,8 +136,9 @@ public class SyncClient {
                 processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             } else if (!wasInTheMap) {
                 FastDigestHandler fastDigestHandler = new ClientRegionMessageFastDigestHandler(clientId, clientRegionMessageHandler);
-                FileByteArrayHandler fileByteArrayHandler = new FastFileByteArrayHandler(fastDigestHandler);
-                FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
+
+                FileScanner fileScanner = new FileScanner(workingDirectory,
+                        new FastFileProcessorFactory(fastDigestHandler));
                 fileScanner.scanFile(file);
             }
         } catch (IOException e) {

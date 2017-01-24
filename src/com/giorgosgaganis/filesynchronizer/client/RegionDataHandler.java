@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
-import static com.giorgosgaganis.filesynchronizer.files.FastFileProcessor.SAMPLE_SIZE;
+import static com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessor.SAMPLE_SIZE;
 
 /**
  * Created by gaganis on 15/01/17.

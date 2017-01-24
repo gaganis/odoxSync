@@ -1,7 +1,7 @@
 package com.giorgosgaganis.filesynchronizer.server.files;
 
-import com.giorgosgaganis.filesynchronizer.files.FileProcessor;
-import com.giorgosgaganis.filesynchronizer.files.SlowFileProcessor;
+import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessor;
+import com.giorgosgaganis.filesynchronizer.files.processing.SlowFileProcessor;
 import com.giorgosgaganis.filesynchronizer.utils.Contants;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
@@ -70,7 +70,6 @@ public class FileProcessorBatchTest {
         rc.calculateForSize(fileSize);
 
         return new SlowFileProcessor(
-                null,
                 file);
     }
 }

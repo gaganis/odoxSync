@@ -16,15 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files;
+package com.giorgosgaganis.filesynchronizer.files.processing;
+
+import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 
 /**
- * Created by gaganis on 23/01/17.
+ * Created by gaganis on 24/01/17.
  */
-public interface FileProcessor {
-    void process(byte[] buffer, BatchArea batchArea);
+public class FastFileProcessorFactory implements FileProcessorFactory {
+    private FastDigestHandler fastFileByteArrayHandler;
 
-    boolean hasNextBatchArea();
+    public FastFileProcessorFactory(FastDigestHandler fastFileByteArrayHandler) {
+        this.fastFileByteArrayHandler = fastFileByteArrayHandler;
+    }
 
-    BatchArea nextBatchArea();
+    @Override
+    public FileProcessor create(File file) {
+        return new FastFileProcessor(fastFileByteArrayHandler, file);
+    }
 }

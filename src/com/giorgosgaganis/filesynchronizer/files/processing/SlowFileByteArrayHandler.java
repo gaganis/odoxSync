@@ -16,11 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files;
+package com.giorgosgaganis.filesynchronizer.files.processing;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,40 +30,32 @@ import java.util.logging.Logger;
 /**
  * Created by gaganis on 23/01/17.
  */
-public class FastFileByteArrayHandler implements FileByteArrayHandler {
+public class SlowFileByteArrayHandler {
     private static final Logger logger = Logger.getLogger(SlowFileProcessor.class.getName());
 
     private static Statistics statistics = Statistics.INSTANCE;
 
-    private final FastDigestHandler fastDigestHandler;
-
-    public FastFileByteArrayHandler(FastDigestHandler fastDigestHandler) {
-        this.fastDigestHandler = fastDigestHandler;
-    }
-
-    @Override
     public void handleBytes(byte[] buffer, File file, Region currentRegion) {
 
-        Integer fastDigest = calculateFastDigest(currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
-        fastDigestHandler.handleFastDigest(buffer, file, currentRegion, fastDigest);
-        statistics.bytesReadFast.addAndGet(currentRegion.getSize());
+        byte[] slowDigest = calculateSlowDigest(currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
+        Region region = file.getRegions().get(currentRegion.getOffset());
+        region.setSlowDigest(slowDigest);
+        statistics.bytesReadSlow.addAndGet(buffer.length);
     }
 
 
-    private static Integer calculateFastDigest(long offset, long size, String fileName, byte[] buffer) {
-        Integer quickDigest = null;
-        int sum = 0;
-        for (int i = 0; i < buffer.length; i++) {
-            byte b = buffer[i];
-            sum += b;
-        }
-        quickDigest = sum;
+    private static byte[] calculateSlowDigest(long offset, long size, String fileName, byte[] buffer) {
+        byte[] slowDigest;
+        Hasher hasher = Hashing.sha256().newHasher();
+        hasher.putBytes(buffer);
+        slowDigest = hasher.hash().asBytes();
 
         if (logger.isLoggable(Level.FINER)) {
-            logger.finer("Calculated fast digest[" + quickDigest
-                    + "] for file [" + fileName + "]" + offset
+            logger.finer("Calculated slow digest[" + slowDigest + "] for file ["
+                    + fileName + "]" + offset
                     + ":" + (offset + size));
         }
-        return quickDigest;
+        statistics.bytesReadSlow.addAndGet(buffer.length);
+        return slowDigest;
     }
 }
