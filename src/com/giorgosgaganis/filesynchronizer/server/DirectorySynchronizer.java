@@ -48,7 +48,7 @@ public class DirectorySynchronizer {
             clients);
 
     private final DirectoryScanner fastDirectoryScanner = new DirectoryScanner(files, true);
-    private final DirectoryScanner slowDirectoryScanner = new DirectoryScanner(files, false);
+//    private final DirectoryScanner slowDirectoryScanner = new DirectoryScanner(files, false);
 
     public String workingDirectory;
 
@@ -61,8 +61,8 @@ public class DirectorySynchronizer {
         fastDirectoryScanner.setWorkingDirectory(workingDirectory);
         fastDirectoryScanner.scanDirectoryAndFiles();
 
-        slowDirectoryScanner.setWorkingDirectory(workingDirectory);
-        slowDirectoryScanner.scanDirectoryAndFiles();
+//        slowDirectoryScanner.setWorkingDirectory(workingDirectory);
+//        slowDirectoryScanner.scanDirectoryAndFiles();
 
         transferCandidateFinder.lookForRegionsToTransfer();
     }

@@ -29,7 +29,7 @@ import java.util.logging.LogManager;
  */
 public class LoggingUtils {
     public static void configureLogging() throws IOException {
-        Path logConfig = Paths.get("/home/gaganis/IdeaProjects/DirectorySynchronizer","logging.properties");
+        Path logConfig = Paths.get("logging.properties");
         if (Files.exists(logConfig)) {
             LogManager.getLogManager().readConfiguration(Files.newInputStream(logConfig));
         }
