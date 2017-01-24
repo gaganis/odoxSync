@@ -45,7 +45,7 @@ public class FileScanner {
         this.fileByteArrayHandler = fileByteArrayHandler;
     }
 
-    public void scanFile(File file, boolean isFast) throws IOException {
+    public void scanFile(File file) throws IOException {
         FileProcessor fileProcessor = new FastFileProcessor(fileByteArrayHandler, file);
 
         Path filePath = Paths.get(workingDirectory, file.getName());
@@ -79,7 +79,7 @@ public class FileScanner {
         rc.calculate();
         FileScanner scanner = new FileScanner(workingDirectory,
                 new FastFileByteArrayHandler(new ConsolePrintingFastDigestHandler()));
-        scanner.scanFile(file, true);
+        scanner.scanFile(file);
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("System.currentTimeMillis() - start = " + elapsedTime);
 

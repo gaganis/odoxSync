@@ -18,11 +18,11 @@
  */
 package com.giorgosgaganis.filesynchronizer.client;
 
-import com.giorgosgaganis.filesynchronizer.Contants;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
+import com.giorgosgaganis.filesynchronizer.server.files.*;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -129,6 +129,10 @@ public class SyncClient {
                 RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferWrite(region, hasher, mappedByteBuffer);
                 processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             } else if (!wasInTheMap) {
+                FastDigestHandler fastDigestHandler = new FileRegionHashMapDigestHandler();
+                FileByteArrayHandler fileByteArrayHandler = new FastFileByteArrayHandler(fastDigestHandler);
+                FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
+                fileScanner.scanFile(file);
                 RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferRead(region, hasher, mappedByteBuffer);
                 processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             }

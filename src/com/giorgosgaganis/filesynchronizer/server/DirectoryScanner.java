@@ -152,7 +152,7 @@ public class DirectoryScanner {
                 FastDigestHandler fastDigestHandler = new FileRegionHashMapDigestHandler();
                 FileByteArrayHandler fileByteArrayHandler = new FastFileByteArrayHandler(fastDigestHandler);
                 FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
-                fileScanner.scanFile(file, true);
+                fileScanner.scanFile(file);
                 long duration = System.currentTimeMillis() - startTime;
                 logger.fine("Finished scan for [" + file.getName() + "] in [" + duration + "ms]");
             }
@@ -167,7 +167,7 @@ public class DirectoryScanner {
             logger.fine("Starting scan for [" + file.getName() + "]");
             FileByteArrayHandler fileByteArrayHandler = new SlowFileByteArrayHandler();
             FileScanner fileScanner = new FileScanner(workingDirectory, fileByteArrayHandler);
-            fileScanner.scanFile(file, false);
+            fileScanner.scanFile(file);
             logger.fine("Finished scan for [" + file.getName() + "]");
 
         } catch (IOException e) {
