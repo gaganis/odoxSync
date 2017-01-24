@@ -95,7 +95,7 @@ public class TransferCandidateFinder {
             if (allCount > 0) {
                 int syncedPercentage = (allCount - toTransferCount) * 100 / allCount;
                 File clientFile = client.getFiles().get(fileId);
-                if(clientFile != null) {
+                if (clientFile != null) {
                     clientFile.setSyncedPercentage(syncedPercentage);
                 }
             }
@@ -109,7 +109,7 @@ public class TransferCandidateFinder {
         Region servRegion = serverFile.getRegions().get(offset);
         if (servRegion != null) {
             File clientFile = client.files.get(fileId);
-            if(clientFile == null){
+            if (clientFile == null) {
                 return false;
             }
             Region clientRegion = clientFile.getRegions().get(offset);
@@ -118,7 +118,7 @@ public class TransferCandidateFinder {
                 return doTransfer;
             }
 
-            if(servRegion.getQuickDigest() == null
+            if (servRegion.getQuickDigest() == null
                     || servRegion.getQuickDigest() == 0) {
                 return false;
             }

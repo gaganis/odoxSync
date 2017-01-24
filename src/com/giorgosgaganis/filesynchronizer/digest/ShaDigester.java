@@ -19,9 +19,6 @@
 package com.giorgosgaganis.filesynchronizer.digest;
 
 import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
-
-import java.nio.MappedByteBuffer;
 
 /**
  * Created by gaganis on 13/01/17.

@@ -18,8 +18,10 @@
  */
 package com.giorgosgaganis.filesynchronizer.server;
 
-import com.giorgosgaganis.filesynchronizer.*;
-import com.giorgosgaganis.filesynchronizer.server.files.*;
+import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.RegionCalculator;
+import com.giorgosgaganis.filesynchronizer.files.*;
+import com.giorgosgaganis.filesynchronizer.server.files.FileRegionHashMapDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;

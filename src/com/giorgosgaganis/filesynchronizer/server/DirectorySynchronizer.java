@@ -18,11 +18,13 @@
  */
 package com.giorgosgaganis.filesynchronizer.server;
 
-import com.giorgosgaganis.filesynchronizer.*;
+import com.giorgosgaganis.filesynchronizer.Client;
+import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidateFinder;
-import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -130,7 +132,7 @@ public class DirectorySynchronizer {
 
             clientRegions.put(region.getOffset(), region);
             logger.fine("Added client region " + region);
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }

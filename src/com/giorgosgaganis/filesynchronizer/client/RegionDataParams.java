@@ -21,7 +21,6 @@ package com.giorgosgaganis.filesynchronizer.client;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
 
 /**
  * Created by gaganis on 16/01/17.

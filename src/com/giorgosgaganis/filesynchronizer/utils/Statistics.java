@@ -28,7 +28,7 @@ public class Statistics {
     public AtomicLong bytesReadFast = new AtomicLong(0);
     public AtomicLong bytesReadSlow = new AtomicLong(0);
 
-    private Statistics(){
+    private Statistics() {
     }
 
     public static void printStatistic(String statName, AtomicLong bytesTransferred) {

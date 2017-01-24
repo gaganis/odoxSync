@@ -18,8 +18,6 @@
  */
 package com.giorgosgaganis.filesynchronizer.digest;
 
-import java.nio.MappedByteBuffer;
-
 /**
  * Created by gaganis on 13/01/17.
  */

@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.giorgosgaganis.filesynchronizer.Contants.REGION_SIZE;
+import static com.giorgosgaganis.filesynchronizer.utils.Contants.REGION_SIZE;
 
 /**
  * Created by gaganis on 14/01/17.

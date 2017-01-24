@@ -1,10 +1,10 @@
 package com.giorgosgaganis.filesynchronizer.server.files;
 
-import com.giorgosgaganis.filesynchronizer.Contants;
+import com.giorgosgaganis.filesynchronizer.files.FileProcessor;
+import com.giorgosgaganis.filesynchronizer.files.SlowFileProcessor;
+import com.giorgosgaganis.filesynchronizer.utils.Contants;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
-import com.giorgosgaganis.filesynchronizer.server.files.FileProcessor;
-import com.giorgosgaganis.filesynchronizer.server.files.SlowFileProcessor;
 import org.junit.Test;
 
 import java.io.IOException;

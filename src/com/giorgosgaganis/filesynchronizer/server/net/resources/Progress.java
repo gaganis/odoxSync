@@ -19,8 +19,8 @@
 package com.giorgosgaganis.filesynchronizer.server.net.resources;
 
 import com.giorgosgaganis.filesynchronizer.Client;
-import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -50,7 +50,7 @@ public class Progress {
         Map<Integer, Map<String, Integer>> result = new HashMap<>();
 
         for (Client client : clients.values()) {
-            HashMap<String,Integer> resultFileMap = new HashMap<>();
+            HashMap<String, Integer> resultFileMap = new HashMap<>();
             result.put(client.getId(), resultFileMap);
 
             ConcurrentHashMap<Integer, File> files = client.getFiles();

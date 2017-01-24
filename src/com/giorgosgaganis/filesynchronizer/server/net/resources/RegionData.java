@@ -19,8 +19,8 @@
 package com.giorgosgaganis.filesynchronizer.server.net.resources;
 
 import com.giorgosgaganis.filesynchronizer.Client;
-import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidate;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import org.glassfish.grizzly.http.server.Response;

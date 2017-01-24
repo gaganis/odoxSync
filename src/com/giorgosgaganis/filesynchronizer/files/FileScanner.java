@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.server.files;
+package com.giorgosgaganis.filesynchronizer.files;
 
-import com.giorgosgaganis.filesynchronizer.*;
+import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
@@ -88,6 +89,6 @@ public class FileScanner {
         String speed = Statistics.humanReadableByteCount(bytesReadFast / elapsedTime * 1000, false);
 
         System.out.println("speed = " + speed);
-        System.out.println("Files.size(Paths.get(workingDirectory,file.getName())) = " + Files.size(Paths.get(workingDirectory,file.getName())));
+        System.out.println("Files.size(Paths.get(workingDirectory,file.getName())) = " + Files.size(Paths.get(workingDirectory, file.getName())));
     }
 }

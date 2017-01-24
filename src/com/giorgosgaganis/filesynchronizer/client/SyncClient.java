@@ -22,7 +22,10 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
-import com.giorgosgaganis.filesynchronizer.server.files.*;
+import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.FastFileByteArrayHandler;
+import com.giorgosgaganis.filesynchronizer.files.FileByteArrayHandler;
+import com.giorgosgaganis.filesynchronizer.files.FileScanner;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -78,7 +81,7 @@ public class SyncClient {
 
     private void start() {
         Path root = Paths.get(workingDirectory).toAbsolutePath().normalize();
-        logger.info("Starting sync client at [" + root +"]");
+        logger.info("Starting sync client at [" + root + "]");
         clientId = restClient.getClientId();
 
         restClient.setClientId(clientId);
@@ -123,7 +126,7 @@ public class SyncClient {
 
         file.setAbsolutePath(filePath.toAbsolutePath());
 
-        boolean wasInTheMap  = files.putIfAbsent(file.getId(), file) != null;
+        boolean wasInTheMap = files.putIfAbsent(file.getId(), file) != null;
 
         try {
             if (Files.notExists(filePath)) {

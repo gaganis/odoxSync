@@ -20,14 +20,14 @@ package com.giorgosgaganis.filesynchronizer.client;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
-import com.giorgosgaganis.filesynchronizer.server.files.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 
 /**
  * Created by gaganis on 24/01/17.
  */
 public class ClientRegionMessageFastDigestHandler implements FastDigestHandler {
 
-    private final int clientId ;
+    private final int clientId;
     private final ClientRegionMessageHandler clientRegionMessageHandler;
 
     public ClientRegionMessageFastDigestHandler(int clientId, ClientRegionMessageHandler clientRegionMessageHandler) {

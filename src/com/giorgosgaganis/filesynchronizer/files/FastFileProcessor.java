@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.server.files;
+package com.giorgosgaganis.filesynchronizer.files;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;

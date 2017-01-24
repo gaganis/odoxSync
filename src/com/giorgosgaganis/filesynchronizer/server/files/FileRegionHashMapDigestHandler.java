@@ -20,7 +20,7 @@ package com.giorgosgaganis.filesynchronizer.server.files;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
-import com.giorgosgaganis.filesynchronizer.server.files.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 
 public class FileRegionHashMapDigestHandler implements FastDigestHandler {
 

@@ -18,8 +18,8 @@
  */
 package com.giorgosgaganis.filesynchronizer.server.net.resources;
 
-import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.client.ClientRegionMessage;
+import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

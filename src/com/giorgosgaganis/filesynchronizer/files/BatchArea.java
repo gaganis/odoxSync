@@ -16,11 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer;
+package com.giorgosgaganis.filesynchronizer.files;
+
+import java.util.LinkedList;
 
 /**
- * Created by gaganis on 14/01/17.
+ * Created by gaganis on 21/01/17.
  */
-public class Contants {
-    public static final long REGION_SIZE = 0x100000;
+public class BatchArea {
+    final long size;
+    final long offset;
+    final LinkedList<Long> currentBatchRegions;
+
+    public BatchArea(long offset, long size, LinkedList<Long> currentBatchRegions) {
+        this.offset = offset;
+        this.size = size;
+        this.currentBatchRegions = currentBatchRegions;
+    }
 }

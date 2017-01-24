@@ -16,17 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.server.files;
-
-import com.giorgosgaganis.filesynchronizer.server.files.BatchArea;
+package com.giorgosgaganis.filesynchronizer.utils;
 
 /**
- * Created by gaganis on 23/01/17.
+ * Created by gaganis on 14/01/17.
  */
-public interface FileProcessor {
-    void process(byte[] buffer, BatchArea batchArea);
-
-    boolean hasNextBatchArea();
-
-    BatchArea nextBatchArea();
+public class Contants {
+    public static final long REGION_SIZE = 0x100000;
 }

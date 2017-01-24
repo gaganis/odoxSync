@@ -30,7 +30,6 @@ import static com.giorgosgaganis.filesynchronizer.utils.LoggingUtils.configureLo
 
 /**
  * com.giorgosgaganis.filesynchronizer.server.net.MainServer class.
- *
  */
 public class MainServer {
     // Base URI the Grizzly HTTP server will listen on
@@ -38,6 +37,7 @@ public class MainServer {
 
     /**
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
+     *
      * @return Grizzly HTTP server.
      */
     public static HttpServer startServer(String workingDirectory) throws IOException {
@@ -54,6 +54,7 @@ public class MainServer {
 
     /**
      * com.giorgosgaganis.filesynchronizer.server.net.MainServer method.
+     *
      * @param args
      * @throws IOException
      */
