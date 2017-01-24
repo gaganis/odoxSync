@@ -84,7 +84,7 @@ public class RegionDataHandler extends Thread {
                             hasher.putBytes(regionData.bytes);
 
                             int sum = 0;
-                            for (int i = 0; i < regionData.bytes.length; i += Contants.BYTE_SKIP_LENGHT) {
+                            for (int i = 0; i < regionData.bytes.length; i++) {
                                 byte b = regionData.bytes[i];
                                 sum += b;
                             }

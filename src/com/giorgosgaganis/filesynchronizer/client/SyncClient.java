@@ -165,7 +165,7 @@ public class SyncClient {
 
     private int processByteBufferWrite(Region region, Hasher hasher, MappedByteBuffer mappedByteBuffer) {
         int sum = 0;
-        for (int i = 0; i < region.getSize(); i += Contants.BYTE_SKIP_LENGHT) {
+        for (int i = 0; i < region.getSize(); i++) {
             byte b = 0;
             mappedByteBuffer.put(i, b);
 
@@ -178,7 +178,7 @@ public class SyncClient {
         byte[] buffer = new byte[mappedByteBuffer.remaining()];
         mappedByteBuffer.get(buffer);
         int sum = 0;
-        for (int i = 0; i < buffer.length; i += Contants.BYTE_SKIP_LENGHT) {
+        for (int i = 0; i < buffer.length; i++) {
             byte b = buffer[i];
             sum += b;
         }

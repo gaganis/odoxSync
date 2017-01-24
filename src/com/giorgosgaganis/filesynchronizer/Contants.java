@@ -23,6 +23,4 @@ package com.giorgosgaganis.filesynchronizer;
  */
 public class Contants {
     public static final long REGION_SIZE = 0x100000;
-//    public static final int BYTE_SKIP_LENGHT = 64;
-    public static final int BYTE_SKIP_LENGHT = 1;
 }

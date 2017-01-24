@@ -25,8 +25,6 @@ import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.giorgosgaganis.filesynchronizer.Contants.BYTE_SKIP_LENGHT;
-
 /**
  * Created by gaganis on 23/01/17.
  */
@@ -53,7 +51,7 @@ public class FastFileByteArrayHandler implements FileByteArrayHandler {
     private static Integer calculateFastDigest(long offset, long size, String fileName, byte[] buffer) {
         Integer quickDigest = null;
         int sum = 0;
-        for (int i = 0; i < buffer.length; i += BYTE_SKIP_LENGHT) {
+        for (int i = 0; i < buffer.length; i++) {
             byte b = buffer[i];
             sum += b;
         }
