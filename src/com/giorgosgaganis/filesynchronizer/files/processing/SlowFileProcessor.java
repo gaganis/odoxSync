@@ -62,7 +62,7 @@ public class SlowFileProcessor implements FileProcessor {
 
             Region currentRegion = regions.get(currentBatchRegionOffset);
 
-            fileByteArrayHandler.handleBytes(buffer, file, currentRegion);
+            fileByteArrayHandler.handleBytes(buffer, file, batchArea.offset, currentRegion);
         }
     }
 

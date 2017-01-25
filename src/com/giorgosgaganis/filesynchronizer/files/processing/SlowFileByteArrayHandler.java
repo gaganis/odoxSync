@@ -35,19 +35,21 @@ public class SlowFileByteArrayHandler {
 
     private static Statistics statistics = Statistics.INSTANCE;
 
-    public void handleBytes(byte[] buffer, File file, Region currentRegion) {
+    public void handleBytes(byte[] buffer, File file, long batchAreaOffset, Region currentRegion) {
 
-        byte[] slowDigest = calculateSlowDigest(currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
+        byte[] slowDigest = calculateSlowDigest(batchAreaOffset, currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
         Region region = file.getRegions().get(currentRegion.getOffset());
         region.setSlowDigest(slowDigest);
         statistics.bytesReadSlow.addAndGet(buffer.length);
     }
 
 
-    private static byte[] calculateSlowDigest(long offset, long size, String fileName, byte[] buffer) {
+    private static byte[] calculateSlowDigest(long batchAreaOffset, long offset, long size, String fileName, byte[] buffer) {
         byte[] slowDigest;
         Hasher hasher = Hashing.sha256().newHasher();
-        hasher.putBytes(buffer);
+        hasher.putBytes(buffer,
+                Math.toIntExact(offset - batchAreaOffset),
+                Math.toIntExact(size));
         slowDigest = hasher.hash().asBytes();
 
         if (logger.isLoggable(Level.FINER)) {
