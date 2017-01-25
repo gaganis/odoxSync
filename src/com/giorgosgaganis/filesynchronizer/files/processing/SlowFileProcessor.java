@@ -23,6 +23,9 @@ import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.files.BatchArea;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileTime;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -45,6 +48,7 @@ public class SlowFileProcessor implements FileProcessor {
     private final LinkedList<Long> currentBatchRegions = new LinkedList<>();
 
     private final SlowFileByteArrayHandler fileByteArrayHandler = new SlowFileByteArrayHandler();
+    private FileTime batchLastModifiedTime;
 
     public SlowFileProcessor(File file) {
         this.file = file;
@@ -62,7 +66,7 @@ public class SlowFileProcessor implements FileProcessor {
 
             Region currentRegion = regions.get(currentBatchRegionOffset);
 
-            fileByteArrayHandler.handleBytes(buffer, file, batchArea.offset, currentRegion);
+            fileByteArrayHandler.handleBytes(buffer, file, batchArea.offset, currentRegion, batchLastModifiedTime);
         }
     }
 
@@ -86,5 +90,14 @@ public class SlowFileProcessor implements FileProcessor {
             currentBatchRegions.add(regionOffset);
         }
         return new BatchArea(firstRegionOffset, size, currentBatchRegions);
+    }
+
+    @Override
+    public void doBeforeBatchByteRead() throws IOException {
+        batchLastModifiedTime = Files.getLastModifiedTime(file.getAbsolutePath());
+    }
+
+    @Override
+    public void doBeforeFileRead() throws IOException {
     }
 }

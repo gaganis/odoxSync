@@ -54,13 +54,15 @@ public class FileScanner {
         FileProcessor fileProcessor = fileProcessorFactory.create(file);
 
         Path filePath = Paths.get(workingDirectory, file.getName());
+        fileProcessor.doBeforeFileRead();
         try (
                 RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
                 FileChannel channel = randomAccessFile.getChannel()
         ) {
             while (fileProcessor.hasNextBatchArea()) {
-
                 BatchArea batchArea = fileProcessor.nextBatchArea();
+
+                fileProcessor.doBeforeBatchByteRead();
 
                 MappedByteBuffer mappedByteBuffer = channel.map(
                         FileChannel.MapMode.READ_ONLY,

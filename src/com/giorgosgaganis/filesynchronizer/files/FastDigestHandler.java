@@ -21,9 +21,11 @@ package com.giorgosgaganis.filesynchronizer.files;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 
+import java.nio.file.attribute.FileTime;
+
 /**
  * Created by gaganis on 23/01/17.
  */
 public interface FastDigestHandler {
-    void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest);
+    void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime);
 }

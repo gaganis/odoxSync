@@ -21,12 +21,14 @@ package com.giorgosgaganis.filesynchronizer.files;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 
+import java.nio.file.attribute.FileTime;
+
 /**
  * Created by gaganis on 23/01/17.
  */
 public class ConsolePrintingFastDigestHandler implements FastDigestHandler {
     @Override
-    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest) {
+    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime) {
         System.out.print("currentOffset = " + currentRegion.getOffset());
         System.out.println(", fastDigest = " + fastDigest);
     }

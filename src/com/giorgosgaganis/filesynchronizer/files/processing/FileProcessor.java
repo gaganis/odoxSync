@@ -20,6 +20,8 @@ package com.giorgosgaganis.filesynchronizer.files.processing;
 
 import com.giorgosgaganis.filesynchronizer.files.BatchArea;
 
+import java.io.IOException;
+
 /**
  * Created by gaganis on 23/01/17.
  */
@@ -29,4 +31,8 @@ public interface FileProcessor {
     boolean hasNextBatchArea();
 
     BatchArea nextBatchArea();
+
+    void doBeforeBatchByteRead() throws IOException;
+
+    void doBeforeFileRead() throws IOException;
 }

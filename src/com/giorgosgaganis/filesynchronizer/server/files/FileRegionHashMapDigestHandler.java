@@ -22,11 +22,14 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 
+import java.nio.file.attribute.FileTime;
+
 public class FileRegionHashMapDigestHandler implements FastDigestHandler {
 
     @Override
-    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest) {
+    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime) {
         Region region = file.getRegions().get(currentRegion.getOffset());
         region.setQuickDigest(fastDigest);
+        region.setFastModifiedTime(fileLastModifiedTime);
     }
 }

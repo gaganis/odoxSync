@@ -18,8 +18,10 @@
  */
 package com.giorgosgaganis.filesynchronizer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -34,6 +36,8 @@ public class Region {
     private ConcurrentHashMap<Integer, byte[]> slowDigestsMap = new ConcurrentHashMap<>();
 
     private byte[] slowDigest = null;
+    private FileTime slowModifiedTime;
+    private FileTime fastModifiedTime;
 
     public Region() {
     }
@@ -55,9 +59,17 @@ public class Region {
         return quickDigest;
     }
 
-
     public void setQuickDigest(Integer quickDigest) {
         this.quickDigest = quickDigest;
+    }
+
+    public void setFastModifiedTime(FileTime fastModifiedTime) {
+        this.fastModifiedTime = fastModifiedTime;
+    }
+
+    @JsonIgnore
+    public FileTime getFastModifiedTime() {
+        return fastModifiedTime;
     }
 
     public ConcurrentHashMap<Integer, byte[]> getSlowDigestsMap() {
@@ -72,6 +84,16 @@ public class Region {
         this.slowDigest = slowDigest;
     }
 
+
+    public void setSlowModifiedTime(FileTime slowModifiedTime) {
+        this.slowModifiedTime = slowModifiedTime;
+    }
+
+    @JsonIgnore
+    public FileTime getSlowModifiedTime() {
+        return slowModifiedTime;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -81,4 +103,5 @@ public class Region {
                 .append("slowDigest", slowDigest)
                 .toString();
     }
+
 }

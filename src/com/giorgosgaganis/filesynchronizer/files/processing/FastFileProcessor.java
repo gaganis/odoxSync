@@ -23,6 +23,9 @@ import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.files.BatchArea;
 import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileTime;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -42,6 +45,7 @@ public class FastFileProcessor implements FileProcessor {
     private final LinkedList<Long> regionsToProcess;
 
     private final FastFileByteArrayHandler fileByteArrayHandler;
+    private FileTime fileLastModifiedTime;
 
     public FastFileProcessor(FastDigestHandler fastDigestHandler, File file) {
         this.file = file;
@@ -58,7 +62,7 @@ public class FastFileProcessor implements FileProcessor {
 
         Region currentRegion = regions.get(batchArea.currentBatchRegions.remove());
 
-        fileByteArrayHandler.handleBytes(buffer, file, currentRegion);
+        fileByteArrayHandler.handleBytes(buffer, file, currentRegion, fileLastModifiedTime);
     }
 
     @Override
@@ -74,6 +78,15 @@ public class FastFileProcessor implements FileProcessor {
         Region region = regions.get(regionOffset);
 
         return getSample(currentBatchRegions, regionOffset, region);
+    }
+
+    @Override
+    public void doBeforeBatchByteRead() throws IOException {
+    }
+
+    @Override
+    public void doBeforeFileRead() throws IOException {
+        fileLastModifiedTime = Files.getLastModifiedTime(file.getAbsolutePath());
     }
 
     public BatchArea getSample(LinkedList<Long> currentBatchRegions, Long regionOffset, Region region) {

@@ -22,6 +22,8 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 
+import java.nio.file.attribute.FileTime;
+
 /**
  * Created by gaganis on 24/01/17.
  */
@@ -36,7 +38,7 @@ public class ClientRegionMessageFastDigestHandler implements FastDigestHandler {
     }
 
     @Override
-    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest) {
+    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime) {
         clientRegionMessageHandler.submitClientRegionMessage(clientId, file, currentRegion.getOffset(), currentRegion.getSize(), fastDigest, null);
     }
 }

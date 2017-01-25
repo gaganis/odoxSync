@@ -23,6 +23,7 @@ import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
+import java.nio.file.attribute.FileTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,10 +41,10 @@ public class FastFileByteArrayHandler {
         this.fastDigestHandler = fastDigestHandler;
     }
 
-    public void handleBytes(byte[] buffer, File file, Region currentRegion) {
+    public void handleBytes(byte[] buffer, File file, Region currentRegion, FileTime fileLastModifiedTime) {
 
         Integer fastDigest = calculateFastDigest(currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
-        fastDigestHandler.handleFastDigest(buffer, file, currentRegion, fastDigest);
+        fastDigestHandler.handleFastDigest(buffer, file, currentRegion, fastDigest, fileLastModifiedTime);
         statistics.bytesReadFast.addAndGet(currentRegion.getSize());
     }
 

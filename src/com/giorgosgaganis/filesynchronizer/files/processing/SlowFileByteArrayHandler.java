@@ -24,6 +24,7 @@ import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
+import java.nio.file.attribute.FileTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,11 +36,12 @@ public class SlowFileByteArrayHandler {
 
     private static Statistics statistics = Statistics.INSTANCE;
 
-    public void handleBytes(byte[] buffer, File file, long batchAreaOffset, Region currentRegion) {
+    public void handleBytes(byte[] buffer, File file, long batchAreaOffset, Region currentRegion, FileTime batchLastModifiedTime) {
 
         byte[] slowDigest = calculateSlowDigest(batchAreaOffset, currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
         Region region = file.getRegions().get(currentRegion.getOffset());
         region.setSlowDigest(slowDigest);
+        region.setSlowModifiedTime(batchLastModifiedTime);
         statistics.bytesReadSlow.addAndGet(buffer.length);
     }
 

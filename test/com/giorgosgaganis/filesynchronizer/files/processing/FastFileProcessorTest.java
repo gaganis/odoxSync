@@ -43,7 +43,7 @@ public class FastFileProcessorTest {
 
         rc.calculate();
         FastFileProcessor fastFileProcessor = new FastFileProcessor(
-                (buffer, file1, currentRegion, fastDigest) -> {
+                (buffer, file1, currentRegion, fastDigest, fileLastModifiedTime) -> {
                 }
                 , file);
 
