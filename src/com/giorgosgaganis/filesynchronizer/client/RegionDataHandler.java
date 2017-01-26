@@ -58,7 +58,7 @@ public class RegionDataHandler extends Thread {
 
         startStatisticsThread();
 
-        for (int threadCounter = 0; threadCounter < 2; threadCounter++) {
+        for (int threadCounter = 0; threadCounter < 4; threadCounter++) {
 
             new Thread(() -> {
                 do {

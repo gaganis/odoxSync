@@ -33,7 +33,6 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,6 +76,13 @@ public class DirectoryScanner {
                         if (!files.containsValue(file)) {
                             int id = fileIdCounter.getAndIncrement();
                             file.setId(id);
+
+                            file.setAbsolutePath(
+                                    Paths.get(
+                                            workingDirectory,
+                                            name
+                                    ).toAbsolutePath());
+
                             files.put(id, file);
                             logger.fine("Added new tracked file " + id + ":[" + name + "]");
                         } else {
@@ -97,16 +103,12 @@ public class DirectoryScanner {
                 long startTime = System.currentTimeMillis();
 
 
-                ForkJoinPool forkJoinPool = new ForkJoinPool(2);
                 try {
-                    forkJoinPool.submit(() -> {
-                                if (isFast) {
-                                    files.values().parallelStream().forEach(this::processFileFast);
-                                } else {
-                                    files.values().parallelStream().forEach(this::processFileSlow);
-                                }
-                            }
-                    ).get();
+                    if (isFast) {
+                        files.values().stream().forEach(this::processFileFast);
+                    } else {
+                        files.values().parallelStream().forEach(this::processFileSlow);
+                    }
                     scanCount++;
 
                     long duration = System.currentTimeMillis() - startTime;
@@ -116,8 +118,6 @@ public class DirectoryScanner {
                             + duration / 1000 + "] at [" + Statistics.humanReadableByteCount(speed, false) + "]");
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
             } while (true);

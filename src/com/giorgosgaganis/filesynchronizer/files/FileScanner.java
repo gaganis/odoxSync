@@ -56,7 +56,7 @@ public class FileScanner {
         Path filePath = Paths.get(workingDirectory, file.getName());
         fileProcessor.doBeforeFileRead();
         try (
-                RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
+                RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "rw");
                 FileChannel channel = randomAccessFile.getChannel()
         ) {
             while (fileProcessor.hasNextBatchArea()) {

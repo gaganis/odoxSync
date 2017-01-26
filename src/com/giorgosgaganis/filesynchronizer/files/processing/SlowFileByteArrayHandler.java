@@ -42,7 +42,7 @@ public class SlowFileByteArrayHandler {
         Region region = file.getRegions().get(currentRegion.getOffset());
         region.setSlowDigest(slowDigest);
         region.setSlowModifiedTime(batchLastModifiedTime);
-        statistics.bytesReadSlow.addAndGet(buffer.length);
+        statistics.bytesReadSlow.addAndGet(currentRegion.getSize());
     }
 
 
@@ -59,7 +59,6 @@ public class SlowFileByteArrayHandler {
                     + fileName + "]" + offset
                     + ":" + (offset + size));
         }
-        statistics.bytesReadSlow.addAndGet(buffer.length);
         return slowDigest;
     }
 }
