@@ -4,11 +4,15 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.files.BatchArea;
+import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.server.files.FileProcessorBatchTest;
+import com.giorgosgaganis.filesynchronizer.server.files.FileRegionHashMapDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Contants;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,14 +46,38 @@ public class FastFileProcessorTest {
         RegionCalculator rc = new RegionCalculator(workingDirectory, file);
 
         rc.calculate();
+        FastDigestHandler fastDigestHandler = (buffer, file1, currentRegion, fastDigest, fileLastModifiedTime) -> {
+        };
         FastFileProcessor fastFileProcessor = new FastFileProcessor(
-                (buffer, file1, currentRegion, fastDigest, fileLastModifiedTime) -> {
-                }
+                fastDigestHandler
                 , file);
 
         Region region = file.getRegions().get(key);
         LinkedList<Long> currentBatchRegions = new LinkedList<>();
         currentBatchRegions.add(region.getOffset());
         return fastFileProcessor.getSample(currentBatchRegions, region.getOffset(), region);
+    }
+
+    @Test
+    public void should_not_skip_after_touch() throws IOException, InterruptedException {
+        long fileSize = ((Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE) * 2) + 1;
+        String workingDirectory = "/home/gaganis/IdeaProjects/DirectorySynchronizer/testdata/source";
+        String fileName = "ubuntu-16.04.1-desktop-amd64.iso";
+        File file = new File(fileName);
+        FileProcessorBatchTest.updateAbsolutePath(file, workingDirectory, fileName);
+
+        Supplier<FileProcessor> fileProcessorSupplier = () -> getFileProcessor(fileSize,workingDirectory,file);
+        //1st pass
+        FileProcessorBatchTest.testTouchSkip(file, fileProcessorSupplier, Contants.REGION_SIZE);
+    }
+
+    private static FileProcessor getFileProcessor(long fileSize, String workingDirectory, File file) {
+        RegionCalculator rc = new RegionCalculator(workingDirectory, file);
+
+        rc.calculateForSize(fileSize);
+
+        return new FastFileProcessor(
+                new FileRegionHashMapDigestHandler(),
+                file);
     }
 }

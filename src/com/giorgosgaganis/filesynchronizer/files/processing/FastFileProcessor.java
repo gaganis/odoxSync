@@ -95,11 +95,11 @@ public class FastFileProcessor implements FileProcessor {
 
         currentBatchRegions.add(regionOffset);
 
-        FileTime regionSlowModifiedTime = region
-                .getSlowModifiedTime();
+        FileTime regionFastModifiedTime = region
+                .getFastModifiedTime();
 
-        boolean isSkip = regionSlowModifiedTime != null
-                && regionSlowModifiedTime.compareTo(fileLastModifiedTime) >= 0;
+        boolean isSkip = regionFastModifiedTime != null
+                && regionFastModifiedTime.compareTo(fileLastModifiedTime) >= 0;
 
         return new BatchArea(offset, sampleSize, currentBatchRegions, isSkip);
     }

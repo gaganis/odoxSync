@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -106,31 +106,40 @@ public class FileProcessorBatchTest {
         File file = new File(fileName);
         updateAbsolutePath(file, workingDirectory, fileName);
 
+        Supplier<FileProcessor> fileProcessorSupplier = () -> getFileProcessor(fileSize,workingDirectory,file);
         //1st pass
-        FileProcessor fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        testTouchSkip(file, fileProcessorSupplier, Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE);
+    }
+
+    public static void testTouchSkip(File file, Supplier<FileProcessor> fileProcessorSupplier, long byteArraySize) throws IOException, InterruptedException {
+        FileProcessor fileProcessor = fileProcessorSupplier.get();
+
+        fileProcessor.doBeforeFileRead();
         BatchArea batchArea = fileProcessor.nextBatchArea();
         assertThat(batchArea.isSkip).isFalse();
 
         fileProcessor.doBeforeBatchByteRead();
         fileProcessor.process(
-                new byte[(int) (Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE)],
+                new byte[(int) byteArraySize],
                 batchArea);
 
         //2nd pass
-        fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        fileProcessor = fileProcessorSupplier.get();
+        fileProcessor.doBeforeFileRead();
         batchArea = fileProcessor.nextBatchArea();
         assertThat(batchArea.isSkip).isTrue();
 
-        Thread.sleep(1000);//The precision of touch makes the test flaky, hence the sleep to make the touch roll to the next second
+        Thread.sleep(1000);//The 1 second precision of touch makes the test flaky, hence the sleep to make the touch roll to the next second
         FileUtils.touch(file.getAbsolutePath().toFile());
 
         //3rd pass
-        fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        fileProcessor = fileProcessorSupplier.get();
+        fileProcessor.doBeforeFileRead();
         batchArea = fileProcessor.nextBatchArea();
         assertThat(batchArea.isSkip).isFalse();
     }
 
-    private static void updateAbsolutePath(File file, String workingDirectory, String fileName) {
+    public static void updateAbsolutePath(File file, String workingDirectory, String fileName) {
         file.setAbsolutePath(
                 Paths.get(
                         workingDirectory,
