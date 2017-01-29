@@ -27,10 +27,12 @@ public class BatchArea {
     public final long size;
     public final long offset;
     public final LinkedList<Long> currentBatchRegions;
+    public final boolean isSkip;
 
-    public BatchArea(long offset, long size, LinkedList<Long> currentBatchRegions) {
+    public BatchArea(long offset, long size, LinkedList<Long> currentBatchRegions, boolean isSkip) {
         this.offset = offset;
         this.size = size;
         this.currentBatchRegions = currentBatchRegions;
+        this.isSkip = isSkip;
     }
 }

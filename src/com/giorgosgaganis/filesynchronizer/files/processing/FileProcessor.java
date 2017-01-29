@@ -30,7 +30,7 @@ public interface FileProcessor {
 
     boolean hasNextBatchArea();
 
-    BatchArea nextBatchArea();
+    BatchArea nextBatchArea() throws IOException;
 
     void doBeforeBatchByteRead() throws IOException;
 

@@ -1,13 +1,17 @@
 package com.giorgosgaganis.filesynchronizer.server.files;
 
+import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.RegionCalculator;
+import com.giorgosgaganis.filesynchronizer.files.BatchArea;
 import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessor;
 import com.giorgosgaganis.filesynchronizer.files.processing.SlowFileProcessor;
 import com.giorgosgaganis.filesynchronizer.utils.Contants;
-import com.giorgosgaganis.filesynchronizer.File;
-import com.giorgosgaganis.filesynchronizer.RegionCalculator;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,10 +65,89 @@ public class FileProcessorBatchTest {
         assertThat(fp.hasNextBatchArea()).isFalse();
     }
 
+    @Test
+    public void batch_should_not_skip_on_first_scan() throws IOException {
+        long fileSize = ((Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE) * 2) + 1;
+        FileProcessor fp = getFileProcessorForFileSize(fileSize);
+
+
+        BatchArea batchArea = fp.nextBatchArea();
+        assertThat(batchArea.isSkip).isFalse();
+    }
+
+    @Test
+    public void batch_should_skip_on_second_scan() throws IOException {
+        long fileSize = ((Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE) * 2) + 1;
+        String workingDirectory = "/home/gaganis/IdeaProjects/DirectorySynchronizer/testdata/source";
+        String fileName = "ubuntu-16.04.1-desktop-amd64.iso";
+        File file = new File(fileName);
+        updateAbsolutePath(file, workingDirectory, fileName);
+
+        FileProcessor fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        BatchArea batchArea = fileProcessor.nextBatchArea();
+        assertThat(batchArea.isSkip).isFalse();
+
+        fileProcessor.doBeforeBatchByteRead();
+        fileProcessor.process(
+                new byte[(int) (Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE)],
+                batchArea);
+        fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        batchArea = fileProcessor.nextBatchArea();
+        assertThat(batchArea.isSkip).isTrue();
+        FileUtils.touch(file.getAbsolutePath().toFile());
+
+    }
+
+    @Test
+    public void should_not_skip_after_touch() throws IOException, InterruptedException {
+        long fileSize = ((Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE) * 2) + 1;
+        String workingDirectory = "/home/gaganis/IdeaProjects/DirectorySynchronizer/testdata/source";
+        String fileName = "ubuntu-16.04.1-desktop-amd64.iso";
+        File file = new File(fileName);
+        updateAbsolutePath(file, workingDirectory, fileName);
+
+        //1st pass
+        FileProcessor fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        BatchArea batchArea = fileProcessor.nextBatchArea();
+        assertThat(batchArea.isSkip).isFalse();
+
+        fileProcessor.doBeforeBatchByteRead();
+        fileProcessor.process(
+                new byte[(int) (Contants.REGION_SIZE * SlowFileProcessor.BATCH_SIZE)],
+                batchArea);
+
+        //2nd pass
+        fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        batchArea = fileProcessor.nextBatchArea();
+        assertThat(batchArea.isSkip).isTrue();
+
+        Thread.sleep(1000);//The precision of touch makes the test flaky, hence the sleep to make the touch roll to the next second
+        FileUtils.touch(file.getAbsolutePath().toFile());
+
+        //3rd pass
+        fileProcessor = getFileProcessor(fileSize, workingDirectory, file);
+        batchArea = fileProcessor.nextBatchArea();
+        assertThat(batchArea.isSkip).isFalse();
+    }
+
+    private static void updateAbsolutePath(File file, String workingDirectory, String fileName) {
+        file.setAbsolutePath(
+                Paths.get(
+                        workingDirectory,
+                        fileName
+                ).toAbsolutePath());
+    }
+
     private static FileProcessor getFileProcessorForFileSize(long fileSize) {
         String workingDirectory = "/home/gaganis/IdeaProjects/DirectorySynchronizer/testdata/source";
-        File file = new File("ubuntu-16.04.1-desktop-amd64.iso");
+        String fileName = "ubuntu-16.04.1-desktop-amd64.iso";
+        File file = new File(fileName);
+        updateAbsolutePath(file, workingDirectory, fileName);
 
+        return getFileProcessor(fileSize, workingDirectory, file);
+    }
+
+    private static FileProcessor getFileProcessor(long fileSize, String workingDirectory, File file) {
         RegionCalculator rc = new RegionCalculator(workingDirectory, file);
 
         rc.calculateForSize(fileSize);

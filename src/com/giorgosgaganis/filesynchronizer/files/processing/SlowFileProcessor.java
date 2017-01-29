@@ -76,25 +76,35 @@ public class SlowFileProcessor implements FileProcessor {
     }
 
     @Override
-    public BatchArea nextBatchArea() {
+    public BatchArea nextBatchArea() throws IOException {
         currentBatchRegions.clear();
+        batchLastModifiedTime = Files.getLastModifiedTime(file.getAbsolutePath());
 
         Long firstRegionOffset = regionsToProcess.remove();
         long size = regions.get(firstRegionOffset).getSize();
         currentBatchRegions.add(firstRegionOffset);
 
+        boolean isSkip = true;
         for (int i = 1; i < BATCH_SIZE && !regionsToProcess.isEmpty(); i++) {
             Long regionOffset = regionsToProcess.remove();
-            size += regions.get(regionOffset).getSize();
+            Region region = regions.get(regionOffset);
+            size += region.getSize();
 
+
+            FileTime regionSlowModifiedTime = region
+                    .getSlowModifiedTime();
+            if(regionSlowModifiedTime == null
+                    || regionSlowModifiedTime.compareTo(batchLastModifiedTime) == -1) {
+                isSkip = false;
+            }
             currentBatchRegions.add(regionOffset);
         }
-        return new BatchArea(firstRegionOffset, size, currentBatchRegions);
+        return new BatchArea(firstRegionOffset, size, currentBatchRegions, isSkip);
     }
 
     @Override
     public void doBeforeBatchByteRead() throws IOException {
-        batchLastModifiedTime = Files.getLastModifiedTime(file.getAbsolutePath());
+
     }
 
     @Override

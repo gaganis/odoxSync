@@ -32,7 +32,7 @@ public class Client {
     public static final double OFFER_EXPIRATION_SECONDS = 5;
     private final int id;
     public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
-            new LinkedBlockingQueue<>();
+            new LinkedBlockingQueue<>(5);
 
     public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
 

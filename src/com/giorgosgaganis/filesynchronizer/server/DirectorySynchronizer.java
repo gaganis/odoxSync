@@ -44,6 +44,8 @@ public class DirectorySynchronizer {
 
     public final ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<>();
 
+    
+
 
     private TransferCandidateFinder transferCandidateFinder = new TransferCandidateFinder(
             files,
