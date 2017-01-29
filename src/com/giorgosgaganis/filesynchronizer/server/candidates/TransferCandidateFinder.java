@@ -72,7 +72,8 @@ public class TransferCandidateFinder {
 
     private void lookAtFile(Client client, Integer clientId, Integer fileId) {
         File serverFile = files.get(fileId);
-        if (serverFile != null) {
+        File clientFile = client.getFiles().get(fileId);
+        if (serverFile != null && clientFile != null) {
             int allCount = 0;
             int toTransferCount = 0;
 
@@ -85,8 +86,12 @@ public class TransferCandidateFinder {
                         + fileId + "] and region " + offset + "]");
                 boolean doTranser = lookAtRegion(serverFile, client, fileId, offset);
 
-                Region region = serverFile.getRegions().get(offset);
-                if (doTranser || region.getQuickDigest() == null) {
+                boolean haveClientDigest = false;
+
+                Region clientRegion = clientFile.getRegions().get(offset);
+                if (doTranser
+                        || clientRegion == null
+                        || clientRegion.getQuickDigest() == null) {
                     toTransferCount++;
                 }
                 allCount++;
@@ -94,7 +99,6 @@ public class TransferCandidateFinder {
 
             if (allCount > 0) {
                 int syncedPercentage = (allCount - toTransferCount) * 100 / allCount;
-                File clientFile = client.getFiles().get(fileId);
                 if (clientFile != null) {
                     clientFile.setSyncedPercentage(syncedPercentage);
                 }
@@ -106,34 +110,35 @@ public class TransferCandidateFinder {
     private boolean lookAtRegion(File serverFile, Client client, Integer fileId, Long offset) {
         boolean doTransfer = false;
 
-        Region servRegion = serverFile.getRegions().get(offset);
-        if (servRegion != null) {
-            File clientFile = client.files.get(fileId);
-            if (clientFile == null) {
+        File clientFile = client.files.get(fileId);
+        if (clientFile == null) {
+            return false;
+        }
+
+        Region serverRegion = serverFile.getRegions().get(offset);
+        Region clientRegion = clientFile.getRegions().get(offset);
+
+        if (serverRegion != null && clientRegion != null) {
+
+            Integer serverQuickDigest = serverRegion.getQuickDigest();
+            Integer clientQuickDigest = clientRegion.getQuickDigest();
+
+            if (serverQuickDigest == null || clientQuickDigest == null) {
                 return false;
             }
-            Region clientRegion = clientFile.getRegions().get(offset);
 
-            if (clientRegion == null) {
-                return doTransfer;
-            }
-
-            if (servRegion.getQuickDigest() == null
-                    || servRegion.getQuickDigest() == 0) {
-                return false;
-            }
-            int clientQuickDigest = servRegion.getQuickDigest();
-
-            Integer clientRegionQuickDigest = clientRegion.getQuickDigest();
-            if (clientQuickDigest != clientRegionQuickDigest) {
+            if (!serverQuickDigest.equals(clientQuickDigest)) {
                 doTransfer = true;
             } else {
-                byte[] bytes = clientRegion.getSlowDigestsMap().get(clientRegionQuickDigest);
-                if (bytes != null) {
-                    for (int i = 0; i < bytes.length; i++) {
-                        if (servRegion.getSlowDigest()[i] != bytes[i]) {
+                byte[] clientByteDigest = clientRegion.getSlowDigest();
+                byte[] serverByteDigest = serverRegion.getSlowDigest();
+
+                if (clientByteDigest != null && serverByteDigest != null) {
+                    for (int i = 0; i < serverByteDigest.length; i++) {
+                        if (clientByteDigest[i] != serverByteDigest[i]) {
                             doTransfer = true;
                             logger.info("Collision detected");
+                            break;
                         }
                     }
                 }
@@ -143,9 +148,9 @@ public class TransferCandidateFinder {
                 TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, clientRegion.getSize());
                 try {
 
-                    //TODO this is contains a race since is is a unsynchronized compare and set idiom
                     removeFromOfferedIfExpired(client, transferCandidate);
 
+                    //TODO this is contains a race since is is a unsynchronized compare and set idiom
                     if (!client.transferCandidateQueue.contains(transferCandidate)
                             && !client.offeredTransferCandidates.contains(transferCandidate)) {
                         client.transferCandidateQueue.put(transferCandidate);
@@ -162,7 +167,10 @@ public class TransferCandidateFinder {
         int index = client.offeredTransferCandidates.indexOf(transferCandidate);
 
         int expiryDelay = OFFER_EXPIRY_SECONDS * 1000;
+        //TODO This is also a race the item found at index can be removed before reaching the following line so the get would
+        //retrieve the wrong item
         if (index >= 0 && (client.offeredTransferCandidates.get(index).getOfferedTimeMillis() + expiryDelay) < System.currentTimeMillis()) {
+            //TODO again the above comment is also true for the following line
             client.offeredTransferCandidates.remove(index);
         }
     }

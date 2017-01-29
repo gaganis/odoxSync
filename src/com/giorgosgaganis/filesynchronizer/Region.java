@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.nio.file.attribute.FileTime;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -32,8 +31,6 @@ public class Region {
     private long size;
 
     private Integer quickDigest = null;
-
-    private ConcurrentHashMap<Integer, byte[]> slowDigestsMap = new ConcurrentHashMap<>();
 
     private byte[] slowDigest = null;
     private FileTime slowModifiedTime;
@@ -70,10 +67,6 @@ public class Region {
     @JsonIgnore
     public FileTime getFastModifiedTime() {
         return fastModifiedTime;
-    }
-
-    public ConcurrentHashMap<Integer, byte[]> getSlowDigestsMap() {
-        return slowDigestsMap;
     }
 
     public byte[] getSlowDigest() {
