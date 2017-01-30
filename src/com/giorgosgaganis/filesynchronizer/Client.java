@@ -31,13 +31,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Client {
     public static final double OFFER_EXPIRATION_SECONDS = 5;
     private final int id;
-    public OscillatingQueueWrapper<TransferCandidate> transferCandidateQueueWrapper =
-            new OscillatingQueueWrapper<>(40, 200);
+    public OscillatingQueueWrapper<TransferCandidate> transferCandidateQueueWrapper
+            = new OscillatingQueueWrapper<>(50, 500);
 
-    public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates
+            = new CopyOnWriteArrayList<>();
 
     public ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
-
 
     public Client(int id) {
         this.id = id;

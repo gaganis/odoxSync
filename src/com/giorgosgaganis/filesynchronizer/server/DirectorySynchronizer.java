@@ -48,8 +48,15 @@ public class DirectorySynchronizer {
             files,
             clients);
 
-    private final DirectoryScanner fastDirectoryScanner = new DirectoryScanner(files, true);
-    private final DirectoryScanner slowDirectoryScanner = new DirectoryScanner(files, false);
+    private final DirectoryScanner fastDirectoryScanner = new DirectoryScanner(
+            files,
+            true,
+            new CandidateQueueActivityStaler(clients));
+
+    private final DirectoryScanner slowDirectoryScanner = new DirectoryScanner(
+            files,
+            false,
+            new CandidateQueueActivityStaler(clients));
 
     public String workingDirectory;
 
@@ -124,9 +131,13 @@ public class DirectorySynchronizer {
 
             Client client = clients.get(clientId);
 
-            client.files.putIfAbsent(fileId, new File(fileName));
-            File file = client.files.get(fileId);
-            ConcurrentHashMap<Long, Region> clientRegions = file.getRegions();
+            File clientFile = new File(fileName);
+            clientFile.setId(fileId);
+
+            File existingFile = client.files.putIfAbsent(fileId, clientFile);
+
+            File serverFile = client.files.get(fileId);
+            ConcurrentHashMap<Long, Region> clientRegions = serverFile.getRegions();
             Region region = clientRegionMessage.getRegion();
 
             clientRegions.put(region.getOffset(), region);

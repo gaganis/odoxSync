@@ -50,10 +50,12 @@ public class DirectoryScanner {
     private String workingDirectory;
 
     private volatile int scanCount = 0;
+    private final ActivityStaler activityStaler;
 
-    public DirectoryScanner(ConcurrentHashMap<Integer, File> files, boolean isFast) {
+    public DirectoryScanner(ConcurrentHashMap<Integer, File> files, boolean isFast, ActivityStaler activityStaler) {
         this.files = files;
         this.isFast = isFast;
+        this.activityStaler = activityStaler;
     }
 
     private void scan(String workingDirectory) {
@@ -153,7 +155,7 @@ public class DirectoryScanner {
                 long startTime = System.currentTimeMillis();
                 logger.fine("Starting scan for [" + file.getName() + "]");
                 FileScanner fileScanner = new FileScanner(workingDirectory,
-                        new FastFileProcessorFactory(new FileRegionHashMapDigestHandler()));
+                        new FastFileProcessorFactory(new FileRegionHashMapDigestHandler()), activityStaler);
                 fileScanner.scanFile(file);
                 long duration = System.currentTimeMillis() - startTime;
                 logger.fine("Finished scan for [" + file.getName() + "] in [" + duration + "ms]");
@@ -168,7 +170,7 @@ public class DirectoryScanner {
         try {
             logger.fine("Starting scan for [" + file.getName() + "]");
 
-            FileScanner fileScanner = new FileScanner(workingDirectory, new SlowFileProcessorFactory());
+            FileScanner fileScanner = new FileScanner(workingDirectory, new SlowFileProcessorFactory(), activityStaler);
             fileScanner.scanFile(file);
             logger.fine("Finished scan for [" + file.getName() + "]");
 

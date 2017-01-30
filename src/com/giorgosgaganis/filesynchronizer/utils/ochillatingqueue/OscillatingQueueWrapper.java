@@ -18,8 +18,6 @@
  */
 package com.giorgosgaganis.filesynchronizer.utils.ochillatingqueue;
 
-import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidate;
-
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -40,6 +38,10 @@ public class OscillatingQueueWrapper<T> {
     public OscillatingQueueWrapper(int minShrinkLimit, int maxGrowLimit) {
         this.minShrinkLimit = minShrinkLimit;
         this.maxGrowLimit = maxGrowLimit;
+    }
+
+    public LinkedBlockingQueue<T> getBackingQueue() {
+        return backingQueue;
     }
 
     public void put(T e) throws InterruptedException {
@@ -77,11 +79,11 @@ public class OscillatingQueueWrapper<T> {
     }
 
     private void waitForGrowingAndPut(T e) throws InterruptedException {
-        waitForGrowing();
+        waitWhileShrinking();
         backingQueue.put(e);
     }
 
-    public void waitForGrowing() {
+    public void waitWhileShrinking() {
         lock.lock();
         try {
             if (growing) {

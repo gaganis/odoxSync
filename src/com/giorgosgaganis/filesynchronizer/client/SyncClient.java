@@ -91,7 +91,7 @@ public class SyncClient {
             do {
                 processFiles();
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(30_000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -138,7 +138,7 @@ public class SyncClient {
                 FastDigestHandler fastDigestHandler = new ClientRegionMessageFastDigestHandler(clientId, clientRegionMessageHandler);
 
                 FileScanner fileScanner = new FileScanner(workingDirectory,
-                        new FastFileProcessorFactory(fastDigestHandler));
+                        new FastFileProcessorFactory(fastDigestHandler), () -> {});
                 fileScanner.scanFile(file);
             }
         } catch (IOException e) {

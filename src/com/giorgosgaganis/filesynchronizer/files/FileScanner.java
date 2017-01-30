@@ -23,6 +23,7 @@ import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessor;
 import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.server.ActivityStaler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
@@ -43,10 +44,13 @@ public class FileScanner {
     private final String workingDirectory;
     private final FileProcessorFactory fileProcessorFactory;
 
+    private final ActivityStaler activityStaler;
 
-    public FileScanner(String workingDirectory, FileProcessorFactory fileProcessorFactory) {
+
+    public FileScanner(String workingDirectory, FileProcessorFactory fileProcessorFactory, ActivityStaler activityStaler) {
         this.workingDirectory = workingDirectory;
         this.fileProcessorFactory = fileProcessorFactory;
+        this.activityStaler = activityStaler;
     }
 
     public void scanFile(File file) throws IOException {
@@ -54,6 +58,8 @@ public class FileScanner {
         FileProcessor fileProcessor = fileProcessorFactory.create(file);
 
         Path filePath = Paths.get(workingDirectory, file.getName());
+        activityStaler.waitToDoActivity();
+
         fileProcessor.doBeforeFileRead();
         try (
                 RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "rw");
@@ -71,6 +77,8 @@ public class FileScanner {
                 byte[] buffer = new byte[mappedByteBuffer.remaining()];
                 mappedByteBuffer.get(buffer);
                 fileProcessor.process(buffer, batchArea);
+
+                activityStaler.waitToDoActivity();
             }
         }
     }
@@ -85,7 +93,7 @@ public class FileScanner {
 
         rc.calculate();
         FileScanner scanner = new FileScanner(workingDirectory,
-                new FastFileProcessorFactory(new ConsolePrintingFastDigestHandler()));
+                new FastFileProcessorFactory(new ConsolePrintingFastDigestHandler()), () -> {});
         scanner.scanFile(file);
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("System.currentTimeMillis() - start = " + elapsedTime);
