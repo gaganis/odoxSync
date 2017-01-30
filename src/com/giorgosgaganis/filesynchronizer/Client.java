@@ -19,11 +19,11 @@
 package com.giorgosgaganis.filesynchronizer;
 
 import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidate;
+import com.giorgosgaganis.filesynchronizer.utils.ochillatingqueue.OscillatingQueueWrapper;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by gaganis on 14/01/17.
@@ -31,8 +31,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Client {
     public static final double OFFER_EXPIRATION_SECONDS = 5;
     private final int id;
-    public LinkedBlockingQueue<TransferCandidate> transferCandidateQueue =
-            new LinkedBlockingQueue<>();
+    public OscillatingQueueWrapper<TransferCandidate> transferCandidateQueueWrapper =
+            new OscillatingQueueWrapper<>(40, 200);
 
     public CopyOnWriteArrayList<TransferCandidate> offeredTransferCandidates = new CopyOnWriteArrayList<>();
 

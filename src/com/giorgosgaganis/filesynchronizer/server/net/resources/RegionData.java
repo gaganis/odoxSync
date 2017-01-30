@@ -72,7 +72,7 @@ public class RegionData {
             TransferCandidate transferCandidate;
 
             if (client == null
-                    || (transferCandidate = client.transferCandidateQueue.poll(2, TimeUnit.SECONDS)) == null) {
+                    || (transferCandidate = client.transferCandidateQueueWrapper.poll(2, TimeUnit.SECONDS)) == null) {
                 response.addHeader("nothingToTransfer", "nothingToTransfer");
                 return outputStream -> {
                 };

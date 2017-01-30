@@ -1,9 +1,10 @@
 package com.giorgosgaganis.filesynchronizer.utils.ochillatingqueue;
 
-import com.giorgosgaganis.filesynchronizer.utils.ochillatingqueue.OchillatingQueueWrapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +19,7 @@ public class OscillatingQueueWrapperTest {
     @Test
     public void test_stop_growing() throws Exception {
         int maxGrowLimit = 20;
-        OchillatingQueueWrapper.OscillatingQueueWrapper<Integer> oscillatingQueueWrapper = new OchillatingQueueWrapper.OscillatingQueueWrapper<>(5, maxGrowLimit);
+        OscillatingQueueWrapper<Integer> oscillatingQueueWrapper = new OscillatingQueueWrapper<>(5, maxGrowLimit);
 
         for (int i = 0; i < maxGrowLimit; i++) {
             oscillatingQueueWrapper.put(i);
@@ -39,7 +40,7 @@ public class OscillatingQueueWrapperTest {
     @Test
     public void test_stop_shrinking() throws Exception {
         int maxGrowLimit = 20;
-        OchillatingQueueWrapper.OscillatingQueueWrapper<Integer> oscillatingQueueWrapper = new OchillatingQueueWrapper.OscillatingQueueWrapper<>(5, maxGrowLimit);
+        OscillatingQueueWrapper<Integer> oscillatingQueueWrapper = new OscillatingQueueWrapper<>(5, maxGrowLimit);
 
         for (int i = 0; i < maxGrowLimit; i++) {
             oscillatingQueueWrapper.put(i);
@@ -59,7 +60,7 @@ public class OscillatingQueueWrapperTest {
         Thread consumer = new Thread(() -> {
             for (int i = 0; i < maxGrowLimit + 1; i++) {
                 try {
-                    oscillatingQueueWrapper.getBackingQueue().take();
+                    oscillatingQueueWrapper.poll(100, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

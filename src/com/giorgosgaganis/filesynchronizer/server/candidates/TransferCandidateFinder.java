@@ -151,9 +151,9 @@ public class TransferCandidateFinder {
                     removeFromOfferedIfExpired(client, transferCandidate);
 
                     //TODO this is contains a race since is is a unsynchronized compare and set idiom
-                    if (!client.transferCandidateQueue.contains(transferCandidate)
+                    if (!client.transferCandidateQueueWrapper.contains(transferCandidate)
                             && !client.offeredTransferCandidates.contains(transferCandidate)) {
-                        client.transferCandidateQueue.put(transferCandidate);
+                        client.transferCandidateQueueWrapper.put(transferCandidate);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
