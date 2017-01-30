@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,9 +111,13 @@ public class DirectoryScanner {
                     scanCount++;
 
                     long duration = System.currentTimeMillis() - startTime;
-                    long speed = (Statistics.INSTANCE.bytesReadFast.get() - fastBytesAtStart) * 1000 / duration;
+                    long speed =
+                            duration == 0 ?
+                                    -1 :
+                                    (Statistics.INSTANCE.bytesReadFast.get() - fastBytesAtStart) * 1000 / duration;
 
-                    logger.info("Finished [" + scanCount + "] scan in ["
+                    String scanType = isFast ? "fast" : "slow";
+                    logger.info("Finished [" + scanCount + "] " + scanType + " scan in ["
                             + duration / 1000 + "] at [" + Statistics.humanReadableByteCount(speed, false) + "]");
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
