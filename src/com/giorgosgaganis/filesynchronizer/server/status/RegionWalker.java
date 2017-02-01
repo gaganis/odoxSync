@@ -66,7 +66,9 @@ public class RegionWalker {
 
         for (Client client : clients.values()) {
             File clientFile = client.files.get(serverFile.getId());
-            inspectors.addAll(getClientFileInspectors(clientFile));
+            if(clientFile != null) {
+                inspectors.addAll(getClientFileInspectors(clientFile));
+            }
         }
         inspect(serverFile, inspectors);
     }

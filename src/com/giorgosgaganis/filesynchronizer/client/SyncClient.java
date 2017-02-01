@@ -54,7 +54,7 @@ public class SyncClient {
     private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
 
     private final RestClient restClient;
-    private final ClientRegionMessageHandler clientRegionMessageHandler;
+    private final ClientMessageHandler clientMessageHandler;
     private final RegionDataHandler regionDataHandler;
 
     private ExecutorService fileExecutorService = Executors.newFixedThreadPool(2);
@@ -63,8 +63,8 @@ public class SyncClient {
     public SyncClient(String hostPort, String workingDirectory) {
         this.workingDirectory = workingDirectory;
         restClient = new RestClient(hostPort);
-        clientRegionMessageHandler = new ClientRegionMessageHandler(restClient);
-        regionDataHandler = new RegionDataHandler(restClient, clientRegionMessageHandler, files);
+        clientMessageHandler = new ClientMessageHandler(restClient);
+        regionDataHandler = new RegionDataHandler(restClient, clientMessageHandler, files);
     }
 
 
@@ -97,6 +97,8 @@ public class SyncClient {
                 }
             } while (true);
         }).start();
+
+        clientMessageHandler.start();
     }
 
     private void processFiles() {
@@ -135,7 +137,7 @@ public class SyncClient {
                 RegionProcessor regionProcessor = (region, hasher, mappedByteBuffer) -> processByteBufferWrite(region, hasher, mappedByteBuffer);
                 processRegions(file, regionProcessor, "rw", FileChannel.MapMode.READ_WRITE);
             } else if (!wasInTheMap) {
-                FastDigestHandler fastDigestHandler = new ClientRegionMessageFastDigestHandler(clientId, clientRegionMessageHandler);
+                FastDigestHandler fastDigestHandler = new ClientRegionMessageFastDigestHandler(clientId, clientMessageHandler);
 
                 FileScanner fileScanner = new FileScanner(workingDirectory,
                         new FastFileProcessorFactory(fastDigestHandler), () -> {});
@@ -167,7 +169,7 @@ public class SyncClient {
                 byte[] slowDigest = hasher.hash().asBytes();
                 region.setSlowDigest(slowDigest);
 
-                clientRegionMessageHandler.submitClientRegionMessage(clientId, file, region.getOffset(), region.getSize(), sum, slowDigest);
+                clientMessageHandler.submitClientRegionMessage(clientId, file, region.getOffset(), region.getSize(), sum, slowDigest);
             }
         }
     }

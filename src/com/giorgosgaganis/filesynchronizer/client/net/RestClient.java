@@ -21,6 +21,7 @@ package com.giorgosgaganis.filesynchronizer.client.net;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.client.RegionDataParams;
+import com.giorgosgaganis.filesynchronizer.messages.ClientFastDigestMessage;
 import org.apache.commons.io.IOUtils;
 
 import javax.ws.rs.client.*;
@@ -29,6 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,5 +113,15 @@ public class RestClient {
 
     public void setClientId(int clientId) {
         this.clientId = clientId;
+    }
+
+    public void postFastDigestMessageBatch(ArrayList<ClientFastDigestMessage> batch) {
+        logger.fine("Posting batch of ClientFastDigestMessages");
+        WebTarget webTarget = restClient.target(SERVER_PATH + "clientfastdigestmessages");
+        Invocation.Builder invocationBuilder =
+                webTarget.request();
+
+        Response post = invocationBuilder.post(Entity.entity(batch, MediaType.APPLICATION_JSON_TYPE));
+        post.close();
     }
 }

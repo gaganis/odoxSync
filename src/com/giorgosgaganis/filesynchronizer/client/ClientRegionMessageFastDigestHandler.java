@@ -30,15 +30,19 @@ import java.nio.file.attribute.FileTime;
 public class ClientRegionMessageFastDigestHandler implements FastDigestHandler {
 
     private final int clientId;
-    private final ClientRegionMessageHandler clientRegionMessageHandler;
+    private final ClientMessageHandler clientMessageHandler;
 
-    public ClientRegionMessageFastDigestHandler(int clientId, ClientRegionMessageHandler clientRegionMessageHandler) {
+    public ClientRegionMessageFastDigestHandler(int clientId, ClientMessageHandler clientMessageHandler) {
         this.clientId = clientId;
-        this.clientRegionMessageHandler = clientRegionMessageHandler;
+        this.clientMessageHandler = clientMessageHandler;
     }
 
     @Override
     public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime) {
-        clientRegionMessageHandler.submitClientRegionMessage(clientId, file, currentRegion.getOffset(), currentRegion.getSize(), fastDigest, null);
+        try {
+            clientMessageHandler.submitFastDigest(clientId, file.getId(), currentRegion.getOffset(), fastDigest);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

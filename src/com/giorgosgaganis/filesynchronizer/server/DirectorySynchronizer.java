@@ -22,11 +22,13 @@ import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.client.ClientRegionMessage;
+import com.giorgosgaganis.filesynchronizer.messages.ClientFastDigestMessage;
 import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidateFinder;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
@@ -136,14 +138,14 @@ public class DirectorySynchronizer {
 
             File existingFile = client.files.putIfAbsent(fileId, clientFile);
 
-            if(existingFile != null) {
+            if (existingFile != null) {
                 clientFile = existingFile;
             }
             ConcurrentHashMap<Long, Region> clientRegions = clientFile.getRegions();
             Region region = clientRegionMessage.getRegion();
 
             Region existingRegion = clientRegions.put(region.getOffset(), region);
-            if(existingRegion != null){
+            if (existingRegion != null) {
                 System.out.println("Replacing existingRegion = " + existingRegion);
             }
             logger.fine("Added client region " + region);
@@ -153,4 +155,33 @@ public class DirectorySynchronizer {
         }
     }
 
+    public void addClientFastDigests(List<ClientFastDigestMessage> clientFastDigestMessages) {
+        for (ClientFastDigestMessage clientFastDigestMessage : clientFastDigestMessages) {
+
+            int clientId = clientFastDigestMessage.getClientId();
+            int fileId = clientFastDigestMessage.getFileId();
+            long offset = clientFastDigestMessage.getOffset();
+            int fastDigest = clientFastDigestMessage.getFastDigest();
+
+            Region clientRegion = getClientRegion(clientId, fileId, offset);
+            clientRegion.setQuickDigest(fastDigest);
+        }
+    }
+
+    private Region getClientRegion(int clientId, int fileId, long offset) {
+        Client client = clients.get(clientId);
+
+        String fileName = files.get(fileId).getName();
+
+        File clientFile = client.files.computeIfAbsent(fileId, integer -> {
+            File newFile = new File(fileName);
+            newFile.setId(fileId);
+            return newFile;
+        });
+
+        Region serverRegion = files.get(fileId).getRegions().get(offset);
+
+        ConcurrentHashMap<Long, Region> clientRegions = clientFile.getRegions();
+        return clientRegions.computeIfAbsent(offset, (aLong) -> new Region(serverRegion.getOffset(), serverRegion.getSize()));
+    }
 }

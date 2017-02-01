@@ -42,13 +42,13 @@ public class RegionDataHandler extends Thread {
     private final Statistics statistics = Statistics.INSTANCE;
 
     private RestClient restClient;
-    private ClientRegionMessageHandler clientRegionMessageHandler;
+    private ClientMessageHandler clientMessageHandler;
     private ConcurrentHashMap<Integer, File> files;
     private int clientId;
 
-    public RegionDataHandler(RestClient restClient, ClientRegionMessageHandler clientRegionMessageHandler, ConcurrentHashMap<Integer, File> files) {
+    public RegionDataHandler(RestClient restClient, ClientMessageHandler clientMessageHandler, ConcurrentHashMap<Integer, File> files) {
         this.restClient = restClient;
-        this.clientRegionMessageHandler = clientRegionMessageHandler;
+        this.clientMessageHandler = clientMessageHandler;
         this.files = files;
     }
 
@@ -93,7 +93,7 @@ public class RegionDataHandler extends Thread {
                                 sum += b;
                             }
 
-                            clientRegionMessageHandler.submitClientRegionMessage(clientId, file, regionData.offset, regionData.size, sum, hasher.hash().asBytes());
+                            clientMessageHandler.submitClientRegionMessage(clientId, file, regionData.offset, regionData.size, sum, hasher.hash().asBytes());
                             regionData.response.close();
                         } catch (Exception e) {
                             e.printStackTrace();
