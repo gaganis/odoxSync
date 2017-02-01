@@ -21,6 +21,7 @@ package com.giorgosgaganis.filesynchronizer.server.candidates;
 import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.giorgosgaganis.filesynchronizer.server.status.RegionWalker;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -51,7 +52,8 @@ public class TransferCandidateFinder {
                         lookAtClient(clientId);
                     }
 
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
+                    new RegionWalker(files, clients).walk();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

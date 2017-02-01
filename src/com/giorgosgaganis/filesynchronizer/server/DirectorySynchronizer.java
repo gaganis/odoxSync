@@ -136,11 +136,16 @@ public class DirectorySynchronizer {
 
             File existingFile = client.files.putIfAbsent(fileId, clientFile);
 
-            File serverFile = client.files.get(fileId);
-            ConcurrentHashMap<Long, Region> clientRegions = serverFile.getRegions();
+            if(existingFile != null) {
+                clientFile = existingFile;
+            }
+            ConcurrentHashMap<Long, Region> clientRegions = clientFile.getRegions();
             Region region = clientRegionMessage.getRegion();
 
-            clientRegions.put(region.getOffset(), region);
+            Region existingRegion = clientRegions.put(region.getOffset(), region);
+            if(existingRegion != null){
+                System.out.println("Replacing existingRegion = " + existingRegion);
+            }
             logger.fine("Added client region " + region);
         } catch (Exception e) {
             e.printStackTrace();

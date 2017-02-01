@@ -41,6 +41,9 @@ public class File {
 
     private ConcurrentHashMap<Long, Region> regions = new ConcurrentHashMap<>();
     private int syncedPercentage;
+    private int fastUpToDatePercent;
+    private int slowUpToDatePercent;
+    private int metadataReceivedPercent;
 
     public File() {
     }
@@ -115,5 +118,29 @@ public class File {
     @Override
     public int hashCode() {
         return Objects.hashCode(name);
+    }
+
+    public void setFastUpToDatePercent(int fastUpToDatePercent) {
+        this.fastUpToDatePercent = fastUpToDatePercent;
+    }
+
+    public int getFastUpToDatePercent() {
+        return fastUpToDatePercent;
+    }
+
+    public void setSlowUpToDatePercent(int slowUpToDatePercent) {
+        this.slowUpToDatePercent = slowUpToDatePercent;
+    }
+
+    public int getSlowUpToDatePercent() {
+        return slowUpToDatePercent;
+    }
+
+    public void setMetadataReceivedPercent(int metadataReceivedPercent) {
+        this.metadataReceivedPercent = metadataReceivedPercent;
+    }
+
+    public int getMetadataReceivedPercent() {
+        return metadataReceivedPercent;
     }
 }
