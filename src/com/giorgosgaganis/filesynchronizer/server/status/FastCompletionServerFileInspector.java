@@ -42,7 +42,7 @@ public class FastCompletionServerFileInspector implements Inspector {
     @Override
     public void inspectRegion(Region region) {
         FileTime regionFastModifiedTime = region.getFastModifiedTime();
-        if (currentAccessTime.compareTo(regionFastModifiedTime) >= 0) {
+        if (regionFastModifiedTime != null && currentAccessTime.compareTo(regionFastModifiedTime) >= 0) {
             upToDate++;
         }
         count++;
