@@ -22,8 +22,10 @@ import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.client.ClientRegionMessage;
+import com.giorgosgaganis.filesynchronizer.messages.BlankFileMessage;
 import com.giorgosgaganis.filesynchronizer.messages.ClientFastDigestMessage;
 import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidateFinder;
+import com.giorgosgaganis.filesynchronizer.server.status.RegionWalker;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
@@ -67,6 +69,7 @@ public class DirectorySynchronizer {
         this.workingDirectory = workingDirectory;
 
         startStatisticsPrintThread();
+        startProgressTrackingThread();
 
         fastDirectoryScanner.setWorkingDirectory(workingDirectory);
         fastDirectoryScanner.scanDirectoryAndFiles();
@@ -75,6 +78,19 @@ public class DirectorySynchronizer {
         slowDirectoryScanner.scanDirectoryAndFiles();
 
         transferCandidateFinder.lookForRegionsToTransfer();
+    }
+
+    private void startProgressTrackingThread() {
+        new Thread(null, () -> {
+            do {
+                try {
+                    new RegionWalker(files, clients).walk();
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } while (true);
+        }, "odox-progress-tracker").start();
     }
 
     private void startStatisticsPrintThread() {
@@ -171,17 +187,41 @@ public class DirectorySynchronizer {
     private Region getClientRegion(int clientId, int fileId, long offset) {
         Client client = clients.get(clientId);
 
-        String fileName = files.get(fileId).getName();
-
-        File clientFile = client.files.computeIfAbsent(fileId, integer -> {
-            File newFile = new File(fileName);
-            newFile.setId(fileId);
-            return newFile;
-        });
+        File clientFile = getOrCreateClientFile(fileId, client);
 
         Region serverRegion = files.get(fileId).getRegions().get(offset);
 
         ConcurrentHashMap<Long, Region> clientRegions = clientFile.getRegions();
         return clientRegions.computeIfAbsent(offset, (aLong) -> new Region(serverRegion.getOffset(), serverRegion.getSize()));
+    }
+
+    private File getOrCreateClientFile(int fileId, Client client) {
+        String fileName = files.get(fileId).getName();
+
+        return client.files.computeIfAbsent(fileId, integer -> {
+            File newFile = new File(fileName);
+            newFile.setId(fileId);
+            return newFile;
+        });
+    }
+
+    public void addBlankFile(BlankFileMessage blankFileMessage) {
+        int clientId = blankFileMessage.getClientId();
+        int fileId = blankFileMessage.getFileId();
+
+        Client client = clients.get(clientId);
+        File clientFile = getOrCreateClientFile(fileId, client);
+
+        ConcurrentHashMap<Long, Region> clientRegions = clientFile.getRegions();
+        ConcurrentHashMap<Long, Region> serverRegions = files.get(fileId).getRegions();
+
+        for (Region serverRegion : serverRegions.values()) {
+            long offset = serverRegion.getOffset();
+            long size = serverRegion.getSize();
+
+            Region region = clientRegions.computeIfAbsent(offset, (aLong) ->
+                    new Region(offset, size));
+            region.setQuickDigest(0);
+        }
     }
 }

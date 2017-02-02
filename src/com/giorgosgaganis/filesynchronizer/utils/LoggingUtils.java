@@ -32,6 +32,12 @@ public class LoggingUtils {
         Path logConfig = Paths.get("logging.properties");
         if (Files.exists(logConfig)) {
             LogManager.getLogManager().readConfiguration(Files.newInputStream(logConfig));
+        } else {
+          logConfig = Paths.get("/home/gaganis/IdeaProjects/DirectorySynchronizer", "logging.properties");
+            if (Files.exists(logConfig)) {
+                LogManager.getLogManager().readConfiguration(Files.newInputStream(logConfig));
+            }
         }
+
     }
 }

@@ -53,7 +53,7 @@ public class TransferCandidateFinder {
                     }
 
                     Thread.sleep(1000);
-                    new RegionWalker(files, clients).walk();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -147,7 +147,7 @@ public class TransferCandidateFinder {
             }
 
             if (doTransfer) {
-                TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, clientRegion.getSize());
+                TransferCandidate transferCandidate = new TransferCandidate(fileId, offset, serverRegion.getSize());
                 try {
 
                     removeFromOfferedIfExpired(client, transferCandidate);
@@ -170,7 +170,7 @@ public class TransferCandidateFinder {
 
         int expiryDelay = OFFER_EXPIRY_SECONDS * 1000;
         //TODO This is also a race the item found at index can be removed before reaching the following line so the get would
-        //retrieve the wrong item
+        //retrieve the wrong item. TODO Replace with removeIf
         if (index >= 0 && (client.offeredTransferCandidates.get(index).getOfferedTimeMillis() + expiryDelay) < System.currentTimeMillis()) {
             //TODO again the above comment is also true for the following line
             client.offeredTransferCandidates.remove(index);

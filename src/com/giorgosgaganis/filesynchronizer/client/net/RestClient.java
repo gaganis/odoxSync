@@ -21,6 +21,7 @@ package com.giorgosgaganis.filesynchronizer.client.net;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.client.RegionDataParams;
+import com.giorgosgaganis.filesynchronizer.messages.BlankFileMessage;
 import com.giorgosgaganis.filesynchronizer.messages.ClientFastDigestMessage;
 import org.apache.commons.io.IOUtils;
 
@@ -122,6 +123,16 @@ public class RestClient {
                 webTarget.request();
 
         Response post = invocationBuilder.post(Entity.entity(batch, MediaType.APPLICATION_JSON_TYPE));
+        post.close();
+    }
+
+    public void postBlankFileMessage(BlankFileMessage blankFileMessage) {
+        logger.fine("Posting BlankFileMessage");
+        WebTarget webTarget = restClient.target(SERVER_PATH + "blankfilemessage");
+        Invocation.Builder invocationBuilder =
+                webTarget.request();
+
+        Response post = invocationBuilder.post(Entity.entity(blankFileMessage, MediaType.APPLICATION_JSON_TYPE));
         post.close();
     }
 }

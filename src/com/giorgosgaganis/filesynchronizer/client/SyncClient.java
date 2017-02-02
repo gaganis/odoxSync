@@ -25,6 +25,7 @@ import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
 import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.files.FileScanner;
 import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.messages.BlankFileMessage;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -36,11 +37,14 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Created by gaganis on 14/01/17.
@@ -51,20 +55,20 @@ public class SyncClient {
     private final String workingDirectory;
     private int clientId = -1;
 
-    private final ConcurrentHashMap<Integer, File> files = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<Integer, File> allFiles = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, File> fastProcessedFiles = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, File> slowProcessedFiles = new ConcurrentHashMap<>();
 
     private final RestClient restClient;
     private final ClientMessageHandler clientMessageHandler;
     private final RegionDataHandler regionDataHandler;
 
-    private ExecutorService fileExecutorService = Executors.newFixedThreadPool(2);
-
-
     public SyncClient(String hostPort, String workingDirectory) {
         this.workingDirectory = workingDirectory;
         restClient = new RestClient(hostPort);
         clientMessageHandler = new ClientMessageHandler(restClient);
-        regionDataHandler = new RegionDataHandler(restClient, clientMessageHandler, files);
+        regionDataHandler = new RegionDataHandler(restClient, clientMessageHandler, allFiles);
     }
 
 
@@ -104,17 +108,91 @@ public class SyncClient {
     private void processFiles() {
         Collection<File> files = restClient.getFiles();
 
-        List<Future<?>> futureList = new ArrayList<>();
-        files.stream().forEach((File file) -> futureList.add(fileExecutorService.submit(() -> processFile(file))));
-        for (Future<?> future : futureList) {
-            //This could be a race. Can we be interrupted before the future finishes execution?
-            try {
-                future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+        initAbsolutePaths(files);
+
+        files.stream().forEach((file) -> allFiles.putIfAbsent(file.getId(), file));
+
+        List<File> blankFiles = files
+                .stream()
+                .filter((file) -> Files.notExists(file.getAbsolutePath()))
+                .collect(Collectors.toList());
+
+        FutureTask<?> blankTask = new FutureTask(
+                () -> blankFiles.stream().forEach(this::blankFile),
+                null);
+        blankTask.run();
+
+        List<File> existingFiles = files
+                .stream()
+                .filter((file) -> Files.exists(file.getAbsolutePath()))
+                .collect(Collectors.toList());
+
+        FutureTask<?> fastTask = new FutureTask(
+                () -> existingFiles.stream().forEach(this::fastScanFile),
+                null);
+        fastTask.run();
+
+        FutureTask<?> slowTask = new FutureTask(
+            () -> existingFiles.stream().forEach(this::slowScanFile),
+
+         null);
+        slowTask.run();
+
+        try {
+            blankTask.run();
+            fastTask.get();
+            slowTask.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initAbsolutePaths(Collection<File> fileCollection) {
+        Path root = Paths.get(workingDirectory).toAbsolutePath().normalize();
+        fileCollection.stream().forEach((file -> file.setAbsolutePath(root.resolve(file.getName()))));
+    }
+
+    private void blankFile(File file) {
+
+        try {
+            File existingFile = fastProcessedFiles.putIfAbsent(file.getId(), file);
+            if (existingFile == null) {
+                Path parent = file.getAbsolutePath().getParent();
+                Files.createDirectories(parent);
+
+                restClient.postBlankFileMessage(
+                        new BlankFileMessage(clientId, file.getId()));
             }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,
+                    "Failure while initializing blank file [" + file.getName() + "]", e);
+        }
+
+    }
+
+    private void slowScanFile(File file) {
+
+    }
+
+    private void fastScanFile(File file) {
+        try {
+            File existingFile = fastProcessedFiles.putIfAbsent(file.getId(), file);
+            if (existingFile == null) {
+                logger.fine("Beginning fast scan for file [" + file.getName() + "}");
+
+                FastDigestHandler fastDigestHandler =
+                        new ClientRegionMessageFastDigestHandler(clientId, clientMessageHandler);
+
+                FileScanner fileScanner = new FileScanner(workingDirectory,
+                        new FastFileProcessorFactory(fastDigestHandler), () -> {
+                });
+                fileScanner.scanFile(file);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,
+                    "Failure while fast scanning file [" + file.getName() + "]", e);
         }
     }
 
@@ -127,7 +205,7 @@ public class SyncClient {
 
         file.setAbsolutePath(filePath.toAbsolutePath());
 
-        boolean wasInTheMap = files.putIfAbsent(file.getId(), file) != null;
+        boolean wasInTheMap = allFiles.putIfAbsent(file.getId(), file) != null;
 
         try {
             if (Files.notExists(filePath)) {
@@ -140,7 +218,8 @@ public class SyncClient {
                 FastDigestHandler fastDigestHandler = new ClientRegionMessageFastDigestHandler(clientId, clientMessageHandler);
 
                 FileScanner fileScanner = new FileScanner(workingDirectory,
-                        new FastFileProcessorFactory(fastDigestHandler), () -> {});
+                        new FastFileProcessorFactory(fastDigestHandler), () -> {
+                });
                 fileScanner.scanFile(file);
             }
         } catch (IOException e) {
