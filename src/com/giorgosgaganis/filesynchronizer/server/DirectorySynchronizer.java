@@ -160,10 +160,7 @@ public class DirectorySynchronizer {
             ConcurrentHashMap<Long, Region> clientRegions = clientFile.getRegions();
             Region region = clientRegionMessage.getRegion();
 
-            Region existingRegion = clientRegions.put(region.getOffset(), region);
-            if (existingRegion != null) {
-                System.out.println("Replacing existingRegion = " + existingRegion);
-            }
+            clientRegions.put(region.getOffset(), region);
             logger.fine("Added client region " + region);
         } catch (Exception e) {
             e.printStackTrace();

@@ -76,11 +76,10 @@ public class RegionDataHandler extends Thread {
 
                         try (
                                 RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw");
-                                FileChannel channel = randomAccessFile.getChannel()
                         ) {
-                            MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, regionData.offset, regionData.size);
                             Hasher hasher = Hashing.sha256().newHasher();
-                            mappedByteBuffer.put(regionData.bytes);
+                            randomAccessFile.seek(regionData.offset);
+                            randomAccessFile.write(regionData.bytes);
                             statistics.bytesTransferred.addAndGet(regionData.size);
                             hasher.putBytes(regionData.bytes);
 
@@ -94,7 +93,6 @@ public class RegionDataHandler extends Thread {
                             }
 
                             clientMessageHandler.submitClientRegionMessage(clientId, file, regionData.offset, regionData.size, sum, hasher.hash().asBytes());
-                            regionData.response.close();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
