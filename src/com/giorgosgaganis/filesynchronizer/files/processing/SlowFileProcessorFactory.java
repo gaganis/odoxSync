@@ -19,13 +19,20 @@
 package com.giorgosgaganis.filesynchronizer.files.processing;
 
 import com.giorgosgaganis.filesynchronizer.File;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestHandler;
 
 /**
  * Created by gaganis on 24/01/17.
  */
 public class SlowFileProcessorFactory implements FileProcessorFactory {
+    private final SlowDigestHandler slowDigestHandler;
+
+    public SlowFileProcessorFactory(SlowDigestHandler slowDigestHandler) {
+        this.slowDigestHandler = slowDigestHandler;
+    }
+
     @Override
     public FileProcessor create(File file) {
-        return new SlowFileProcessor(file);
+        return new SlowFileProcessor(slowDigestHandler, file);
     }
 }

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files;
+package com.giorgosgaganis.filesynchronizer.files.processing.handlers;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
@@ -26,6 +26,10 @@ import java.nio.file.attribute.FileTime;
 /**
  * Created by gaganis on 23/01/17.
  */
-public interface FastDigestHandler {
-    void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime);
+public class ConsolePrintingFastDigestHandler implements FastDigestHandler {
+    @Override
+    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime) {
+        System.out.print("currentOffset = " + currentRegion.getOffset());
+        System.out.println(", fastDigest = " + fastDigest);
+    }
 }

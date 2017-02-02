@@ -23,7 +23,9 @@ import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.files.FileScanner;
 import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.files.processing.SlowFileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestHandler;
 import com.giorgosgaganis.filesynchronizer.server.files.FileRegionHashMapDigestHandler;
+import com.giorgosgaganis.filesynchronizer.server.files.HashMapSlowDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
@@ -170,7 +172,8 @@ public class DirectoryScanner {
         try {
             logger.fine("Starting scan for [" + file.getName() + "]");
 
-            FileScanner fileScanner = new FileScanner(workingDirectory, new SlowFileProcessorFactory(), activityStaler);
+            SlowDigestHandler slowDigestHandler = new HashMapSlowDigestHandler();
+            FileScanner fileScanner = new FileScanner(workingDirectory, new SlowFileProcessorFactory(slowDigestHandler), activityStaler);
             fileScanner.scanFile(file);
             logger.fine("Finished scan for [" + file.getName() + "]");
 

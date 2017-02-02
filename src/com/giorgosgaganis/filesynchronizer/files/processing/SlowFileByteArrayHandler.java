@@ -20,6 +20,7 @@ package com.giorgosgaganis.filesynchronizer.files.processing;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -35,16 +36,19 @@ public class SlowFileByteArrayHandler {
     private static final Logger logger = Logger.getLogger(SlowFileProcessor.class.getName());
 
     private static Statistics statistics = Statistics.INSTANCE;
+    private final SlowDigestHandler slowDigestHandler;
+
+    public SlowFileByteArrayHandler(SlowDigestHandler slowDigestHandler) {
+
+        this.slowDigestHandler = slowDigestHandler;
+    }
 
     public void handleBytes(byte[] buffer, File file, long batchAreaOffset, Region currentRegion, FileTime batchLastModifiedTime) {
 
         byte[] slowDigest = calculateSlowDigest(batchAreaOffset, currentRegion.getOffset(), currentRegion.getSize(), file.getName(), buffer);
-        Region region = file.getRegions().get(currentRegion.getOffset());
-        region.setSlowDigest(slowDigest);
-        region.setSlowModifiedTime(batchLastModifiedTime);
+        slowDigestHandler.handleSlowDigest(file, currentRegion, batchLastModifiedTime, slowDigest);
         statistics.bytesReadSlow.addAndGet(currentRegion.getSize());
     }
-
 
     private static byte[] calculateSlowDigest(long batchAreaOffset, long offset, long size, String fileName, byte[] buffer) {
         byte[] slowDigest;

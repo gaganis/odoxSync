@@ -20,7 +20,7 @@ package com.giorgosgaganis.filesynchronizer.files.processing;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
-import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.nio.file.attribute.FileTime;

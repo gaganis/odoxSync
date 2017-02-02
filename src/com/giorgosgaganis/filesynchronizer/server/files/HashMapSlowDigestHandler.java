@@ -16,20 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files;
+package com.giorgosgaganis.filesynchronizer.server.files;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestHandler;
 
 import java.nio.file.attribute.FileTime;
 
 /**
- * Created by gaganis on 23/01/17.
+ * Created by gaganis on 02/02/17.
  */
-public class ConsolePrintingFastDigestHandler implements FastDigestHandler {
-    @Override
-    public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime) {
-        System.out.print("currentOffset = " + currentRegion.getOffset());
-        System.out.println(", fastDigest = " + fastDigest);
+public class HashMapSlowDigestHandler implements SlowDigestHandler {
+    public void handleSlowDigest(File file, Region currentRegion, FileTime batchLastModifiedTime, byte[] slowDigest) {
+        Region region = file.getRegions().get(currentRegion.getOffset());
+        region.setSlowDigest(slowDigest);
+        region.setSlowModifiedTime(batchLastModifiedTime);
     }
 }

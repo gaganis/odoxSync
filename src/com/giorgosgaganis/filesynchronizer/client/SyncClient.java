@@ -22,7 +22,7 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
-import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.files.FileScanner;
 import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.messages.BlankFileMessage;

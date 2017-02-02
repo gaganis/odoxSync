@@ -16,23 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with odoxSync.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.giorgosgaganis.filesynchronizer.files.processing;
+package com.giorgosgaganis.filesynchronizer.files.processing.handlers;
 
 import com.giorgosgaganis.filesynchronizer.File;
-import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.Region;
+
+import java.nio.file.attribute.FileTime;
 
 /**
- * Created by gaganis on 24/01/17.
+ * Created by gaganis on 02/02/17.
  */
-public class FastFileProcessorFactory implements FileProcessorFactory {
-    private FastDigestHandler fastDigestHandler;
-
-    public FastFileProcessorFactory(FastDigestHandler fastDigestHandler) {
-        this.fastDigestHandler = fastDigestHandler;
-    }
-
-    @Override
-    public FileProcessor create(File file) {
-        return new FastFileProcessor(fastDigestHandler, file);
-    }
+public interface SlowDigestHandler {
+    void handleSlowDigest(File file, Region currentRegion, FileTime batchLastModifiedTime, byte[] slowDigest);
 }

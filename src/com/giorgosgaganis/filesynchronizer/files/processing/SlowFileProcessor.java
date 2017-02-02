@@ -21,6 +21,7 @@ package com.giorgosgaganis.filesynchronizer.files.processing;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.files.BatchArea;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
@@ -47,16 +48,18 @@ public class SlowFileProcessor implements FileProcessor {
 
     private final LinkedList<Long> currentBatchRegions = new LinkedList<>();
 
-    private final SlowFileByteArrayHandler fileByteArrayHandler = new SlowFileByteArrayHandler();
+    private final SlowFileByteArrayHandler fileByteArrayHandler;
     private FileTime batchLastModifiedTime;
 
-    public SlowFileProcessor(File file) {
+    public SlowFileProcessor(SlowDigestHandler slowDigestHandler, File file) {
         this.file = file;
         regions = file.getRegions();
         regionsToProcess = regions.keySet()
                 .stream()
                 .sorted()
                 .collect(Collectors.toCollection(LinkedList::new));
+
+        fileByteArrayHandler = new SlowFileByteArrayHandler(slowDigestHandler);
     }
 
     @Override

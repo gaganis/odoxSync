@@ -4,7 +4,7 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.files.BatchArea;
-import com.giorgosgaganis.filesynchronizer.files.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.server.files.FileProcessorBatchTest;
 import com.giorgosgaganis.filesynchronizer.server.files.FileRegionHashMapDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Contants;

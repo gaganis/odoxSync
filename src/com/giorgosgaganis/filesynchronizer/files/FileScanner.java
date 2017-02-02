@@ -23,6 +23,7 @@ import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessor;
 import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.ConsolePrintingFastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.server.ActivityStaler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 

@@ -162,6 +162,6 @@ public class FileProcessorBatchTest {
         rc.calculateForSize(fileSize);
 
         return new SlowFileProcessor(
-                file);
+                (file1, currentRegion, batchLastModifiedTime, slowDigest) -> {}, file);
     }
 }
