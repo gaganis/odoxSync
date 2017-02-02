@@ -85,6 +85,12 @@ public class DirectoryScanner {
                                             workingDirectory,
                                             name
                                     ).toAbsolutePath());
+                            RegionCalculator rc = new RegionCalculator(workingDirectory, file);
+                            try {
+                                rc.calculate();
+                            } catch (IOException e) {
+                                logger.log(Level.SEVERE, "Error while getting size of file", e);
+                            }
 
                             files.put(id, file);
                             logger.fine("Added new tracked file " + id + ":[" + name + "]");
