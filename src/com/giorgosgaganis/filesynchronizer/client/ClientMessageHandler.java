@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class ClientMessageHandler {
     private static final Logger logger = Logger.getLogger(ClientMessageHandler.class.getName());
 
-    public static final int BATCH_SIZE = 100;
+    public static final int BATCH_SIZE = 200;
 
     private final RestClient restClient;
 

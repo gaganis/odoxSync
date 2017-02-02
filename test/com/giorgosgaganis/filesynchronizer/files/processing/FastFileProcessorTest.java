@@ -66,15 +66,13 @@ public class FastFileProcessorTest {
         File file = new File(fileName);
         FileProcessorBatchTest.updateAbsolutePath(file, workingDirectory, fileName);
 
-        Supplier<FileProcessor> fileProcessorSupplier = () -> getFileProcessor(fileSize,workingDirectory,file);
+        Supplier<FileProcessor> fileProcessorSupplier = () -> getFileProcessor(fileSize, workingDirectory, file);
         //1st pass
         FileProcessorBatchTest.testTouchSkip(file, fileProcessorSupplier, Contants.REGION_SIZE);
     }
 
     private static FileProcessor getFileProcessor(long fileSize, String workingDirectory, File file) {
-        RegionCalculator rc = new RegionCalculator(workingDirectory, file);
-
-        rc.calculateForSize(fileSize);
+        RegionCalculator.calculateForSize(file, fileSize);
 
         return new FastFileProcessor(
                 new FileRegionHashMapDigestHandler(),

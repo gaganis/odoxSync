@@ -24,6 +24,7 @@ import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
@@ -74,24 +75,39 @@ public class Progress {
         Map<Integer, List<FileProgress>> result = new HashMap<>();
 
         for (Client client : clients.values()) {
-            List<FileProgress> fileProgresses = new ArrayList<>();
+
+            List<FileProgress> fileProgresses = getFileProgresses(serverFiles, client);
             result.put(client.getId(), fileProgresses);
-
-            ConcurrentHashMap<Integer, File> files = client.getFiles();
-            for (File file : files.values()
-                    .stream()
-                    .sorted(Comparator.comparing(File::getName))
-                    .collect(Collectors.toList())) {
-                FileProgress fileProgress = new FileProgress();
-                fileProgress.name = file.getName();
-                fileProgress.metadataSynced = file.getMetadataReceivedPercent();
-
-                File serverFile = serverFiles.get(file.getId());
-                fileProgress.fastDigestScanned = serverFile.getFastUpToDatePercent();
-                fileProgress.slowDigestScanned = serverFile.getSlowUpToDatePercent();
-                fileProgresses.add(fileProgress);
-            }
         }
         return result;
+    }
+
+    private List<FileProgress> getFileProgresses(ConcurrentHashMap<Integer, File> serverFiles, Client client) {
+        List<FileProgress> fileProgresses = new ArrayList<>();
+        ConcurrentHashMap<Integer, File> files = client.getFiles();
+        for (File file : files.values()
+                .stream()
+                .sorted(Comparator.comparing(File::getName))
+                .collect(Collectors.toList())) {
+            FileProgress fileProgress = new FileProgress();
+            fileProgress.name = file.getName();
+            fileProgress.metadataSynced = file.getMetadataReceivedPercent();
+
+            File serverFile = serverFiles.get(file.getId());
+            fileProgress.fastDigestScanned = serverFile.getFastUpToDatePercent();
+            fileProgress.slowDigestScanned = serverFile.getSlowUpToDatePercent();
+            fileProgresses.add(fileProgress);
+        }
+        return fileProgresses;
+    }
+
+    @GET
+    @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<FileProgress> getForClient(@PathParam("id") int id) {
+        ConcurrentHashMap<Integer, Client> clients = DirectorySynchronizer.INSTANCE.clients;
+        ConcurrentHashMap<Integer, File> serverFiles = DirectorySynchronizer.INSTANCE.files;
+
+        return getFileProgresses(serverFiles, clients.get(id));
     }
 }

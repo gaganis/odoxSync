@@ -43,10 +43,10 @@ public class RegionCalculator {
         Path path = Paths.get(workingDirectory, file.getName());
         long fileSize = Files.size(path);
 
-        calculateForSize(fileSize);
+        calculateForSize(file, fileSize);
     }
 
-    public void calculateForSize(long fileSize) {
+    public static void calculateForSize(File file, long fileSize) {
         file.setSize(fileSize);
 
         ConcurrentHashMap<Long, Region> regions = file.getRegions();

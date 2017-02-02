@@ -157,9 +157,8 @@ public class FileProcessorBatchTest {
     }
 
     private static FileProcessor getFileProcessor(long fileSize, String workingDirectory, File file) {
-        RegionCalculator rc = new RegionCalculator(workingDirectory, file);
 
-        rc.calculateForSize(fileSize);
+        RegionCalculator.calculateForSize(file, fileSize);
 
         return new SlowFileProcessor(
                 (file1, currentRegion, batchLastModifiedTime, slowDigest) -> {}, file);

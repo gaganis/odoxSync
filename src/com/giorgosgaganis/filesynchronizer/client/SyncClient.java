@@ -22,9 +22,9 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
-import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.files.FileScanner;
 import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
 import com.giorgosgaganis.filesynchronizer.messages.BlankFileMessage;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.google.common.hash.Hasher;
@@ -133,9 +133,9 @@ public class SyncClient {
         fastTask.run();
 
         FutureTask<?> slowTask = new FutureTask(
-            () -> existingFiles.stream().forEach(this::slowScanFile),
+                () -> existingFiles.stream().forEach(this::slowScanFile),
 
-         null);
+                null);
         slowTask.run();
 
         try {
@@ -157,14 +157,14 @@ public class SyncClient {
     private void blankFile(File file) {
 
         try {
-            File existingFile = fastProcessedFiles.putIfAbsent(file.getId(), file);
-            if (existingFile == null) {
+            if ((!fastProcessedFiles.containsKey(file.getId()))) {
                 Path parent = file.getAbsolutePath().getParent();
                 Files.createDirectories(parent);
 
                 restClient.postBlankFileMessage(
                         new BlankFileMessage(clientId, file.getId()));
             }
+            fastProcessedFiles.put(file.getId(), file);
         } catch (Exception e) {
             logger.log(Level.SEVERE,
                     "Failure while initializing blank file [" + file.getName() + "]", e);
@@ -178,8 +178,7 @@ public class SyncClient {
 
     private void fastScanFile(File file) {
         try {
-            File existingFile = fastProcessedFiles.putIfAbsent(file.getId(), file);
-            if (existingFile == null) {
+            if (!fastProcessedFiles.containsKey(file.getId())) {
                 logger.fine("Beginning fast scan for file [" + file.getName() + "}");
 
                 FastDigestHandler fastDigestHandler =
@@ -189,6 +188,8 @@ public class SyncClient {
                         new FastFileProcessorFactory(fastDigestHandler), () -> {
                 });
                 fileScanner.scanFile(file);
+                fastProcessedFiles.put(file.getId(), file);
+                logger.fine("Done fast scan for file [" + file.getName() + "}");
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE,
@@ -233,8 +234,7 @@ public class SyncClient {
                 FileChannel channel = randomAccessFile.getChannel()
 
         ) {
-            RegionCalculator regionCalculator = new RegionCalculator(workingDirectory, file);
-            regionCalculator.calculateForSize(file.getSize());
+            RegionCalculator.calculateForSize(file, file.getSize());
 
 
             for (Region region : file.getRegions().values()) {
