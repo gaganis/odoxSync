@@ -18,23 +18,28 @@
  */
 package com.giorgosgaganis.filesynchronizer.server;
 
+import com.fasterxml.jackson.databind.deser.Deserializers;
 import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.client.ClientRegionMessage;
 import com.giorgosgaganis.filesynchronizer.messages.BlankFileMessage;
 import com.giorgosgaganis.filesynchronizer.messages.ClientFastDigestMessage;
+import com.giorgosgaganis.filesynchronizer.messages.ClientSlowDigestMessage;
 import com.giorgosgaganis.filesynchronizer.server.candidates.TransferCandidateFinder;
 import com.giorgosgaganis.filesynchronizer.server.status.RegionWalker;
 import com.giorgosgaganis.filesynchronizer.utils.LoggingUtils;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+
+import static com.giorgosgaganis.filesynchronizer.utils.Contants.REGION_SIZE;
 
 /**
  * Created by gaganis on 13/01/17.
@@ -212,6 +217,9 @@ public class DirectorySynchronizer {
         ConcurrentHashMap<Long, Region> clientRegions = clientFile.getRegions();
         ConcurrentHashMap<Long, Region> serverRegions = files.get(fileId).getRegions();
 
+        byte[] emptyByteArrayRegionSize = new byte[(int) REGION_SIZE];
+        byte[] slowDigestForWholeEmptyRegion = Base64.getEncoder().encode(emptyByteArrayRegionSize);
+
         for (Region serverRegion : serverRegions.values()) {
             long offset = serverRegion.getOffset();
             long size = serverRegion.getSize();
@@ -219,6 +227,26 @@ public class DirectorySynchronizer {
             Region region = clientRegions.computeIfAbsent(offset, (aLong) ->
                     new Region(offset, size));
             region.setQuickDigest(0);
+            if(region.getSize() == REGION_SIZE) {
+                region.setSlowDigest(slowDigestForWholeEmptyRegion);
+            } else {
+                byte[] emptyArraySmallerSize = new byte[(int) region.getSize()];
+                region.setSlowDigest(
+                        Base64.getEncoder()
+                                .encode(emptyArraySmallerSize));
+            }
+        }
+    }
+
+    public void addClientSlowDigests(List<ClientSlowDigestMessage> clientSlowDigestMessage) {
+        for (ClientSlowDigestMessage slowDigestMessage : clientSlowDigestMessage) {
+            int clientId = slowDigestMessage.getClientId();
+            int fileId = slowDigestMessage.getFileId();
+            long offset = slowDigestMessage.getOffset();
+            byte[] slowDigest = slowDigestMessage.getSlowDigest();
+
+            Region clientRegion = getClientRegion(clientId, fileId, offset);
+            clientRegion.setSlowDigest(slowDigest);
         }
     }
 }

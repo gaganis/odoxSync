@@ -22,6 +22,7 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
 import com.giorgosgaganis.filesynchronizer.messages.ClientFastDigestMessage;
+import com.giorgosgaganis.filesynchronizer.messages.ClientSlowDigestMessage;
 
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,6 +40,7 @@ public class ClientMessageHandler {
     private final RestClient restClient;
 
     LinkedBlockingQueue<ClientFastDigestMessage> fastMessagesQueue = new LinkedBlockingQueue<>(BATCH_SIZE);
+    LinkedBlockingQueue<ClientSlowDigestMessage> slowMessagesQueue = new LinkedBlockingQueue<>(BATCH_SIZE);
 
     public ClientMessageHandler(RestClient restClient) {
         this.restClient = restClient;
@@ -61,6 +63,23 @@ public class ClientMessageHandler {
                 }
             } while (true);
         }, "fast digest message handler").start();
+
+        new Thread(null, () -> {
+            do {
+                try {
+                    ArrayList<ClientSlowDigestMessage> batch = new ArrayList<>(BATCH_SIZE);
+                    int drainedNo = slowMessagesQueue.drainTo(batch, BATCH_SIZE);
+                    if(drainedNo == 0) {
+                        Thread.sleep(1000);
+                    } else {
+                        restClient.postSlowDigestMessageBatch(batch);
+                    }
+
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } while (true);
+        }, "slow digest message handler").start();
     }
 
     private void submit(ClientRegionMessage clientRegionMessage) {
@@ -80,6 +99,11 @@ public class ClientMessageHandler {
     public void submitFastDigest(int clientId, int fileId, long offset, Integer fastDigest) throws InterruptedException {
         ClientFastDigestMessage message = new ClientFastDigestMessage(clientId, fileId, offset, fastDigest);
         fastMessagesQueue.put(message);
+    }
+
+    public void submitSlowDigest(int clientId, int fileId, long offset, byte[] slowDigest) throws InterruptedException {
+        ClientSlowDigestMessage message = new ClientSlowDigestMessage(clientId, fileId, offset, slowDigest);
+        slowMessagesQueue.put(message);
     }
 
     public void submitClientRegionMessage(int clientId, File file, long offset, long size, Integer sum, byte[] slowDigest) {

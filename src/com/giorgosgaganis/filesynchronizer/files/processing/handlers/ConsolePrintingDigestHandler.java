@@ -22,14 +22,22 @@ import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
 
 import java.nio.file.attribute.FileTime;
+import java.util.Base64;
 
 /**
  * Created by gaganis on 23/01/17.
  */
-public class ConsolePrintingFastDigestHandler implements FastDigestHandler {
+public class ConsolePrintingDigestHandler implements FastDigestHandler, SlowDigestHandler {
     @Override
     public void handleFastDigest(byte[] buffer, File file, Region currentRegion, Integer fastDigest, FileTime fileLastModifiedTime) {
         System.out.print("currentOffset = " + currentRegion.getOffset());
         System.out.println(", fastDigest = " + fastDigest);
+    }
+
+    @Override
+    public void handleSlowDigest(File file, Region currentRegion, FileTime batchLastModifiedTime, byte[] slowDigest) {
+
+        System.out.print("currentOffset = " + currentRegion.getOffset());
+        System.out.println(", fastDigest = " + Base64.getEncoder().encodeToString(slowDigest));
     }
 }

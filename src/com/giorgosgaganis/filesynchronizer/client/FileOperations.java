@@ -24,7 +24,9 @@ import com.giorgosgaganis.filesynchronizer.RegionCalculator;
 import com.giorgosgaganis.filesynchronizer.client.net.RestClient;
 import com.giorgosgaganis.filesynchronizer.files.FileScanner;
 import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.files.processing.SlowFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestHandler;
 import com.giorgosgaganis.filesynchronizer.messages.BlankFileMessage;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -141,6 +143,24 @@ public class FileOperations {
 
     private void slowScanFile(File file) {
 
+        try {
+            if (!slowProcessedFiles.containsKey(file.getId())) {
+                logger.fine("Beginning slow scan for file [" + file.getName() + "}");
+
+                SlowDigestHandler slowDigestHandler =
+                        new ClientRegionMessageSlowDigestHandler(clientId, clientMessageHandler);
+
+                FileScanner fileScanner = new FileScanner(workingDirectory,
+                        new SlowFileProcessorFactory(slowDigestHandler), () -> {
+                });
+                fileScanner.scanFile(file);
+                slowProcessedFiles.put(file.getId(), file);
+                logger.fine("Done slow scan for file [" + file.getName() + "}");
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,
+                    "Failure while slow scanning file [" + file.getName() + "]", e);
+        }
     }
 
     private void fastScanFile(File file) {

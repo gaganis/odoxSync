@@ -20,10 +20,10 @@ package com.giorgosgaganis.filesynchronizer.files;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.RegionCalculator;
-import com.giorgosgaganis.filesynchronizer.files.processing.FastFileProcessorFactory;
 import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessor;
 import com.giorgosgaganis.filesynchronizer.files.processing.FileProcessorFactory;
-import com.giorgosgaganis.filesynchronizer.files.processing.handlers.ConsolePrintingFastDigestHandler;
+import com.giorgosgaganis.filesynchronizer.files.processing.SlowFileProcessorFactory;
+import com.giorgosgaganis.filesynchronizer.files.processing.handlers.ConsolePrintingDigestHandler;
 import com.giorgosgaganis.filesynchronizer.server.ActivityStaler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
@@ -69,6 +69,10 @@ public class FileScanner {
             while (fileProcessor.hasNextBatchArea()) {
                 BatchArea batchArea = fileProcessor.nextBatchArea();
 
+                if(batchArea.isSkip) {
+                    continue;
+                }
+
                 fileProcessor.doBeforeBatchByteRead();
 
                 MappedByteBuffer mappedByteBuffer = channel.map(
@@ -88,13 +92,15 @@ public class FileScanner {
 
         long start = System.currentTimeMillis();
         String workingDirectory = ".";
-        File file = new File("testdata/source/ubuntu-16.04.1-desktop-amd64.iso");
+        String name = args[0];// "testdata/target/ubuntu-16.04.1-desktop-amd64.iso";
+        File file = new File(name);
+        file.setAbsolutePath(Paths.get(name).toAbsolutePath());
 
         RegionCalculator rc = new RegionCalculator(workingDirectory, file);
 
         rc.calculate();
         FileScanner scanner = new FileScanner(workingDirectory,
-                new FastFileProcessorFactory(new ConsolePrintingFastDigestHandler()), () -> {});
+                new SlowFileProcessorFactory(new ConsolePrintingDigestHandler()), () -> {});
         scanner.scanFile(file);
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("System.currentTimeMillis() - start = " + elapsedTime);

@@ -161,6 +161,6 @@ public class FileProcessorBatchTest {
         RegionCalculator.calculateForSize(file, fileSize);
 
         return new SlowFileProcessor(
-                (file1, currentRegion, batchLastModifiedTime, slowDigest) -> {}, file);
+                (file1, currentRegion, batchLastModifiedTime, slowDigest) -> currentRegion.setSlowModifiedTime(batchLastModifiedTime), file);
     }
 }

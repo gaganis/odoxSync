@@ -78,7 +78,7 @@ public class RegionDataHandler extends Thread {
                             Hasher hasher = Hashing.sha256().newHasher();
                             randomAccessFile.seek(regionData.offset);
                             randomAccessFile.write(regionData.bytes);
-                            statistics.bytesTransferred.addAndGet(regionData.size);
+                            statistics.bytesTransferred.addAndGet(regionData.bytes.length);
                             hasher.putBytes(regionData.bytes);
 
                             long sampleSize = regionData.size <= SAMPLE_SIZE ? regionData.size : SAMPLE_SIZE;
