@@ -114,7 +114,7 @@ public class FileProcessorBatchTest {
     public static void testTouchSkip(File file, Supplier<FileProcessor> fileProcessorSupplier, long byteArraySize) throws IOException, InterruptedException {
         FileProcessor fileProcessor = fileProcessorSupplier.get();
 
-        fileProcessor.doBeforeFileRead();
+        fileProcessor.doBeforeFileRead(null);
         BatchArea batchArea = fileProcessor.nextBatchArea();
         assertThat(batchArea.isSkip).isFalse();
 
@@ -125,7 +125,7 @@ public class FileProcessorBatchTest {
 
         //2nd pass
         fileProcessor = fileProcessorSupplier.get();
-        fileProcessor.doBeforeFileRead();
+        fileProcessor.doBeforeFileRead(null);
         batchArea = fileProcessor.nextBatchArea();
         assertThat(batchArea.isSkip).isTrue();
 
@@ -134,7 +134,7 @@ public class FileProcessorBatchTest {
 
         //3rd pass
         fileProcessor = fileProcessorSupplier.get();
-        fileProcessor.doBeforeFileRead();
+        fileProcessor.doBeforeFileRead(null);
         batchArea = fileProcessor.nextBatchArea();
         assertThat(batchArea.isSkip).isFalse();
     }

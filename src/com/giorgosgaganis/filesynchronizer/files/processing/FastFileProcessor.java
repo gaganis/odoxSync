@@ -24,6 +24,7 @@ import com.giorgosgaganis.filesynchronizer.files.BatchArea;
 import com.giorgosgaganis.filesynchronizer.files.processing.handlers.FastDigestHandler;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 import java.util.LinkedList;
@@ -58,6 +59,11 @@ public class FastFileProcessor implements FileProcessor {
     }
 
     @Override
+    public File getFile() {
+        return file;
+    }
+
+    @Override
     public void process(byte[] buffer, BatchArea batchArea) {
 
         Region currentRegion = regions.get(batchArea.currentBatchRegions.remove());
@@ -85,7 +91,7 @@ public class FastFileProcessor implements FileProcessor {
     }
 
     @Override
-    public void doBeforeFileRead() throws IOException {
+    public void doBeforeFileRead(RandomAccessFile randomAccessFile) throws IOException {
         fileLastModifiedTime = Files.getLastModifiedTime(file.getAbsolutePath());
     }
 

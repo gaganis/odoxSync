@@ -28,6 +28,8 @@ public class Statistics {
     public AtomicLong bytesReadFast = new AtomicLong(0);
     public AtomicLong bytesReadSlow = new AtomicLong(0);
 
+    public AtomicLong collisions = new AtomicLong(0);
+
     private Statistics() {
     }
 

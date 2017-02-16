@@ -86,15 +86,14 @@ public class FileOperations {
                 .filter((file) -> Files.notExists(file.getAbsolutePath()))
                 .collect(Collectors.toList());
 
-        FutureTask<?> blankTask = new FutureTask(
-                () -> blankFiles.stream().forEach(this::blankFile),
-                null);
-        blankTask.run();
+        blankFiles.stream().forEach(this::blankFile);
 
         List<File> existingFiles = files
                 .stream()
                 .filter((file) -> Files.exists(file.getAbsolutePath()))
                 .collect(Collectors.toList());
+
+        existingFiles.stream().forEach(this::resizeFile);
 
         FutureTask<?> fastTask = new FutureTask(
                 () -> existingFiles.stream().forEach(this::fastScanFile),
@@ -108,12 +107,24 @@ public class FileOperations {
         slowTask.run();
 
         try {
-            blankTask.run();
             fastTask.get();
             slowTask.get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void resizeFile(File file) {
+        Path absolutePath = file.getAbsolutePath();
+        try (
+                RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw");
+        ) {
+            if(Files.size(absolutePath) < file.getSize()) {
+                randomAccessFile.setLength(file.getSize());
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

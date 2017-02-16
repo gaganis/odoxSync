@@ -25,6 +25,7 @@ import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestH
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 import java.util.LinkedList;
@@ -40,7 +41,6 @@ public class SlowFileProcessor implements FileProcessor {
 
     public static final int BATCH_SIZE = 32;
 
-    private static Statistics statistics = Statistics.INSTANCE;
     private final File file;
     private final ConcurrentHashMap<Long, Region> regions;
 
@@ -60,6 +60,11 @@ public class SlowFileProcessor implements FileProcessor {
                 .collect(Collectors.toCollection(LinkedList::new));
 
         fileByteArrayHandler = new SlowFileByteArrayHandler(slowDigestHandler);
+    }
+
+    @Override
+    public File getFile() {
+        return file;
     }
 
     @Override
@@ -111,6 +116,6 @@ public class SlowFileProcessor implements FileProcessor {
     }
 
     @Override
-    public void doBeforeFileRead() throws IOException {
+    public void doBeforeFileRead(RandomAccessFile randomAccessFile) throws IOException {
     }
 }

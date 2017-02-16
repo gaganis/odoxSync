@@ -29,8 +29,6 @@ import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,14 +59,15 @@ public class FileScanner {
         Path filePath = Paths.get(workingDirectory, file.getName());
         activityStaler.waitToDoActivity();
 
-        fileProcessor.doBeforeFileRead();
         try (
                 RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "rw");
         ) {
+            fileProcessor.doBeforeFileRead(randomAccessFile);
+
             while (fileProcessor.hasNextBatchArea()) {
                 BatchArea batchArea = fileProcessor.nextBatchArea();
 
-                if(batchArea.isSkip) {
+                if (batchArea.isSkip) {
                     continue;
                 }
 
@@ -97,7 +96,8 @@ public class FileScanner {
 
         rc.calculate();
         FileScanner scanner = new FileScanner(workingDirectory,
-                new SlowFileProcessorFactory(new ConsolePrintingDigestHandler()), () -> {});
+                new SlowFileProcessorFactory(new ConsolePrintingDigestHandler()), () -> {
+        });
         scanner.scanFile(file);
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("System.currentTimeMillis() - start = " + elapsedTime);

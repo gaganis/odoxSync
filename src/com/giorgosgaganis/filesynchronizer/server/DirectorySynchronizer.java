@@ -104,19 +104,11 @@ public class DirectorySynchronizer {
             do {
                 AtomicLong counter = Statistics.INSTANCE.bytesTransferred;
                 Statistics.printStatistic("transfered", counter);
-            } while (true);
-        }).start();
-        new Thread(() -> {
 
-            do {
-                AtomicLong counter = Statistics.INSTANCE.bytesReadFast;
+                counter = Statistics.INSTANCE.bytesReadFast;
                 Statistics.printStatistic("read fast", counter);
-            } while (true);
-        }).start();
-        new Thread(() -> {
 
-            do {
-                AtomicLong counter = Statistics.INSTANCE.bytesReadSlow;
+                counter = Statistics.INSTANCE.bytesReadSlow;
                 Statistics.printStatistic("read slow", counter);
             } while (true);
         }).start();

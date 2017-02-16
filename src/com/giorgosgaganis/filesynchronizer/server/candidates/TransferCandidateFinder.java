@@ -21,7 +21,8 @@ package com.giorgosgaganis.filesynchronizer.server.candidates;
 import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
-import com.giorgosgaganis.filesynchronizer.server.status.RegionWalker;
+import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
+import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -129,6 +130,7 @@ public class TransferCandidateFinder {
                 return false;
             }
 
+            boolean isConflict = false;
             if (!serverQuickDigest.equals(clientQuickDigest)) {
                 doTransfer = true;
             } else {
@@ -139,7 +141,7 @@ public class TransferCandidateFinder {
                     for (int i = 0; i < serverByteDigest.length; i++) {
                         if (clientByteDigest[i] != serverByteDigest[i]) {
                             doTransfer = true;
-                            logger.info("Collision detected");
+                            isConflict = true;
                             break;
                         }
                     }
@@ -156,6 +158,10 @@ public class TransferCandidateFinder {
                     if (!client.transferCandidateQueueWrapper.contains(transferCandidate)
                             && !client.offeredTransferCandidates.contains(transferCandidate)) {
                         client.transferCandidateQueueWrapper.put(transferCandidate);
+                        if(isConflict) {
+                            logger.info("Collision detected");
+                            Statistics.INSTANCE.collisions.incrementAndGet();
+                        }
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

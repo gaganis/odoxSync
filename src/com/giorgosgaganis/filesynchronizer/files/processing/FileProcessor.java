@@ -18,14 +18,18 @@
  */
 package com.giorgosgaganis.filesynchronizer.files.processing;
 
+import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.files.BatchArea;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * Created by gaganis on 23/01/17.
  */
 public interface FileProcessor {
+    File getFile();
+
     void process(byte[] buffer, BatchArea batchArea);
 
     boolean hasNextBatchArea();
@@ -34,5 +38,5 @@ public interface FileProcessor {
 
     void doBeforeBatchByteRead() throws IOException;
 
-    void doBeforeFileRead() throws IOException;
+    void doBeforeFileRead(RandomAccessFile randomAccessFile) throws IOException;
 }
