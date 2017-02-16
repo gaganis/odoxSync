@@ -1,3 +1,4 @@
 out/
 logs/
 testdata/
+.sonar/

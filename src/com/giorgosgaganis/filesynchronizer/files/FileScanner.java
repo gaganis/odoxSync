@@ -64,7 +64,6 @@ public class FileScanner {
         fileProcessor.doBeforeFileRead();
         try (
                 RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "rw");
-                FileChannel channel = randomAccessFile.getChannel()
         ) {
             while (fileProcessor.hasNextBatchArea()) {
                 BatchArea batchArea = fileProcessor.nextBatchArea();
@@ -75,12 +74,9 @@ public class FileScanner {
 
                 fileProcessor.doBeforeBatchByteRead();
 
-                MappedByteBuffer mappedByteBuffer = channel.map(
-                        FileChannel.MapMode.READ_ONLY,
-                        batchArea.offset,
-                        batchArea.size);
-                byte[] buffer = new byte[mappedByteBuffer.remaining()];
-                mappedByteBuffer.get(buffer);
+                byte[] buffer = new byte[(int) batchArea.size];
+                randomAccessFile.seek(batchArea.offset);
+                randomAccessFile.readFully(buffer);
                 fileProcessor.process(buffer, batchArea);
 
                 activityStaler.waitToDoActivity();
@@ -93,8 +89,9 @@ public class FileScanner {
         long start = System.currentTimeMillis();
         String workingDirectory = ".";
         String name = args[0];// "testdata/target/ubuntu-16.04.1-desktop-amd64.iso";
+        Path absolutePath = Paths.get(name).toAbsolutePath();
         File file = new File(name);
-        file.setAbsolutePath(Paths.get(name).toAbsolutePath());
+        file.setAbsolutePath(absolutePath);
 
         RegionCalculator rc = new RegionCalculator(workingDirectory, file);
 

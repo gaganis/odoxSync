@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,6 +86,9 @@ public class RestClient {
                 webTarget.request();
 
         Response post = invocationBuilder.post(Entity.entity(clientRegionMessage, MediaType.APPLICATION_JSON_TYPE));
+        if(!Response.Status.Family.SUCCESSFUL.equals(post.getStatusInfo().getFamily())){
+            logger.severe(post.getStatusInfo().toString());
+        }
         post.close();
 
     }
@@ -124,6 +128,9 @@ public class RestClient {
                 webTarget.request();
 
         Response post = invocationBuilder.post(Entity.entity(batch, MediaType.APPLICATION_JSON_TYPE));
+        if(!Response.Status.Family.SUCCESSFUL.equals(post.getStatusInfo().getFamily())){
+            logger.severe(post.getStatusInfo().toString());
+        }
         post.close();
     }
 
@@ -134,16 +141,23 @@ public class RestClient {
                 webTarget.request();
 
         Response post = invocationBuilder.post(Entity.entity(blankFileMessage, MediaType.APPLICATION_JSON_TYPE));
+        if(!Response.Status.Family.SUCCESSFUL.equals(post.getStatusInfo().getFamily())){
+            logger.severe(post.getStatusInfo().toString());
+        }
         post.close();
     }
 
-    public void postSlowDigestMessageBatch(ArrayList<ClientSlowDigestMessage> batch) {
+    public void postSlowDigestMessageBatch(List<ClientSlowDigestMessage> batch) {
         logger.fine("Posting batch of ClientSlowDigestMessages");
         WebTarget webTarget = restClient.target(SERVER_PATH + "clientslowdigestmessages");
         Invocation.Builder invocationBuilder =
                 webTarget.request();
 
-        Response post = invocationBuilder.post(Entity.entity(batch, MediaType.APPLICATION_JSON_TYPE));
+        Entity<List<ClientSlowDigestMessage>> entity = Entity.entity(batch, MediaType.APPLICATION_JSON_TYPE);
+        Response post = invocationBuilder.post(entity);
+        if(!Response.Status.Family.SUCCESSFUL.equals(post.getStatusInfo().getFamily())){
+            logger.severe(post.getStatusInfo().toString());
+        }
         post.close();
     }
 }

@@ -28,6 +28,9 @@ public class ClientSlowDigestMessage {
     private long offset;
     private byte[] slowDigest;
 
+    public ClientSlowDigestMessage() {
+    }
+
     public ClientSlowDigestMessage(int clientId, int fileId, long offset, byte[] slowDigest) {
         this.clientId = clientId;
         this.fileId = fileId;

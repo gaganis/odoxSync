@@ -38,6 +38,6 @@ public class ConsolePrintingDigestHandler implements FastDigestHandler, SlowDige
     public void handleSlowDigest(File file, Region currentRegion, FileTime batchLastModifiedTime, byte[] slowDigest) {
 
         System.out.print("currentOffset = " + currentRegion.getOffset());
-        System.out.println(", fastDigest = " + Base64.getEncoder().encodeToString(slowDigest));
+        System.out.println(", slowDigest = " + Base64.getEncoder().encodeToString(slowDigest));
     }
 }
