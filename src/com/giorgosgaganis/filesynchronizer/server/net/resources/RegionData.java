@@ -34,7 +34,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,6 +89,11 @@ public class RegionData {
 
             return outputStream -> {
                 java.nio.file.Path filePath = Paths.get(directorySynchronizer.workingDirectory, file.getName());
+
+                if(!java.nio.file.Files.exists(filePath)){
+                    return;
+                }
+
                 try (
                         RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "r");
                         FileChannel channel = randomAccessFile.getChannel()

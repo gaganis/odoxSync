@@ -57,6 +57,10 @@ public class FileScanner {
         FileProcessor fileProcessor = fileProcessorFactory.create(file);
 
         Path filePath = Paths.get(workingDirectory, file.getName());
+
+        if(!Files.exists(filePath)) {
+            return;
+        }
         activityStaler.waitToDoActivity();
 
         try (
