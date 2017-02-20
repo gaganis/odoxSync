@@ -20,12 +20,14 @@ package com.giorgosgaganis.filesynchronizer.server.net.resources;
 
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
+import com.giorgosgaganis.filesynchronizer.server.FileModifiedComparator;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -42,6 +44,11 @@ public class Files {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Collection<File> getIt() {
-        return DirectorySynchronizer.INSTANCE.files.values();
+        Collection<File> files = DirectorySynchronizer.INSTANCE.files.values();
+
+        return files
+                .stream()
+                .sorted(new FileModifiedComparator().reversed())
+                .collect(Collectors.toList());
     }
 }

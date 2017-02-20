@@ -27,12 +27,14 @@ import com.giorgosgaganis.filesynchronizer.files.processing.handlers.SlowDigestH
 import com.giorgosgaganis.filesynchronizer.server.files.FileRegionHashMapDigestHandler;
 import com.giorgosgaganis.filesynchronizer.server.files.HashMapSlowDigestHandler;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
+import com.google.common.collect.Comparators;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
+import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -111,12 +113,17 @@ public class DirectoryScanner {
                 long fastBytesAtStart = Statistics.INSTANCE.bytesReadFast.get();
                 long startTime = System.currentTimeMillis();
 
-
                 try {
                     if (isFast) {
-                        files.values().stream().forEach(this::processFileFast);
+                        files.values()
+                                .stream()
+                                .sorted(new FileModifiedComparator().reversed())
+                                .forEach(this::processFileFast);
                     } else {
-                        files.values().parallelStream().forEach(this::processFileSlow);
+                        files.values()
+                                .parallelStream()
+                                .sorted(new FileModifiedComparator().reversed())
+                                .forEach(this::processFileSlow);
                     }
                     scanCount++;
 
