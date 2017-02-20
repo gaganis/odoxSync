@@ -60,6 +60,10 @@ public class RegionWalker {
 
     private void walkClientsForServerFile(File serverFile) throws IOException {
 
+        if(!Files.exists(serverFile.getAbsolutePath())) {
+            return;
+        }
+
         FileTime modifiedTime = Files.getLastModifiedTime(serverFile.getAbsolutePath());
 
         List<Inspector> inspectors = new ArrayList<>(getServerFileInspectors(serverFile, modifiedTime));
