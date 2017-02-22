@@ -150,6 +150,11 @@ public class DirectoryScanner {
             boolean doScan = false;
 
             Path path = Paths.get(workingDirectory, file.getName());
+
+            if(!Files.exists(path)) {
+                return;
+            }
+
             FileTime lastModifiedTime = Files.getLastModifiedTime(path);
 
             if (lastModifiedTime.compareTo(file.getLastModified()) == 0) {

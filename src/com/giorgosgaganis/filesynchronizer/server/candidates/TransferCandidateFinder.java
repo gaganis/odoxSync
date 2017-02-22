@@ -21,7 +21,6 @@ package com.giorgosgaganis.filesynchronizer.server.candidates;
 import com.giorgosgaganis.filesynchronizer.Client;
 import com.giorgosgaganis.filesynchronizer.File;
 import com.giorgosgaganis.filesynchronizer.Region;
-import com.giorgosgaganis.filesynchronizer.server.DirectorySynchronizer;
 import com.giorgosgaganis.filesynchronizer.utils.Statistics;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -158,8 +157,8 @@ public class TransferCandidateFinder {
                     if (!client.transferCandidateQueueWrapper.contains(transferCandidate)
                             && !client.offeredTransferCandidates.contains(transferCandidate)) {
                         client.transferCandidateQueueWrapper.put(transferCandidate);
-                        if(isConflict) {
-                            logger.info("Collision detected");
+                        if (isConflict) {
+                            logger.info("Collision detected [" + transferCandidate.getFileId() + "], [" + transferCandidate.getOffset());
                             Statistics.INSTANCE.collisions.incrementAndGet();
                         }
                     }

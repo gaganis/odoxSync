@@ -48,6 +48,7 @@ public class Files {
 
         return files
                 .stream()
+                .filter((f) -> java.nio.file.Files.exists(f.getAbsolutePath()))
                 .sorted(new FileModifiedComparator().reversed())
                 .collect(Collectors.toList());
     }

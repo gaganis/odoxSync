@@ -37,7 +37,7 @@ public class ByTimeSorter {
                     } catch (IOException e) {
                         return null;
                     }
-                })).forEach(System.out::println);
+                }).reversed()).limit(11110).forEach(System.out::println);
     }
 
 }
