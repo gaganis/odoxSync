@@ -44,26 +44,31 @@ public class Md5Comparer {
         Set<String> allKeys = new HashSet<>(map0.keySet());
         allKeys.addAll(map1.keySet());
 
+        int count = 0;
         for (String key : allKeys) {
+            count++;
 //            System.out.println("key = " + key);
             String value0 = map0.get(key);
             String value1 = map1.get(key);
 
-            if (value0 == null && value1 == null) {
+            if (value0 == null || value1 == null) {
                 continue;
             }
             if (value0 != null && !value0.equals(value1)) {
-                System.out.print("key = " + key);
-                System.out.print(", value0 = " + value0);
-                System.out.println(", value1 = " + value1);
+                System.out.print(count);
+                System.out.print(" value0 = " + value0);
+                System.out.print(", value1 = " + value1);
+                System.out.println(" key = " + key);
                 continue;
             }
 
             if (value1 != null && !value1.equals(value0)) {
-                System.out.print("key = " + key);
-                System.out.print(", value0 = " + value0);
-                System.out.println(", value1 = " + value1);
+                System.out.print(count);
+                System.out.print(" value0 = " + value0);
+                System.out.print(", value1 = " + value1);
+                System.out.println(" key = " + key);
             }
+
         }
 
     }

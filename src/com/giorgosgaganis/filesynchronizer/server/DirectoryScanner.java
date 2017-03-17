@@ -136,7 +136,7 @@ public class DirectoryScanner {
                     String scanType = isFast ? "fast" : "slow";
                     logger.info("Finished [" + scanCount + "] " + scanType + " scan in ["
                             + duration / 1000 + "] at [" + Statistics.humanReadableByteCount(speed, false) + "]");
-                    Thread.sleep(5000);
+                    Thread.sleep(30_000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

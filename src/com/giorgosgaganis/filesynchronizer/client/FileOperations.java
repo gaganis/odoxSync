@@ -118,12 +118,8 @@ public class FileOperations {
 
     private void resizeFile(File file) {
         Path absolutePath = file.getAbsolutePath();
-        try (
-                RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw");
-        ) {
-            if(Files.size(absolutePath) < file.getSize()) {
-                randomAccessFile.setLength(file.getSize());
-            }
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(absolutePath.toFile(), "rw")) {
+            randomAccessFile.setLength(file.getSize());
         } catch (IOException e) {
             e.printStackTrace();
         }
