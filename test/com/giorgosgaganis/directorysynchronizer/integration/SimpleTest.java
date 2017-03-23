@@ -1,7 +1,7 @@
 package com.giorgosgaganis.directorysynchronizer.integration;
 
-import com.giorgosgaganis.filesynchronizer.client.SyncClient;
-import com.giorgosgaganis.filesynchronizer.server.net.MainServer;
+import com.giorgosgaganis.odoxsync.client.SyncClient;
+import com.giorgosgaganis.odoxsync.server.net.MainServer;
 
 import java.io.IOException;
 import java.nio.file.*;

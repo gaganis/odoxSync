@@ -1,12 +1,11 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="fileScanner:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/fileScanner_jar</output-path>
-    <root id="archive" name="FileScanner.jar">
+  <artifact type="jar" name="odoxSyncClient:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/odoxSyncClient_jar</output-path>
+    <root id="archive" name="DirectorySynchronizer.jar">
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/scanner-mf/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/client-mf/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="odoxSync" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-io-2.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jersey-media-json-jackson-2.25.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jersey-common-2.25.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/javax.ws.rs-api-2.0.1.jar" path-in-jar="/" />
@@ -26,8 +25,7 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jackson-annotations-2.8.4.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jackson-jaxrs-json-provider-2.8.4.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jackson-module-jaxb-annotations-2.8.4.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-lang3-3.5.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/guava-21.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-io-2.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jersey-container-grizzly2-http-2.25.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/grizzly-http-server-2.3.28.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/grizzly-http-2.3.28.jar" path-in-jar="/" />
@@ -36,6 +34,8 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jersey-client-2.25.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jersey-media-jaxb-2.25.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/validation-api-1.1.0.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-lang3-3.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/guava-21.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DirectorySynchronizer.iml" filepath="$PROJECT_DIR$/DirectorySynchronizer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/odoxSync.iml" filepath="$PROJECT_DIR$/odoxSync.iml" />
     </modules>
   </component>
 </project>
