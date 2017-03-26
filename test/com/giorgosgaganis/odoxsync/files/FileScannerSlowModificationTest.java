@@ -40,7 +40,7 @@ public class FileScannerSlowModificationTest {
     @Test
     public void modification_is_skipping() throws IOException {
         String workingDirectory = ".";
-        String name = "testdata/source/ubuntu-16.04.1-desktop-amd64.iso.part";
+        String name = "spotless.license.java";
         File file = new File(name);
         file.setAbsolutePath(Paths.get(name).toAbsolutePath());
 
