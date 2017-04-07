@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/odoxSync.iml" filepath="$PROJECT_DIR$/odoxSync.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/odoxSync-buildjob.iml" filepath="$PROJECT_DIR$/.idea/modules/odoxSync-buildjob.iml" />
     </modules>
   </component>
 </project>

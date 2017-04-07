@@ -4,3 +4,4 @@ out/
 logs/
 testdata/
 .sonar/
+.idea/
