@@ -5,3 +5,4 @@ logs/
 testdata/
 .sonar/
 .idea/
+build
