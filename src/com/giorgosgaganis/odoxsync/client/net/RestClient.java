@@ -49,7 +49,7 @@ public class RestClient {
     private int clientId;
 
     public RestClient(String hostPort) {
-        this.SERVER_PATH = "http://" + hostPort + "/myapp/";
+        this.SERVER_PATH = "http://" + hostPort + "/odoxsync/";
     }
 
     public Collection<File> getFiles() {

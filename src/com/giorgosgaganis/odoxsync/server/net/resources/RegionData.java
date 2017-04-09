@@ -39,11 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Root resource (exposed at "myresource" path)
- */
 @Path("regiondata")
-
 public class RegionData {
     private static final Logger logger = Logger.getLogger(RegionData.class.getName());
 
@@ -53,12 +49,6 @@ public class RegionData {
     @Context
     HttpHeaders httpHeaders;
 
-    /**
-     * Method handling HTTP GET requests. The returned object will be sent
-     * to the client as "text/plain" media type.
-     *
-     * @return String that will be returned as a text/plain response.
-     */
     @GET
     @Produces({"application/octet-stream"})
     public StreamingOutput getIt() throws InterruptedException {

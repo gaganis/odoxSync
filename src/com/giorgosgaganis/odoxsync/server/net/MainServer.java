@@ -38,7 +38,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class MainServer {
 
     // Base URI the Grizzly HTTP server will listen on
-    public static final String BASE_URI = "http://0.0.0.0:8081/myapp/";
+    public static final String BASE_URI = "http://0.0.0.0:8081/odoxsync/";
 
     private static final Logger logger = Logger.getLogger(DirectorySynchronizer.class.getName());
 
@@ -47,7 +47,8 @@ public class MainServer {
         DirectorySynchronizer.INSTANCE.start(workingDirectory);
         // create a resource config that scans for JAX-RS resources and providers
         // in com.example package
-        final ResourceConfig rc = new ResourceConfig().packages("com.giorgosgaganis.filesynchronizer.server.net.resources");
+        final ResourceConfig rc = new ResourceConfig().packages("com.giorgosgaganis.odoxsync.server.net.resources");
+
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI

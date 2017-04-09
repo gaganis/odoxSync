@@ -28,9 +28,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
-/**
- * Root resource (exposed at "myresource" path)
- */
 @Path("clients")
 public class Clients {
 

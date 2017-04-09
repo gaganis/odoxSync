@@ -60,11 +60,67 @@ changed from the OS.
 
 ## Quick Start
 
+###Running server for directory `~/programming`
+
+__Grab__ _server.zip_ from the latest [release](https://github.com/gaganis/odoxSync/releases)
+and upload it to the device you want to server files from.
+
+__unzip the archive__
+```
+pi@raspbmc:~$ unzip  server.zip
+Archive:  server.zip
+   creating: server/
+   creating: server/lib/
+  inflating: server/lib/server.jar
+  inflating: server/lib/odoxSync-buildjob-0.1.jar
+  inflating: server/lib/commons-io-2.5.jar
+  inflating: server/lib/guava-21.0.jar
+  inflating: server/lib/jackson-core-2.8.4.jar
+  inflating: server/lib/jackson-module-jaxb-annotations-2.8.4.jar
+  inflating: server/lib/commons-lang3-3.5.jar
+  inflating: server/lib/jersey-container-grizzly2-http-2.25.1.jar
+  inflating: server/lib/jackson-annotations-2.8.0.jar
+  inflating: server/lib/jackson-databind-2.8.4.jar
+  inflating: server/lib/javax.inject-2.5.0-b32.jar
+  inflating: server/lib/grizzly-http-server-2.3.28.jar
+  inflating: server/lib/jersey-common-2.25.1.jar
+  inflating: server/lib/jersey-server-2.25.1.jar
+  inflating: server/lib/javax.ws.rs-api-2.0.1.jar
+  inflating: server/lib/grizzly-http-2.3.28.jar
+  inflating: server/lib/javax.annotation-api-1.2.jar
+  inflating: server/lib/jersey-guava-2.25.1.jar
+  inflating: server/lib/hk2-api-2.5.0-b32.jar
+  inflating: server/lib/hk2-locator-2.5.0-b32.jar
+  inflating: server/lib/osgi-resource-locator-1.0.1.jar
+  inflating: server/lib/jersey-client-2.25.1.jar
+  inflating: server/lib/jersey-media-jaxb-2.25.1.jar
+  inflating: server/lib/validation-api-1.1.0.Final.jar
+  inflating: server/lib/grizzly-framework-2.3.28.jar
+  inflating: server/lib/hk2-utils-2.5.0-b32.jar
+  inflating: server/lib/aopalliance-repackaged-2.5.0-b32.jar
+  inflating: server/lib/javassist-3.20.0-GA.jar
+  inflating: server/lib/javax.inject-1.jar
+   creating: server/bin/
+  inflating: server/bin/server.bat
+  inflating: server/bin/server
+```
+
+__Enter the bin directory of the extracted distribution zip file__
+```
+pi@raspbmc:~$ cd server/bin
+pi@raspbmc:~/server/bin$
+```
+
+__Start the server to serve directory `~/programming`__ Replace parameter with your directory
+pi@raspbmc:~/server/bin$ ./server ~/programming/
+
+### Running the client
+
 
 
 ## Building
 
-Clone the project:
+__Clone the project:__
 ```
 $ git clone https://github.com/gaganis/odoxSync.git
 Cloning into 'odoxSync'...
@@ -76,12 +132,12 @@ Resolving deltas: 100% (895/895), done.
 Checking connectivity... done.
 ```
 
-Enter the project dir:
+__Enter the project dir:__
 ```
 $ cd odoxSync
 ```
 
-Build the project runnable distributions
+__Build the project runnable distributions__
 ```
 $ ./gradlew distZip
 :compileJava
@@ -108,7 +164,7 @@ BUILD SUCCESSFUL
 Total time: 2.291 secs
 ```
 
-The distribution files will be under the server and client distribution builds:
+__The distribution files will be under the server and client distribution builds:__
 ```
 $ find . |grep zip
 ./server/build/distributions/server.zip

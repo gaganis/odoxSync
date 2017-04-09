@@ -31,9 +31,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * Root resource (exposed at "myresource" path)
- */
 @Path("progress")
 public class Progress {
 
