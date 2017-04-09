@@ -11,6 +11,8 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'com.diffplug.gradle.spotless'
 
+version = '0.1'
+
 repositories {
     mavenCentral()
 }
@@ -57,3 +59,30 @@ spotless {
         }
 }
 
+project(':server') {
+    apply plugin: 'application'
+
+    mainClassName = 'com.giorgosgaganis.odoxsync.server.DirectorySynchronizer'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        runtime rootProject
+    }
+}
+
+project(':client') {
+    apply plugin: 'application'
+
+    mainClassName = 'com.giorgosgaganis.odoxsync.client.SyncClient'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        runtime rootProject
+    }
+}
