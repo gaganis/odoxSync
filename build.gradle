@@ -62,7 +62,7 @@ spotless {
 project(':server') {
     apply plugin: 'application'
 
-    mainClassName = 'com.giorgosgaganis.odoxsync.server.DirectorySynchronizer'
+    mainClassName = 'com.giorgosgaganis.odoxsync.server.net.MainServer'
 
     repositories {
         mavenCentral()

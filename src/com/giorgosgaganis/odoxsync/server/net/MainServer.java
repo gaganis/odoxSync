@@ -18,28 +18,30 @@
  */
 package com.giorgosgaganis.odoxsync.server.net;
 
+import static com.giorgosgaganis.odoxsync.utils.LoggingUtils.configureLogging;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Logger;
+
 import com.giorgosgaganis.odoxsync.server.DirectorySynchronizer;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import java.io.IOException;
-import java.net.URI;
-
-import static com.giorgosgaganis.odoxsync.utils.LoggingUtils.configureLogging;
-
 /**
  * com.giorgosgaganis.filesynchronizer.server.net.MainServer class.
  */
 public class MainServer {
+
     // Base URI the Grizzly HTTP server will listen on
     public static final String BASE_URI = "http://0.0.0.0:8081/myapp/";
 
-    /**
-     * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
-     *
-     * @return Grizzly HTTP server.
-     */
+    private static final Logger logger = Logger.getLogger(DirectorySynchronizer.class.getName());
+
     public static HttpServer startServer(String workingDirectory) throws IOException {
         configureLogging();
         DirectorySynchronizer.INSTANCE.start(workingDirectory);
@@ -52,18 +54,15 @@ public class MainServer {
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
     }
 
-    /**
-     * com.giorgosgaganis.filesynchronizer.server.net.MainServer method.
-     *
-     * @param args
-     * @throws IOException
-     */
     public static void main(String[] args) throws IOException {
         String workingDirectory = args.length > 0 ? args[0] : ".";
-        final HttpServer server = startServer(workingDirectory);
-        System.out.println(String.format("Jersey app started with WADL available at "
-                + "%sapplication.wadl\n", BASE_URI));
-
+        Path absolutePath = Paths.get(workingDirectory).toAbsolutePath();
+        if (!Files.exists(absolutePath)) {
+            logger.severe("Directory [" + workingDirectory + "] does not exist");
+            System.exit(1);
+        }
+        logger.info("Starting odoxSync server, at directory [" + absolutePath + "]");
+        final HttpServer server = startServer(absolutePath.toString());
     }
 }
 
