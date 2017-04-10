@@ -1,7 +1,5 @@
 # odoxSync - An optimistic, remote directory synchronizer
 
---- 
-
 This project provides a server and client that can be used
 to synchronize a directory of continuously changing files on
 a server to clients over the network. It has been
@@ -60,7 +58,7 @@ changed from the OS.
 
 ## Quick Start
 
-###Running server for directory `~/programming`
+### Running server for directory `~/test`
 
 __Grab__ _server.zip_ from the latest [release](https://github.com/gaganis/odoxSync/releases)
 and upload it to the device you want to server files from.
@@ -111,8 +109,13 @@ pi@raspbmc:~$ cd server/bin
 pi@raspbmc:~/server/bin$
 ```
 
-__Start the server to serve directory `~/programming`__ Replace parameter with your directory
+__Start the server to serve directory `~/test`__ 
+
+Replace parameter `~/test` with the directory you want to serve
+
+```
 pi@raspbmc:~/server/bin$ ./server ~/programming/
+```
 
 ### Running the client
 
