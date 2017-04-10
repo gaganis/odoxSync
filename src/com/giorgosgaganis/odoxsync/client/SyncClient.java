@@ -58,7 +58,7 @@ public class SyncClient {
     public static void main(String[] args) throws IOException {
 
         String hostPort = args.length > 0 ? args[0] : "192.168.1.7:8081";
-        String workingDirectory = args.length > 1 ? args[0] : ".";
+        String workingDirectory = args.length > 1 ? args[1] : ".";
         LoggingUtils.configureLogging();
 
         SyncClient syncClient = new SyncClient(hostPort, workingDirectory);
