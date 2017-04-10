@@ -56,6 +56,16 @@ each calculation and associates it to fast/slow digests so
 they are not recalculated when the file was not reported as
 changed from the OS.
 
+## Previous approaches - Other tools
+
+Before writing this project I attempted to use rsync over
+ssh. Rsync is a general purpose tool that I really like and
+I have used extensively. I have found that in this case
+it's use of encryption and it's change discovery
+algorithm(rolling checksum) that assumes that it must be
+100% precise made very it very slow(about 2.5 MB/s when transferring
+changes).
+
 ## Quick Start
 
 :exclamation: You need to have java available to run both the 
@@ -200,13 +210,3 @@ $ find . |grep zip
 ./client/build/distributions/client.zip
 ```
 
-## Previous approaches - Other tools
-
-Before writing this project I attempted to use rsync over
-ssh. Rsync is a general purpose tool that I really like and
-I have used it extensively. I have found that in this case
-it's use of encryption and it's change discovery
-algorithm(rolling checksum) that assumes that it must be
-100% precise made very slow(about 2.5 MB/s when transfering
-changes). 
- 
