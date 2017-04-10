@@ -67,12 +67,12 @@ public class FileScannerSlowModificationTest {
         rc.calculate();
         CountingWrapper countingWrapper = new CountingWrapper(new HashMapSlowDigestHandler());
         FileScanner scanner = new FileScanner(workingDirectory,
-                new SlowFileProcessorFactory(countingWrapper), () -> {});
+                new SlowFileProcessorFactory(countingWrapper), () -> {}, false);
         scanner.scanFile(file);
         int firstPassCount = countingWrapper.getCount();
 
         scanner = new FileScanner(workingDirectory,
-                new SlowFileProcessorFactory(countingWrapper), () -> {});
+                new SlowFileProcessorFactory(countingWrapper), () -> {}, false);
         scanner.scanFile(file);
 
         assertThat(countingWrapper.getCount()).isEqualTo(firstPassCount);

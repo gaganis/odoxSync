@@ -173,7 +173,7 @@ public class DirectoryScanner {
                 long startTime = System.currentTimeMillis();
                 logger.fine("Starting scan for [" + file.getName() + "]");
                 FileScanner fileScanner = new FileScanner(workingDirectory,
-                        new FastFileProcessorFactory(new FileRegionHashMapDigestHandler()), activityStaler);
+                        new FastFileProcessorFactory(new FileRegionHashMapDigestHandler()), activityStaler, false);
                 fileScanner.scanFile(file);
                 long duration = System.currentTimeMillis() - startTime;
                 logger.fine("Finished scan for [" + file.getName() + "] in [" + duration + "ms]");
@@ -189,7 +189,7 @@ public class DirectoryScanner {
             logger.fine("Starting scan for [" + file.getName() + "]");
 
             SlowDigestHandler slowDigestHandler = new HashMapSlowDigestHandler();
-            FileScanner fileScanner = new FileScanner(workingDirectory, new SlowFileProcessorFactory(slowDigestHandler), activityStaler);
+            FileScanner fileScanner = new FileScanner(workingDirectory, new SlowFileProcessorFactory(slowDigestHandler), activityStaler, false);
             fileScanner.scanFile(file);
             logger.fine("Finished scan for [" + file.getName() + "]");
 

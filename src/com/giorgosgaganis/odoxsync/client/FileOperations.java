@@ -159,7 +159,7 @@ public class FileOperations {
 
                 FileScanner fileScanner = new FileScanner(workingDirectory,
                         new SlowFileProcessorFactory(slowDigestHandler), () -> {
-                });
+                }, true);
                 fileScanner.scanFile(file);
                 slowProcessedFiles.put(file.getId(), file);
                 logger.fine("Done slow scan for file [" + file.getName() + "}");
@@ -180,7 +180,7 @@ public class FileOperations {
 
                 FileScanner fileScanner = new FileScanner(workingDirectory,
                         new FastFileProcessorFactory(fastDigestHandler), () -> {
-                });
+                }, true);
                 fileScanner.scanFile(file);
                 fastProcessedFiles.put(file.getId(), file);
                 logger.fine("Done fast scan for file [" + file.getName() + "}");
@@ -214,7 +214,7 @@ public class FileOperations {
 
                 FileScanner fileScanner = new FileScanner(workingDirectory,
                         new FastFileProcessorFactory(fastDigestHandler), () -> {
-                });
+                }, true);
                 fileScanner.scanFile(file);
             }
         } catch (IOException e) {

@@ -18,6 +18,13 @@
  */
 package com.giorgosgaganis.odoxsync.files;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Logger;
+
 import com.giorgosgaganis.odoxsync.File;
 import com.giorgosgaganis.odoxsync.RegionCalculator;
 import com.giorgosgaganis.odoxsync.files.processing.FileProcessor;
@@ -26,13 +33,6 @@ import com.giorgosgaganis.odoxsync.files.processing.SlowFileProcessorFactory;
 import com.giorgosgaganis.odoxsync.files.processing.handlers.ConsolePrintingDigestHandler;
 import com.giorgosgaganis.odoxsync.server.ActivityStaler;
 import com.giorgosgaganis.odoxsync.utils.Statistics;
-
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Logger;
 
 /**
  * Created by gaganis on 21/01/17.
@@ -44,12 +44,14 @@ public class FileScanner {
     private final FileProcessorFactory fileProcessorFactory;
 
     private final ActivityStaler activityStaler;
+    private final boolean isWrite;
 
 
-    public FileScanner(String workingDirectory, FileProcessorFactory fileProcessorFactory, ActivityStaler activityStaler) {
+    public FileScanner(String workingDirectory, FileProcessorFactory fileProcessorFactory, ActivityStaler activityStaler, boolean isWrite) {
         this.workingDirectory = workingDirectory;
         this.fileProcessorFactory = fileProcessorFactory;
         this.activityStaler = activityStaler;
+        this.isWrite = isWrite;
     }
 
     public void scanFile(File file) throws IOException {
@@ -58,13 +60,14 @@ public class FileScanner {
 
         Path filePath = Paths.get(workingDirectory, file.getName());
 
-        if(!Files.exists(filePath)) {
+        if (!Files.exists(filePath)) {
             return;
         }
         activityStaler.waitToDoActivity();
 
+        String mode = isWrite ? "rw" : "r";
         try (
-                RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), "rw");
+                RandomAccessFile randomAccessFile = new RandomAccessFile(filePath.toFile(), mode)
         ) {
             fileProcessor.doBeforeFileRead(randomAccessFile);
 
@@ -101,7 +104,7 @@ public class FileScanner {
         rc.calculate();
         FileScanner scanner = new FileScanner(workingDirectory,
                 new SlowFileProcessorFactory(new ConsolePrintingDigestHandler()), () -> {
-        });
+        }, false);
         scanner.scanFile(file);
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("System.currentTimeMillis() - start = " + elapsedTime);
