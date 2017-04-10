@@ -58,6 +58,9 @@ changed from the OS.
 
 ## Quick Start
 
+:exclamation: You need to have java available to run both the 
+server and the client.
+
 ### Running server for directory `~/test`
 
 __Grab__ _server.zip_ from the latest [release](https://github.com/gaganis/odoxSync/releases)
@@ -119,8 +122,31 @@ pi@raspbmc:~/server/bin$ ./server ~/programming/
 
 ### Running the client
 
+__Grab__ _client.zip_ from the latest [release](https://github.com/gaganis/odoxSync/releases)
+and upload it to the device you want to transfer the files to.
+
+__Unzip client.zip__
+```
+unzip client.zip 
+```
+__Enter the bin directory of the extracted distribution zip file__
+```
+cd client/bin
+```
+__Start the client__ 
+
+Replace parameter `~/test` with the directory you want the files to be transferred
+to. And replace `192.169.1.190` with the ip address of your server.
+```
+$ ./client 192.168.1.190:8081 ~/test 
+Apr 10, 2017 12:22:18 PM com.giorgosgaganis.odoxsync.client.SyncClient start
+INFO: Starting sync client at [/home/gaganis/test]
+Apr 10, 2017 12:22:18 PM com.giorgosgaganis.odoxsync.client.net.RestClient getClientId
+INFO: Retrieved clientId [207270713]
+```
 
 
+__
 ## Building
 
 __Clone the project:__
