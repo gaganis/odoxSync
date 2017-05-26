@@ -127,7 +127,7 @@ __Start the server to serve directory `~/test`__
 Replace parameter `~/test` with the directory you want to serve
 
 ```
-pi@raspbmc:~/server/bin$ ./server ~/programming/
+pi@raspbmc:~/server/bin$ ./server ~/test/
 ```
 
 ### Running the client
